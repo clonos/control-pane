@@ -1,0 +1,24 @@
+    <div class="col-md-4 col-md-offset-4">
+	<div class="input-group">
+	    <span class="input-group-addon">
+    		<input type="checkbox" name="ftpd" id="ftpd" value="ftpd" onchange="checkservises('ftpd')"/>
+    	    </span>
+    	    <span class="form-control">ftpd</span>
+        </div>
+    </div>
+    <div class="col-md-4 col-md-offset-4">
+        <div class="input-group">
+    	    <span class="input-group-addon">
+    		<input type="checkbox" name="sshd" id="sshd" value="sshd" onchange="checkservises('sshd')"/>
+    	    </span>
+    	    <span class="form-control">sshd</span>
+        </div>
+    </div>
+    <div class="col-md-4 col-md-offset-4">
+        <div class="input-group">
+    	    <span class="input-group-addon">
+    		<input type="checkbox" name="ntpd" id="ntpd" value="ntpd" onchange="checkservises('ntpd')"/>
+    	    </span>
+    	    <span class="form-control">ntpd</span>
+        </div>
+    </div>

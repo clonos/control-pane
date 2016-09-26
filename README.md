@@ -25,7 +25,7 @@ We like existing Linux-only solutions such as OpenStack (https://www.openstack.o
 
 ## Usage
 
-Use downloads pages to obtain latest .ISO ClonOS image
+Use downloads pages https://clonos.tekroutine.com/download.html to obtain latest .ISO image
 
 ## Limitations
 

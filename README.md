@@ -33,7 +33,7 @@ Tested with following OSes and distribution:
 
 - FreeBSD 11.0
 - Linux Ubuntu 16.04
-- 
+
 
 ## Contributing
 

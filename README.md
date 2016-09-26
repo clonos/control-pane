@@ -31,9 +31,10 @@ Use downloads pages https://clonos.tekroutine.com/download.html to obtain latest
 
 Tested with following OSes and distribution:
 
-- FreeBSD 11.0
-- Linux Ubuntu 16.04
-
+- FreeBSD 11.0+
+- Linux Ubuntu 16.04+
+- pfSense 2.4+
+- OPNSense 16.7+
 
 ## Contributing
 

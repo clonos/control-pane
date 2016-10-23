@@ -3,18 +3,15 @@ function show_jails($nodelist="local")
 {
 	global $workdir;
 
-	//don't show this jail in list
-	$blacklist = array("convectix","puppet","redmine","ldap0","cbsdpuppet1","git","wp_demo");
-
 	$pieces = explode(" ", $nodelist);
-	
+
 	foreach ($pieces as $nodename) {
 		if (!$nodename) {
 			$nodename=$nodelist;
 		}
 		$db = new SQLite3("$workdir/var/db/$nodename.sqlite"); $db->busyTimeout(5000);
 		if (!$db) return;
-		$sql = "SELECT jname,ip4_addr,status FROM jails WHERE emulator != \"bhyve\";";
+		$sql = "SELECT jname,ip4_addr,status,hidden FROM jails WHERE emulator != \"bhyve\";";
 		$result = $db->query($sql);//->fetchArray(SQLITE3_ASSOC);
 		$row = array();
 		$i = 0;
@@ -34,9 +31,10 @@ function show_jails($nodelist="local")
 		while($res = $result->fetchArray(SQLITE3_ASSOC)){
 			if(!isset($res['jname'])) continue;
 			$jname = $res['jname'];
+			$hidden = $res['hidden'];
 
 			//skip blacklisted jail
-			if (in_array($jname, $blacklist)) continue;
+			if ($hidden == "1") continue;
 
 			$ip4_addr = $res['ip4_addr'];
 			$status = $res['status'];

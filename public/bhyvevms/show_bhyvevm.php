@@ -4,23 +4,22 @@ function show_bhyvevm($nodelist="local")
 {
 	global $workdir;
 
-	$blacklist = array("cbsdfbsdsrv","f110a", "f120a", "u1604a","emptyf120a", "emptyf110a","cbsdlinsrv","emptyu1604a");
 	$pieces = explode(" ", $nodelist);
 
 	$db = new SQLite3("$workdir/var/db/local.sqlite"); $db->busyTimeout(5000);
-        $sql = "SELECT nodeip FROM local;";
-        $result = $db->query($sql);//->fetchArray(SQLITE3_ASSOC);
-        $row = $result->fetchArray();
-        list($nodeip)=$row;
-        if (strlen($nodeip)<10) $nodeip="127.0.0.1";
-        $db->close();
+	$sql = "SELECT nodeip FROM local;";
+	$result = $db->query($sql);//->fetchArray(SQLITE3_ASSOC);
+	$row = $result->fetchArray();
+	list($nodeip)=$row;
+	if (strlen($nodeip)<10) $nodeip="127.0.0.1";
+	$db->close();
 
 	foreach ($pieces as $nodename) {
 		if (!$nodename) {
 			$nodename=$nodelist;
 		}
 		$db = new SQLite3("$workdir/var/db/$nodename.sqlite"); $db->busyTimeout(5000);
-		$sql = "SELECT jname,vm_ram,vm_cpus,vm_os_type FROM bhyve;";
+		$sql = "SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden FROM bhyve;";
 		$result = $db->query($sql);//->fetchArray(SQLITE3_ASSOC);
 		$row = array();
 		$i = 0;
@@ -41,9 +40,10 @@ function show_bhyvevm($nodelist="local")
 		while($res = $result->fetchArray(SQLITE3_ASSOC)){
 			if(!isset($res['jname'])) continue;
 			$jname = $res['jname'];
+			$hidden = $res['hidden'];
 
 			//skip blacklisted jail
-			if (in_array($jname, $blacklist)) continue;
+			if ($hidden == "1") continue;
 
 			$vm_ram = $res['vm_ram'] / 1024 / 1024 ;
 			$vm_cpus = $res['vm_cpus'];

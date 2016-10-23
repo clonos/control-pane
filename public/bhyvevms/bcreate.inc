@@ -16,6 +16,11 @@
 					title: 'pfSense 2.4.0-DEVELOP',
 					value: 'pfSense-2-LATEST-amd64',
 					def: 0
+				},
+				{
+					title: 'OPNsense-16.7',
+					value: 'OPNsense-16-RELEASE-amd64',
+					def: 0
 				}
 			]
 		},

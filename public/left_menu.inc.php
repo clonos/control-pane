@@ -1,10 +1,10 @@
 <?php
 require_once'cbsd.inc.php';
 ?>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+	<div class="container-fluid">
+	<div class="navbar-header">
+	<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -33,27 +33,28 @@ require_once'cbsd.inc.php';
       </div>
     </nav>
 
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar">
-          <ul class="nav nav-sidebar">
-    	    <?php
-    		$modules["overview"] = "Overview";
-    		$modules["jailscontainers"] = "Jails containers";
-    		$modules["bhyvevms"] = "Bhyve VMs";
-    		$modules["nodes"] = "Nodes";
-    		$modules["vpnet"] = "Virtual Private Network";
-    		$modules["authkey"] = "Authkey";
-    		$modules["repo"] = "Repository";
-    		$modules["bases"] = "FreeBSD Bases";
-    		$modules["sources"] = "FreeBSD Sources";
-    		$modules["jail_marketplace"] = "Jail Marketplace";
-    		$modules["bhyve_marketplace"] = "Bhyve Marketplace";
-    		$modules["tasklog"] = "TaskLog";
-    		foreach ($modules as $mod_name => $mod_descr) {
-		    $item=$mod_name; $item_desc=$mod_descr;
-		    if ($url_path == "/$item/") echo '<li class="active">'; else  echo '<li>' ?><a href='index.php?mod=<?php echo $item;?>'><?php echo "$item_desc"; if ($url_path == "/$item/") echo '<span class="sr-only">(current)</span>'?></a></li><?php
-		}
-    	    ?>
-        </ul>
-        </div>
+	<div class="container-fluid">
+	<div class="row">
+	<div class="col-sm-3 col-md-2 sidebar">
+		<ul class="nav nav-sidebar">
+			<?php
+			$modules["overview"] = "Overview";
+			$modules["jailscontainers"] = "Jails containers";
+			$modules["bhyvevms"] = "Bhyve VMs";
+			$modules["nodes"] = "Nodes";
+			$modules["vpnet"] = "Virtual Private Network";
+			$modules["authkey"] = "Authkey";
+			$modules["media"] = "Storage Media";
+			$modules["repo"] = "Repository";
+			$modules["bases"] = "FreeBSD Bases";
+			$modules["sources"] = "FreeBSD Sources";
+			$modules["jail_marketplace"] = "Jail Marketplace";
+			$modules["bhyve_marketplace"] = "Bhyve Marketplace";
+			$modules["tasklog"] = "TaskLog";
+			foreach ($modules as $mod_name => $mod_descr) {
+				$item=$mod_name; $item_desc=$mod_descr;
+				if ($url_path == "/$item/") echo '<li class="active">'; else  echo '<li>' ?><a href='index.php?mod=<?php echo $item;?>'><?php echo "$item_desc"; if ($url_path == "/$item/") echo '<span class="sr-only">(current)</span>'?></a></li><?php
+			}
+			?>
+		</ul>
+	</div>

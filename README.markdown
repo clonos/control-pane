@@ -38,7 +38,7 @@ Tested with following OSes and distribution:
 
 ## Contributing
 
-* Fork me on GitHub: git@github.com:clonos/cp.git
+* Fork me on GitHub: [https://github.com/clonos/cp.git](https://github.com/clonos/cp.git)
 * Commit your changes (`git commit -am 'Added some feature'`)
 * Push to the branch (`git push`)
 * Create new Pull Request

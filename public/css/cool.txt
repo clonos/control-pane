@@ -1,0 +1,8 @@
+Всякие интересные фишки
+
+Экран загрузки с прелоадером и раздвигающимися шторками:
+https://ihatetomatoes.net/create-custom-preloading-screen/
+
+Прелоадер
+http://jsfiddle.net/s9oax2pp/
+

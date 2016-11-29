@@ -1,0 +1,251 @@
+/* http://www.drivermarket.net/2015/12/nokia-lumia-640-lte-usb-driver-for.html */
+html {
+	background:#ddd;
+	margin:0;
+	height:100%;
+	overflow:hidden;
+}
+body {
+	border:1px solid #222;
+	border-width:0 1px;
+	background:white;
+	margin:0 20px;
+	height:100%;
+	-webkit-box-shadow: 0px 0px 20px 5px rgba(0,0,0,0.65);
+	-moz-box-shadow: 0px 0px 20px 5px rgba(0,0,0,0.65);
+	box-shadow: 0px 0px 20px 5px rgba(0,0,0,0.65);
+
+}
+
+#content {
+	padding:10px 20px;
+}
+
+ul {margin:0;padding:0;}
+#nav {
+    background-image: url(/images/main-menu-bg.png);
+    background-repeat: repeat-x;
+    height: 52px;
+    border-bottom: 5px solid #0F83A0;
+    padding-left: 10px;
+}
+#nav ul {
+    height: 52px;
+    margin: 0;
+    padding: 0;
+	font-style: normal;
+	font-weight: normal;
+	font-size: 11px;
+	line-height: normal;
+	font-family: Verdana, Geneva, sans-serif;
+}
+#nav li {
+    position: relative;
+    display: inline-block;
+    float: left;
+    border: 1px solid #222;
+    border-width: 0 0 0 1px;
+    height: 47px;
+    margin-top: 5px;
+}
+#nav li.mhome {
+    border: 0;
+    margin-top: 0;
+    height: 52px;
+	width: 55px;
+}
+#nav li.mhome a {
+    height: 52px;
+    border-left: 0 none;
+    text-indent: -9999px;
+    background-color: #0F83A0;
+    background-image: url(/images/home.png);
+    background-repeat: no-repeat;
+    background-position: 50% 9px;
+}
+#nav li a {
+    display: block;
+    line-height: 45px;
+    height: 45px;
+    text-decoration: none;
+    color: #D5D5D5;
+    padding: 0 15px;
+    text-shadow: 0 1px 1px black;
+    border-left: 1px solid #383838;
+	text-transform:uppercase;
+}
+#nav #title {
+	float:right;
+	color:white;
+	margin:18px 18px 0 0;
+	font-size:120%;
+	font-style:italic;
+}
+
+ul.menu {
+	list-style-type:none;
+	margin:10px;
+	font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+	font-size:90%;
+}
+ul.menu li {
+	padding:5px 10px;
+}
+ul.menu a {
+	color: #337ab7;
+    text-decoration: none;
+}
+ul.menu a.sel {
+	color:black;
+}
+
+#content a {
+	color:#337ab7;
+    text-decoration:underline;
+}
+#content a:hover {
+	text-decoration:none;
+}
+
+div#menu {
+	position: relative;
+	top: 0;
+	bottom: 0; 
+	left: 0;
+	width: 250px; /* Width of navigation frame */
+	height: 100%;
+	overflow: hidden; /* Disables scrollbars on the navigation frame. To enable scrollbars, change "hidden" to "scroll" */
+	background: #eee;
+	margin-bottom:-100px;
+}
+
+div#content {
+	position: absolute;
+	top: 74px;
+	left: 270px; /* Set this to the width of the navigation frame */
+	right: 23px;
+	bottom: 0;
+	overflow: auto; 
+}
+
+
+
+.log {
+	position:absolute;
+	left:102%;
+	top:10%;
+	width:20%;
+	height:500px;
+	background:rgba(200,200,200,.8);
+	font-size:x-small;
+}
+
+
+
+/* Таблицы: http://html5book.ru/examples/demo-tables.html */
+
+table {
+	font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+	font-size: 14px;
+	border-collapse: collapse;
+	text-align: center;
+	margin:4px 0;
+}
+table.error tbody {
+	display:none;
+}
+table.error tbody.error {
+	display:table-row-group !important;
+}
+table.error tbody.error td {
+	color:black;
+	background-color:#ffe9e9 !important;
+	text-align:center;
+}
+table tbody.error {
+	display:none;
+}
+.tfill thead td, .tfill td:first-child {
+	background:#337ab7;
+	color:white;
+	padding:10px 20px;
+}
+thead td {
+	font-weight:bold;
+}
+.tfill thead td, td {
+	border-style: solid;
+	border-width: 0 1px 1px 0;
+	border-color: white;
+}
+.tfill td {
+	background: #D8E6F3;
+}
+thead td:first-child, td:first-child {
+	text-align: left;
+}
+
+.tsimple thead td {
+	border-bottom:3px solid #337ab7;
+	padding:10px 20px;
+}
+.tsimple tbody td {
+	padding:10px 20px;
+	border-bottom:1px solid #f0f0f0;
+}
+.tsimple tbody tr:nth-child(2n){
+	background-color: #fafafa;
+}
+.tsimple td.txtleft {
+	text-align:left;
+}
+.tsimple td.txtright {
+	text-align:right;
+}
+.tsimple .nth0 + .nth1 td, .tsimple .nth1 + .nth0 td {
+	border-top:2px solid #e0e0e0;
+}
+
+
+td.ops span.icon-cnt {
+	color:gray;
+	position:relative;
+	text-align:center;
+	text-shadow:2px 2px 2px rgba(0,0,0,0.2);
+
+/* 	display:inline-block;
+	background-color:#f7f7f7;
+	background-image:linear-gradient(top, #f7f7f7, #e7e7e7);
+	width:32px;
+	height:32px;
+	line-height:32px;
+	border-radius:50%;
+	box-shadow:0px 3px 8px #aaa, inset 0px 2px 3px #fff;
+ */}
+td.ops span.icon-cnt:hover .icon-play {
+	color:black;
+	cursor:pointer;
+}
+
+/* td.ops span.icon-play:before {
+	margin-left:.2em;
+}
+ */
+
+#content p {
+	margin:20px 0;
+}
+
+#content ul {
+	margin:10px 0 10px 20px;
+	list-style-type:disc;
+}
+#content ul li {
+	padding:4px 0;
+}
+
+#content h1 {
+	font-size:120%;
+	color:#337ab7;
+	margin:10px 0 20px 0;
+}

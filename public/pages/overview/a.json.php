@@ -17,7 +17,7 @@ $db=new Db('base','nodes');
 $nodes=$db->select('select nodename,ip from nodelist');
 if(!empty($nodes))foreach($nodes as $node)
 {
-	$idle=$clonos->check_locktime($node['ip']);
+	$idle=$this->check_locktime($node['ip']);
 	if($idle==0) $res_array['offline-nodes']++; else $res_array['online-nodes']++;
 	
 	$nodenames[]=$node['nodename'];
@@ -48,9 +48,9 @@ if(!empty($nodenames))foreach($nodenames as $name)
 
 if($res_array['average']>0)
 {
-	$res_array['average']=$clonos->GhzConvert($res_array['average']/($res_array['num-nodes']?:1));
+	$res_array['average']=$this->GhzConvert($res_array['average']/($res_array['num-nodes']?:1));
 }
 
-$res_array['sum-ram']=$clonos->fileSizeConvert($res_array['sum-ram']*1024);
+$res_array['sum-ram']=$this->fileSizeConvert($res_array['sum-ram']*1024);
 
 echo json_encode($res_array);

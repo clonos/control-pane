@@ -1,0 +1,9 @@
+	<tbody>
+		<tr id="#keyid#">
+			<td class="txtleft">#keyname#</td>
+			<td class="txtleft wordwreck"><span class="max-100">#keysrc#</span></td>
+			<td class="ops">
+				<span#deltitle# class="icon-cancel"></span>
+			</td>
+		</tr>
+	</tbody>

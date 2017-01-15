@@ -11,8 +11,8 @@ $_REALPATH=realpath('../');
 include($_REALPATH.'/php/clonos.php');
 $clonos=new ClonOS($_REALPATH);
 
-$file_path=$_REALPATH.$_ds.'public/pages'.$_ds.$path.$_ds;
-$json_name=$file_path.'a.json.php';
+//$file_path=$_REALPATH.$_ds.'public/pages'.$_ds.$path.$_ds;
+//$clonos->json_name=$file_path.'a.json.php';
 
-if(file_exists($json_name)) include($json_name); else echo '{}';
+//if(file_exists($json_name)) include($json_name); else echo '{}';
 exit;

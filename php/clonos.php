@@ -6,8 +6,18 @@ class ClonOS
 	public $workdir='';
 	public $realpath_php='';
 	public $realpath_public='';
+	public $realpath_page='';
+	public $json_name='';
+	public $language='en';
+	public $language_file_loaded=false;
+	public $translate_arr=array();
+	public $table_templates=array();
+	
 	private $_post=false;
 	private $_db=null;
+	private $_client_ip='';
+	private $_dialogs=array();
+	private $_cmd_array=array('jcreate','jstart','jstop','jrestart','jedit','jremove','jexport','jimport','jclone','madd','sstart','sstop','projremove','bcreate','bstart','bstop','brestart','bremove','vm_obtain','removesrc');
 	
 /*
 	public $projectId=0;
@@ -31,9 +41,11 @@ class ClonOS
 			1 => array('pipe','w'),
 			2 => array('pipe','r')
 		);
-//echo self::CBSD_CMD.$cmd;exit;
+		
 		$process = proc_open(self::CBSD_CMD.trim($cmd),$descriptorspec,$pipes,null,null);
-
+		
+		$full_cmd=self::CBSD_CMD.trim($cmd);
+		
 		$error=false;
 		$error_message='';
 		$message='';
@@ -45,44 +57,122 @@ class ClonOS
 			fclose($pipes[0]);
 			fclose($pipes[1]);
 			fclose($pipes[2]);
-
+			
 			$task_id=-1;
 			$return_value = proc_close($process);
 			if($return_value!=0)
 			{
 				$error=true;
 				$error_message=$buf;
-				//$log_file='/tmp';
-				//if(file_exists())
 			}else{
 				$message=trim($buf);
 			}
-			//echo self::CBSD_CMD.$cmd;
-			return array('cmd'=>$cmd,'retval'=>$return_value, 'message'=>$message, 'error'=>$error,'error_message'=>$error_message);
+			
+			return array('cmd'=>$cmd,'full_cmd'=>$full_cmd,'retval'=>$return_value, 'message'=>$message, 'error'=>$error,'error_message'=>$error_message);
 		}
 	}
 	
 	function __construct($_REALPATH)	# /usr/home/web/cp/clonos
 	{
+		$this->_post=($_SERVER['REQUEST_METHOD']=='POST');
+		$this->_vars=$_POST;
+		if(isset($_COOKIE['lang'])) $this->language=$_COOKIE['lang'];
+
 		$this->workdir=getenv('WORKDIR');
 			# // /usr/jails
 			
 		$this->realpath_php=$_REALPATH.'/php/';
 			# /usr/home/web/cp/clonos/php/
 			
-		$this->realpath_php=$_REALPATH.'/public/';
+		$this->realpath_public=$_REALPATH.'/public/';
 			# /usr/home/web/cp/clonos/public/
+		
+		$translate_filename=$this->realpath_public.'/lang/'.$this->language.'.php';
+		$translate_filename_alt=$this->realpath_public.'/lang/en.php';
+		if(file_exists($translate_filename)) $t_filename=$translate_filename; else $t_filename=$translate_filename;
+		include($t_filename);
+		$this->translate_arr=$lang;
+		unset($lang);
+		unset($t_filename);
+		
+		$this->_client_ip=$_SERVER['REMOTE_ADDR'];
+		
+		if(isset($this->_vars['path']))
+		{
+			$this->realpath_page=$this->realpath_public.'pages/'.trim($this->_vars['path'],'/').'/';
+			$this->json_name=$this->realpath_page.'a.json.php';
+		}
+//		$this->json_name=$this->realpath_php.'pages'
+//		$clonos->json_name=$file_path.'a.json.php';
 		
 		include('config.php');
 		include('db.php');
 		include('menu.php');
 		
+		$this->_db_tasks=new Db('base','cbsdtaskd');
+		$this->_db_local=new Db('base','local');
+		
 		$this->config=new Config();
-		$this->menu=new Menu($this->config->menu);
+		$this->menu=new Menu($this->config->menu,$this);
 		
+		if(isset($this->_vars['mode'])) $this->mode=$this->_vars['mode'];
+		if(isset($this->_vars['form_data'])) $this->form=$this->_vars['form_data'];
 		
-		
-		
+		if($this->_post && isset($this->mode))
+		{
+			unset($_POST);
+			switch($this->mode)
+			{
+				case 'getTasksStatus':
+					echo json_encode($this->_getTasksStatus($this->form['jsonObj']));
+					return;break;
+				case 'getJsonPage':
+					if(file_exists($this->json_name)) include($this->json_name); else echo '{}';
+					return;break;
+				case 'freejname':
+					echo json_encode($this->getFreeJname());
+					break;
+
+				case 'jailAdd':
+					echo json_encode($this->jailAdd());
+					return;break;
+				case 'bhyveAdd':
+					echo json_encode($this->bhyveAdd());
+					return;break;
+				case 'bhyveObtain':
+					echo json_encode($this->bhyveObtain());
+					return;break;
+				
+				case 'authkeyAdd':
+					echo json_encode($this->authkeyAdd());
+					return;break;
+				case 'authkeyRemove':
+					echo json_encode($this->authkeyRemove());
+					return;break;
+					
+				case 'vpnetAdd':
+					echo json_encode($this->vpnetAdd());
+					return;break;
+				case 'vpnetRemove':
+					echo json_encode($this->vpnetRemove());
+					return;break;
+					
+				case 'mediaAdd':
+					//echo json_encode($this->mediaAdd());
+					return;break;
+				case 'mediaRemove':
+					echo json_encode($this->mediaRemove());
+					return;break;
+					
+				case 'srcRemove':
+					echo json_encode($this->srcRemove());
+					return;break;
+
+				case 'logLoad':
+					echo json_encode($this->logLoad());
+					return;break;
+			}
+		}
 		
 		
 		
@@ -253,6 +343,33 @@ class ClonOS
 			}
 		}
 	}
+	function getLang()
+	{
+		return $this->language;
+	}
+	function translate($phrase)
+	{
+		if(isset($this->translate_arr[$phrase]))
+			return $this->translate_arr[$phrase];
+		else
+			return $phrase;
+	}
+
+	function getTableChunk($table_name='',$tag)
+	{
+		if(empty($table_name)) return false;
+		if(isset($this->table_templates[$table_name][$tag])) return $this->table_templates[$table_name][$tag];
+		
+		$file_name=$this->realpath_page.$table_name.'.table';
+		if(!file_exists($file_name)) return false;
+		$file=file_get_contents($file_name);
+		$pat='#[\s]*?<'.$tag.'[^>]*>(.*)<\/'.$tag.'>#iUs';
+ 		if(preg_match($pat,$file,$res))
+		{
+			$this->table_templates[$table_name][$tag]=$res;
+			return $res;
+		}
+	}
 	
 	function check_locktime($nodeip)
 	{
@@ -266,13 +383,32 @@ class ClonOS
 		
 		$difftime=(( $cur_time - $st_time ) / 60 );
 		if ( $difftime > 1 ) {
-			return round($difftime);;
+			return round($difftime);
 		} else {
 			return 0; //lock exist but too fresh
 		}
 	}
+	
+	function check_vmonline($vm)
+	{
+		$vmmdir="/dev/vmm";
+		
+		if(!file_exists($vmmdir)) return 0;
+		
+		if($handle=opendir($vmmdir))
+		{
+			while(false!==($entry=readdir($handle)))
+			{
+				if($entry[0]==".") continue;
+				if($vm==$entry) return 1;
+			}
+			closedir($handle);
+		}
+		
+		return 0;
+	}
 
-	function get_node_info($nodename,$value)
+/* 	function get_node_info($nodename,$value)
 	{
 		$db = new SQLite3($this->realpath."/var/db/nodes.sqlite"); $db->busyTimeout(5000);
 		if (!$db) return;
@@ -285,6 +421,54 @@ class ClonOS
 			if(!isset($res["$value"])) return;
 			return $res["$value"];
 		}
+	} */
+	
+	function getRunningTasks($ids=array())
+	{
+		$check_arr=array(
+			'jcreate'=>'Creating',
+			'jstart'=>'Starting',
+			'jstop'=>'Stopping',
+			'jrestart'=>'Restarting',
+			'jremove'=>'Removing',
+			'jexport'=>'Exporting',
+			'jclone'=>'Cloning',
+			'bcreate'=>'Creating',
+			'bstart'=>'Starting',
+			'bstop'=>'Stopping',
+			'brestart'=>'Restarting',
+			'bremove'=>'Removing',
+			'vm_obtain'=>'Creating',
+			'removesrc'=>'Removing',
+		);
+		
+		$res=array();
+		if(!empty($ids))
+		{
+			$tid=join("','",$ids);
+			$query="select id,cmd,status,jname from taskd where status<2 and jname in ('{$tid}')";
+			//echo $query;
+			$tasks=$this->_db_tasks->select($query);
+			if(!empty($tasks)) foreach($tasks as $task)
+			{
+				$rid=preg_replace('/^#/','',$task['jname']);
+				foreach($check_arr as $key=>$val)
+				{
+					if(strpos($task['cmd'],$key)!==false)
+					{
+						$cmd=$key;
+						$txt_status=$val;
+						break;
+					}
+				}
+				$res[$rid]['status']=$task['status'];
+				$res[$rid]['task_cmd']=$cmd;
+				$res[$rid]['txt_status']=$txt_status;
+				$res[$rid]['task_id']=$task['id'];
+			}
+			return $res;
+		}
+		return null;
 	}
 	
 /*
@@ -315,22 +499,36 @@ class ClonOS
 		if(isset($obj['proj_ops'])) return $this->GetProjectTasksStatus($obj);
 		if(isset($obj['mod_ops'])) return $this->GetModulesTasksStatus($obj);
 		
-		$ops_array=array('jcreate','jstart','jstop','jedit','jremove','jexport','jimport','jclone','madd','sstart','sstop','projremove');	//,'mremove'
+		$ops_array=$this->_cmd_array;
+		/*	array('jcreate','jstart','jstop','jrestart','jedit','jremove','jexport','jimport','jclone','madd','sstart','sstop','projremove',
+		'bcreate','bstart','bstop','brestart','bremove',
+		'vm_obtain');	//,'mremove'
+		*/
 		$stat_array=array(
-			'jcreate'=>array(get_translate('Creating'),get_translate('Not running')),
-			'jstart'=>array(get_translate('Starting'),get_translate('Launched')),
-			'jstop'=>array(get_translate('Stopping'),get_translate('Stopped')),
-			'jedit'=>array(get_translate('Saving'),get_translate('Saved')),
-			'jremove'=>array(get_translate('Removing'),get_translate('Removed')),
-			'jexport'=>array(get_translate('Exporting'),get_translate('Exported')),
-			'jimport'=>array(get_translate('Importing'),get_translate('Imported')),
-			'jclone'=>array(get_translate('Cloning'),get_translate('Cloned')),
-			'madd'=>array(get_translate('Installing'),get_translate('Installed')),
+			'jcreate'=>array($this->translate('Creating'),$this->translate('Created')),
+			'jstart'=>array($this->translate('Starting'),$this->translate('Launched')),
+			'jstop'=>array($this->translate('Stopping'),$this->translate('Stopped')),
+			'jrestart'=>array($this->translate('Restarting'),$this->translate('Restarted')),
+			'jedit'=>array($this->translate('Saving'),$this->translate('Saved')),
+			'jremove'=>array($this->translate('Removing'),$this->translate('Removed')),
+			'jexport'=>array($this->translate('Exporting'),$this->translate('Exported')),
+			'jimport'=>array($this->translate('Importing'),$this->translate('Imported')),
+			'jclone'=>array($this->translate('Cloning'),$this->translate('Cloned')),
+			'madd'=>array($this->translate('Installing'),$this->translate('Installed')),
 			//'mremove'=>array('Removing','Removed'),
-			'sstart'=>array(get_translate('Starting'),get_translate('Started')),
-			'sstop'=>array(get_translate('Stopping'),get_translate('Stopped')),
+			'sstart'=>array($this->translate('Starting'),$this->translate('Started')),
+			'sstop'=>array($this->translate('Stopping'),$this->translate('Stopped')),
+			'vm_obtain'=>array($this->translate('Creating'),$this->translate('Created')),
 			//'projremove'=>array('Removing','Removed'),
 		);
+		$stat_array['bcreate']=&$stat_array['jcreate'];
+		$stat_array['bstart']=&$stat_array['jstart'];
+		$stat_array['bstop']=&$stat_array['jstop'];
+		$stat_array['brestart']=&$stat_array['jrestart'];
+		$stat_array['bremove']=&$stat_array['jremove'];
+		$stat_array['removesrc']=&$stat_array['jremove'];
+		
+		
 		if(!empty($obj)) foreach($obj as $key=>$task)
 		{
 			$op=$task['operation'];
@@ -342,18 +540,26 @@ class ClonOS
 				{
 					switch($op)
 					{
-						case 'jstart':	$res=$this->jailStart('jail'.$key,$key);break;
-						case 'jstop':	$res=$this->jailStop('jail'.$key,$key);break;
-						case 'jedit':	$res=$this->jailEdit('jail'.$key);break;
-						case 'jremove':	$res=$this->jailRemove('jail'.$key,$key);break;
-						case 'jexport':	$res=$this->jailExport('jail'.$key,$task['jname'],$key);break;
-						case 'jimport':	$res=$this->jailImport('jail'.$key,$task['jname'],$key);break;
-						case 'jclone':	$res=$this->jailClone('jail'.$key,$key,$obj[$key]);break;
-						case 'madd':	$res=$this->moduleAdd('jail'.$key,$task['jname'],$key);break;
-						//case 'mremove':	$res=$this->moduleRemove('jail'.$key,$task['jname'],$key);break;
-						case 'sstart':	$res=$this->serviceStart($task);break;
-						case 'sstop':	$res=$this->serviceStop($task);break;
-						//case 'projremove':	$res=$this->projectRemove($key,$task);break;
+						case 'jstart':	$res=$this->jailStart($key);break;
+						case 'jstop':	$res=$this->jailStop($key);break;
+						case 'jrestart':$res=$this->jailRestart($key);break;
+						//case 'jedit':	$res=$this->jailEdit('jail'.$key);break;
+						case 'jremove':	$res=$this->jailRemove($key);break;
+						
+						case 'bstart':	$res=$this->bhyveStart($key);break;
+						case 'bstop':	$res=$this->bhyveStop($key);break;
+						case 'brestart':$res=$this->bhyveRestart($key);break;
+						case 'bremove':	$res=$this->bhyveRemove($key);break;
+						case 'removesrc':	$res=$this->srcRemove($key);break;
+						
+						//case 'jexport':	$res=$this->jailExport('jail'.$key,$task['jname'],$key);break;
+						//case 'jimport':	$res=$this->jailImport('jail'.$key,$task['jname'],$key);break;
+						//case 'jclone':	$res=$this->jailClone('jail'.$key,$key,$obj[$key]);break;
+						//case 'madd':	$res=$this->moduleAdd('jail'.$key,$task['jname'],$key);break;
+						////case 'mremove':	$res=$this->moduleRemove('jail'.$key,$task['jname'],$key);break;
+						//case 'sstart':	$res=$this->serviceStart($task);break;
+						//case 'sstop':	$res=$this->serviceStop($task);break;
+						////case 'projremove':	$res=$this->projectRemove($key,$task);break;
 					}
 				}
 				
@@ -398,20 +604,8 @@ class ClonOS
 						if($stat['errcode']>0)
 						{
 							$obj[$key]['errmsg']=file_get_contents($stat['logfile']);
-							$obj[$key]['txt_status']=get_translate('Error');
+							$obj[$key]['txt_status']=$this->translate('Error');
 						}
-					#	Удаляем джейл
-						if($stat['status']==2 && $task['operation']=='jremove')
-						{
-							$this->jailRemoveFromDb($stat['errcode'],$task);
-						}
-					#	Удаляем модуль
-					/*
-						if($stat['status']==2 && $task['operation']=='mremove')
-						{
-							$this->moduleRemoveFromDb($stat['errcode'],$task);
-						}
-					*/
 					#	Возвращаем IP клонированному джейлу, если он был присвоен по DHCP
 						if($stat['status']==2 && $task['operation']=='jclone')
 						{
@@ -422,15 +616,478 @@ class ClonOS
 			}
 		}
 		
-		if(isset($res['cloned']) && $res['cloned'])
-		{
-			$obj[-1]['jails']=$this->getJailsList();
-		}
-
 		return $obj;
 	}
 	
+	function jailAdd()
+	{
+		$form=$this->_vars['form_data'];
+		$err=array();
+		$arr=array(
+			'workdir'=>$this->workdir,
+			'mount_devfs'=>1,
+			'arch'=>'native',
+			'mkhostfile'=>1,
+			'devfs_ruleset'=>4,
+			'ver'=>'native',
+			'mount_src'=>0,
+			'mount_obj'=>0,
+			'mount_kernel'=>0,
+			'applytpl'=>1,
+			'floatresolv'=>1,
+			'allow_mount'=>1,
+			'allow_devfs'=>1,
+			'allow_nullfs'=>1,
+			'mkhostsfile'=>1,
+			'pkg_bootstrap'=>0,
+			'mdsize'=>0,
+			'runasap'=>0,
+			'with_img_helpers'=>'',
+		);
+		
+		$arr_copy=array('jname','host_hostname','ip4_addr','user_pw_root','interface');
+		foreach($arr_copy as $a) if(isset($form[$a])) $arr[$a]=$form[$a];
+		
+		$arr_copy=array('baserw','mount_ports','astart','vnet');
+		foreach($arr_copy as $a) if(isset($form[$a]) && $form[$a]=='on') $arr[$a]=1; else $arr[$a]=0;
+		
+		$sysrc=array();
+		if(isset($form['serv-ftpd'])) $sysrc[]=$form['serv-ftpd'];
+		if(isset($form['serv-sshd'])) $sysrc[]=$form['serv-sshd'];
+		$arr['sysrc_enable']=join($sysrc,' ');
+		
+		/* create jail */
+		$file_name='/tmp/'.$arr['jname'].'.conf';
+		
+		$file=file_get_contents($this->realpath_public.'templates/jail.tpl');
+		if(!empty($file))
+		{
+			foreach($arr as $var=>$val)
+			{
+				$file=str_replace('#'.$var.'#',$val,$file);
+			}
+		}
+		file_put_contents($file_name,$file);
+		
+		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd jcreate inter=0 jconf='.$file_name);
 
+		$err='Jail is not create!';
+		$taskId=-1;
+		if($res['retval']==0)
+		{
+			$err='Jail was created!';
+			$taskId=$res['message'];
+		}
+		// local - поменять на реальный сервер, на котором создаётся клетка!
+		$jid=$arr['jname'];
+		
+		$html='';
+		$hres=$this->getTableChunk('jailslist','tbody');
+		if($hres!==false)
+		{
+			$html_tpl=$hres[1];
+			$vars=array(
+				'nth-num'=>'nth0',				// исправить на актуальные данные!
+				'node'=>'local',				// исправить на актуальные данные!
+				'ip4_addr'=>str_replace(',',',<wbr />',$form['ip4_addr']),
+				'jname'=>$arr['jname'],
+				'jstatus'=>$this->translate('Creating'),
+				'icon'=>'spin6 animate-spin',
+				'desktop'=>'s-on',
+				'maintenance'=>' maintenance',
+				'protected'=>'icon-cancel',
+				'protitle'=>$this->translate('Delete'),
+				'vnc_title'=>$this->translate('Open VNC'),
+				'reboot_title'=>$this->translate('Restart jail'),
+			);
+			
+			foreach($vars as $var=>$val)
+				$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
+			
+			$html=$html_tpl;
+		}
+		
+		/*
+		$html=
+<<<EOT
+		<tr class="nth0 s-on busy maintenance" id="{$jid}"><td>local</td><td class="txtleft">{$jid}</td><td class="txtleft jname">{$arr['ip4_addr']}</td><td class="jstatus">{$this->translate('Creating')}</td><td class="ops" width="5"><span class="icon-cnt"><span class="icon-spin6 animate-spin"></span></span></td><td width="5" class="op-settings"><span class="icon-cog"></span></td><td class="op-reboot" title="{$this->translate('Restart jail')}" width="5"><span class="icon-arrows-cw"></span></td><td class="op-del" title="{$this->translate('Delete')}" width="5"><span class="icon-cancel"></span></td><td class="op-vnc" width="5"><span class="icon-desktop" title="{$this->translate('Open VNC')}"></span></td></tr>
+EOT;
+		*/
+		
+		return array('errorMessage'=>$err,'jail_id'=>$jid,'taskId'=>$taskId,'html'=>$html,'mode'=>$this->mode);
+	}
+	/*
+	function jailCreate($name,$hostname,$ip,$jprofile)
+	{
+		$tpl=$this->getJailTemplate();	//$name,$hostname,1,$ip,$jprofile);
+		$file_name='/tmp/'.$name.'.conf';
+		file_put_contents($file_name,$tpl);
+		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd jcreate inter=0 jconf='.$file_name);
+		return $res;
+	}
+	function getJailTemplate()	//$jailname,$hostname,$astart="1",$ipv4='DHCP',$jprofile)
+	{
+		$form=$this->_vars['form_data'];
+		$replaces=array(
+			'workdir'=>$this->workdir,
+			'jname'=>$form['jailname'],
+			'host_hostname'=>$form['hostname'],
+			'ip4_addr'=>$form['ipv4'],
+			'mount_devfs'=>$form[''],
+			'allow_mount'=>$form[''],
+			'allow_devfs'=>$form[''],
+			'allow_nullfs'=>$form[''],
+			'mkhostsfile'=>$form[''],
+			'devfs_ruleset'=>$form[''],
+			'ver'=>$form[''],
+			'baserw'=>$form[''],
+			'mount_src'=>$form[''],
+			'mount_obj'=>$form[''],
+			'mount_kernel'=>$form[''],
+			'mount_ports'=>$form[''],
+			'astart'=>$form['astart'],
+			'vnet'=>$form[''],
+			'applytpl'=>$form[''],
+			'mdsize'=>$form[''],
+			'floatresolv'=>$form[''],
+			'pkg_bootstrap'=>$form[''],
+			'user_pw_root'=>$form[''],
+			'interface'=>$form[''],
+			'sysrc_enable'=>$form[''],
+			'with_img_helpers'=>$form[''],
+			'runasap'=>$form[''],
+		);
+		$file=file_get_contents($this->realpath_public.'templates/jail.tpl');
+		if(!empty($file))
+		{
+			foreach($replaces as $var=>$val)
+			{
+				$file=str_replace('#'.$var.'#',$val,$file);
+			}
+		}
+		return $file;
+	}
+	*/
+
+	function jailStart($name)
+	{
+		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd jstart inter=0 jname='.$name);	// autoflush=2
+		return $res;
+	}
+	function jailStop($name)
+	{
+		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd jstop inter=0 jname='.$name);	// autoflush=2
+		return $res;
+	}
+	function jailRestart($name)
+	{
+		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd jrestart inter=0 jname='.$name);	// autoflush=2
+		return $res;
+	}
+	function jailRemove($name)
+	{
+		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd jremove inter=0 jname='.$name);	// autoflush=2
+		return $res;
+	}
+
+	function bhyveAdd()
+	{
+		$form=$this->_vars['form_data'];
+		
+		$os_types=$this->config->os_types;
+		$sel_os=$form['vm_os_profile'];
+		list($os_num,$item_num)=explode('.',$sel_os);
+		if(!isset($os_types[$os_num])) return array('error'=>true,'errorMessage'=>'Error in list of OS types!');
+		$os_name=$os_types[$os_num]['os'];
+		$os_items=$os_types[$os_num]['items'][$item_num];
+		
+		$err=array();
+		$arr=array(
+			'workdir'=>$this->workdir,
+			'jname'=>$form['vm_name'],
+			'host_hostname'=>'',
+			'ip4_addr'=>'',
+			'arch'=>'native',
+			'ver'=>'native',
+			'astart'=>0,
+			'interface'=>$form['interface'],
+			'vm_size'=>$form['vm_size'],
+			'vm_cpus'=>$form['vm_cpus'],
+			'vm_ram'=>$form['vm_ram'],
+			'vm_os_type'=>$os_items['type'],
+			'vm_efi'=>'uefi',
+			'vm_os_profile'=>$os_items['profile'],
+			'vm_guestfs'=>'',
+		);
+		
+		/* create vm */
+		$file_name='/tmp/'.$arr['jname'].'.conf';
+		
+		$file=file_get_contents($this->realpath_public.'templates/vm.tpl');
+		if(!empty($file))
+		{
+			foreach($arr as $var=>$val)
+			{
+				$file=str_replace('#'.$var.'#',$val,$file);
+			}
+		}
+		file_put_contents($file_name,$file);
+		
+		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd bcreate inter=0 jconf='.$file_name);
+
+		$err='Virtual Machine is not create!';
+		$taskId=-1;
+		if($res['retval']==0)
+		{
+			$err='Virtual Machine was created!';
+			$taskId=$res['message'];
+		}
+		// local - поменять на реальный сервер, на котором создаётся клетка!
+		$jid=$arr['jname'];
+		
+		$vm_ram=str_replace('g',' GB',$form['vm_ram']);
+		
+		$html='';
+		$hres=$this->getTableChunk('bhyveslist','tbody');
+		if($hres!==false)
+		{
+			$html_tpl=$hres[1];
+			$vars=array(
+				'nth-num'=>'nth0',				// исправить на актуальные данные!
+				'node'=>'local',				// исправить на актуальные данные!
+				'jname'=>$arr['jname'],
+				'vm_status'=>$this->translate('Creating'),
+				'vm_cpus'=>$form['vm_cpus'],
+				'vm_ram'=>$vm_ram,
+				'vm_os_type'=>$os_items['type'],	//$os_name,
+				'icon'=>'spin6 animate-spin',
+				'desktop'=>' s-off',
+				'maintenance'=>' maintenance',
+				'protected'=>'icon-cancel',
+				'protitle'=>$this->translate('Delete'),
+				'vnc_title'=>$this->translate('Open VNC'),
+				'reboot_title'=>$this->translate('Restart VM'),
+			);
+			
+			foreach($vars as $var=>$val)
+				$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
+			
+			$html=$html_tpl;
+		}
+		
+		return array('errorMessage'=>$err,'jail_id'=>$jid,'taskId'=>$taskId,'html'=>$html,'mode'=>$this->mode);
+	}
+	function bhyveObtain()
+	{
+		$form=$this->_vars['form_data'];
+		
+		$os_types=$this->config->os_types;
+		$sel_os=$form['vm_os_profile'];
+		list($os_num,$item_num)=explode('.',$sel_os);
+		if(!isset($os_types[$os_num])) return array('error'=>true,'errorMessage'=>'Error in list of OS types!');
+		//$os_name=$os_types[$os_num]['os'];
+		$os_items=$os_types[$os_num]['items'][$item_num];
+		$os_type=$os_items['type'];
+		
+		$key_name='/usr/home/olevole/.ssh/authorized_keys';
+		$key_id=$form['vm_authkey'];
+		$db=new Db('base','authkey');
+		$nres=$db->selectAssoc('select name from authkey where idx='.$key_id);
+		if($nres['name']!==false)
+		{
+			$key_name=$nres['name'];
+		}
+		$cmd="task owner=cbsdweb mode=new /usr/local/bin/cbsd vm_obtain jname={$form['vm_name']} vm_size={$form['vm_size']} vm_cpus={$form['vm_cpus']} vm_ram={$form['vm_ram']} vm_os_type={$os_type} mask={$form['mask']} ip4_addr={$form['ip4_addr']} gw={$form['gateway']} authkey={$key_name} pw={$form['vm_password']}";
+		
+		$res=$this->cbsd_cmd($cmd);
+		$err='Virtual Machine is not create!';
+		$taskId=-1;
+		if($res['retval']==0)
+		{
+			$err='Virtual Machine was created!';
+			$taskId=$res['message'];
+		}
+		
+		$vm_ram=str_replace('g',' GB',$form['vm_ram']);
+		
+		$html='';
+		$hres=$this->getTableChunk('bhyveslist','tbody');
+		if($hres!==false)
+		{
+			$html_tpl=$hres[1];
+			$vars=array(
+				'nth-num'=>'nth0',				// исправить на актуальные данные!
+				'node'=>'local',				// исправить на актуальные данные!
+				'jname'=>$form['vm_name'],
+				'vm_status'=>$this->translate('Creating'),
+				'vm_cpus'=>$form['vm_cpus'],
+				'vm_ram'=>$vm_ram,
+				'vm_os_type'=>$os_type,
+				'icon'=>'spin6 animate-spin',
+				'desktop'=>' s-off',
+				'maintenance'=>' maintenance',
+				'protected'=>'icon-cancel',
+				'protitle'=>$this->translate('Delete'),
+				'vnc_title'=>$this->translate('Open VNC'),
+				'reboot_title'=>$this->translate('Restart VM'),
+			);
+			
+			foreach($vars as $var=>$val)
+				$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
+			
+			$html=$html_tpl;
+		}
+		
+		return array('errorMessage'=>$err,'jail_id'=>$form['vm_name'],'taskId'=>$taskId,'html'=>$html,'mode'=>$this->mode);
+	}
+	function bhyveStart($name)
+	{
+		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd bstart inter=0 jname='.$name);	// autoflush=2
+		return $res;
+	}
+	function bhyveStop($name)
+	{
+		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd bstop inter=0 jname='.$name);	// autoflush=2
+		return $res;
+	}
+	function bhyveRestart($name)
+	{
+		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd brestart inter=0 jname='.$name);	// autoflush=2
+		return $res;
+	}
+	function bhyveRemove($name)
+	{
+		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd bremove inter=0 jname='.$name);	// autoflush=2
+		return $res;
+	}
+
+	function authkeyAdd()
+	{
+		$form=$this->_vars['form_data'];
+		
+		$query="insert into authkey (name,authkey) values ('{$form['keyname']}','{$form['keysrc']}')";
+		
+		$db=new Db('base','authkey');
+		//$res=array('error'=>false,'lastId'=>2);
+		$res=$db->insert($query);
+		if($res['error'])
+		{
+			return array('error'=>$res);
+		}
+		
+		$html='';
+		$hres=$this->getTableChunk('authkeyslist','tbody');
+		if($hres!==false)
+		{
+			$html_tpl=$hres[1];
+			$vars=array(
+				'keyid'=>$res['lastID'],
+				'keyname'=>$form['keyname'],
+				'keysrc'=>$form['keysrc'],
+				'deltitle'=>$this->translate('Delete'),
+			);
+			
+			foreach($vars as $var=>$val)
+				$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
+			
+			$html=$html_tpl;
+		}
+		
+		return array('keyname'=>$form['keyname'],'html'=>$html);
+	}
+	function authkeyRemove()
+	{
+		$form=$this->_vars['form_data'];
+		
+		$db=new Db('base','authkey');
+		$res=$db->update('delete from authkey where idx='.$form['auth_id']);
+		if($res===false) return array('error'=>true,'res'=>print_r($res,true));
+		
+		return array('error'=>false,'auth_id'=>$form['auth_id']);
+	}
+	
+	function vpnetAdd()
+	{
+		$form=$this->_vars['form_data'];
+		
+		$query="insert into vpnet (name,vpnet) values ('{$form['netname']}','{$form['network']}')";
+		
+		$db=new Db('base','vpnet');
+		
+		$res=$db->insert($query);
+		if($res['error'])
+		{
+			return array('error'=>$res);
+		}
+		
+		$html='';
+		$hres=$this->getTableChunk('vpnetslist','tbody');
+		if($hres!==false)
+		{
+			$html_tpl=$hres[1];
+			$vars=array(
+				'netid'=>$res['lastID'],
+				'netname'=>$form['netname'],
+				'network'=>$form['network'],
+				'deltitle'=>$this->translate('Delete'),
+			);
+			
+			foreach($vars as $var=>$val)
+				$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
+			
+			$html=$html_tpl;
+		}
+		
+		return array('netname'=>$form['netname'],'html'=>$html);
+	}
+	function vpnetRemove()
+	{
+		$form=$this->_vars['form_data'];
+		
+		$db=new Db('base','vpnet');
+		$res=$db->update('delete from vpnet where idx='.$form['vpnet_id']);
+		if($res===false) return array('error'=>true,'res'=>print_r($res,true));
+		
+		return array('error'=>false,'vpnet_id'=>$form['vpnet_id']);
+	}
+	
+	
+	function mediaRemove()
+	{
+		$form=$this->_vars['form_data'];
+		/*
+		$db=new Db('base','storage_media');
+		$res=$db->update('delete from media where idx='.$form['media_id']);
+		if($res===false) return array('error'=>true,'res'=>print_r($res,true));
+		*/
+		return array('error'=>false,'media_id'=>$form['media_id']);
+	}
+	
+	function srcRemove($ver)
+	{
+		$ver=str_replace('src','',$ver);
+		if(empty($ver)) return array('error'=>true,'errorMessage'=>'Version of sources is emtpy!');
+		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd removesrc inter=0 ver='.$ver.' jname=#src'.$ver);
+		return $res;
+	}
+	
+	
+	function logLoad()
+	{
+		$form=$this->_vars['form_data'];
+		$log_id=$form['log_id'];
+		if(!is_numeric($log_id)) return array('error'=>'Log ID must be a number');
+		
+		$log_file='/tmp/taskd.'.$log_id.'.log';
+		if(file_exists($log_file))
+		{
+			$html=file_get_contents($log_file);
+			$html=str_replace("\n",'<br />',$html);
+			return array('html'=>'<div style="font-weight:bold;">Log ID: '.$log_id.'</div><br />'.$html);
+		}
+		
+		return array('error'=>'Log file is not exists!');
+	}
 	
 	
 	
@@ -440,6 +1097,25 @@ class ClonOS
 	
 	
 	
+	function useDialogs($arr=array())
+	{
+		//print_r($arr);
+		$this->_dialogs=$arr;
+	}
+	function placeDialogs()
+	{
+		if(empty($this->_dialogs)) return;
+		echo PHP_EOL;
+		foreach($this->_dialogs as $dialog_name)
+		{
+			$file_name=$this->realpath_public.'dialogs/'.$dialog_name.'.php';
+			if(file_exists($file_name))
+			{
+				include($file_name);
+				echo PHP_EOL,PHP_EOL;
+			}
+		}
+	}
 	
 	
 	
@@ -449,15 +1125,30 @@ class ClonOS
 	
 	
 	
+	function runVNC($jname)
+	{
+		$res=$this->cbsd_cmd("vm_vncwss jname={$jname} permit={$this->_client_ip}");
+		$res=$this->_db_local->selectAssoc('select nodeip from local');
+		$nodeip=$res['nodeip'];
+		if(strlen($nodeip)<10) $nodeip='127.0.0.1';
+		header('Location: http://'.$nodeip.':6080/vnc_auto.html?host='.$nodeip.'&port=6080');
+		exit;
+	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
+	function getFreeJname()
+	{
+		$arr=array();
+		$res=$this->cbsd_cmd("freejname");
+		if($res['error'])
+		{
+			$arr['error']=true;
+			$arr['error_message']=$err['error_message'];
+		}else{
+			$arr['error']=false;
+			$arr['freejname']=$res['message'];
+		}
+		return $arr;
+	}
 	
 	
 	
@@ -469,7 +1160,7 @@ class ClonOS
 		return round($Hz/$h,2).' '.$l;
 	}
 	
-	function fileSizeConvert($bytes, $bytes_in_mb=1024)
+	function fileSizeConvert($bytes,$bytes_in_mb=1024,$round=false)
 	{
 		$bytes = floatval($bytes);
 		$arBytes = array(
@@ -501,49 +1192,24 @@ class ClonOS
 			if($bytes >= $arItem["VALUE"])
 			{
 				$result = $bytes / $arItem["VALUE"];
+				if($round) $result=round($result);
 				$result = str_replace(".", "," , strval(round($result, 2)))." ".$arItem["UNIT"];
 				break;
 			}
 		}
 		return $result;
 	}
-}
-
-function translate($phrase)
-{
-	$lang=getLang();
-	$file=getLangFilePath($lang);
-	if(!file_exists($file)) $file=getLangFilePath('en');
-	if(!file_exists($file)) return;
-	require($file);
 	
-	if(isset($lang[$phrase]))
-		echo $lang[$phrase];
-	else
-		echo $phrase;
-}
-function get_translate($phrase)
-{
-	$lang=getLang();
-	$file=getLangFilePath($lang);
-	if(!file_exists($file)) $file=getLangFilePath('en');
-	require($file);
-	
-	if(isset($lang[$phrase]))
-		return $lang[$phrase];
-	else
-		return $phrase;
-}
-
-function getLang()
-{
-	if(isset($_COOKIE['lang']))
-		$lang=$_COOKIE['lang'];
-	if(empty($lang)) $lang='en';
-	return $lang;
-}
-function getLangFilePath($lang)
-{
-	global $_REALPATH;
-	return $_REALPATH.'/public/lang/'.$lang.'.php';
+	function colorizeCmd($cmd_string)
+	{
+		$arr=$this->_cmd_array;
+		foreach($arr as $item)
+		{
+			$cmd_string=str_replace($item,'<span class="cbsd-cmd">'.$item.'</span>',$cmd_string);
+		}
+		
+		$cmd_string=preg_replace('#(\/.+/cbsd)#','<span class="cbsd-lnch">$1</span>',$cmd_string);
+		
+		return '<span class="cbsd-str">'.$cmd_string.'</span>';
+	}
 }

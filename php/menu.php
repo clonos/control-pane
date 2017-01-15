@@ -33,7 +33,7 @@ class Menu
 	public $path='';
 	public $first_key=array();
 	
-	function __construct($menu_config=array())
+	function __construct($menu_config=array(),$parent)
 	{
 		if(!empty($menu_config))
 		{
@@ -47,8 +47,8 @@ class Menu
 		$this->path=$qstr;	//$_MENU_PATH
 		if(!empty($menu_config))foreach($menu_config as $key=>$val)
 		{
-			$mname=get_translate($val['name']);
-			$mtitle=get_translate($val['title']);
+			$mname=$parent->translate($val['name']);
+			$mtitle=$parent->translate($val['title']);
 			
 			$link=$key;
 			$sel='';
@@ -57,14 +57,18 @@ class Menu
 				$this->title=$mtitle;	//$_TITLE
 				$this->name=$mname;		//$_MENU_NAME
 			}
-			$this->html.='	<li><a href="/'.$link.'/" title="'.$mtitle.'"'.$sel.'>'.$mname.'</a>';
+			
+			$icon='empty';
+			if(isset($val['icon']) && !empty($val['icon'])) $icon=$val['icon'];
+			$span='<span class="'.$icon.'"></span>';
+			$this->html.='	<li><a href="/'.$link.'/" title="'.$mtitle.'"'.$sel.'>'.$span.'<span class="mtxt">'.$mname.'</span></a>';
 			if(!empty($val['submenu']))
 			{
 				$this->html.= PHP_EOL.'		<ul class="submenu">'.PHP_EOL;
 				foreach($val['submenu'] as $k=>$s)
 				{
-					$sname=get_translate($s['name']);
-					$stitle=get_translate($s['title']);
+					$sname=$parent->translate($s['name']);
+					$stitle=$parent->translate($s['title']);
 					
 					$slink=$link.'/'.$k;
 					$sl=$link.'_'.$k;

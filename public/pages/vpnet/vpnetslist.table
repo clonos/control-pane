@@ -1,0 +1,9 @@
+	<tbody>
+		<tr id="#netid#">
+			<td class="txtleft">#netname#</td>
+			<td class="txtleft wordwreck"><span class="max-100">#network#</span></td>
+			<td class="ops">
+				<span#deltitle# class="icon-cancel"></span>
+			</td>
+		</tr>
+	</tbody>

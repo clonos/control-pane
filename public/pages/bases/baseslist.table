@@ -1,0 +1,15 @@
+	<tbody>
+		<tr class="#nth-num##maintenance#" id="#name#">
+			<td class="wordwreck">#node#</td>
+			<td class="txtleft">#name#</td>
+			<td class="txtleft">#platform#</td>
+			<td>#arch#</td>
+			<td>#targetarch#</td>
+			<td>#ver#</td>
+			<td>#stable#</td>
+			<td>#elf#</td>
+			<td class="small">#date#</td>
+			<td width="5" class="ops op-update" title="#updtitle#"><span class="icon-download"></span></td>
+			<td width="5" class="ops op-del" title="#deltitle#"><span class="icon-cancel"></span></td>
+		</tr>
+	</tbody>

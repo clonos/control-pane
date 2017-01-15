@@ -1,0 +1,15 @@
+	<tbody>
+		<tr class="#nth-num##desktop##maintenance#" id="#jname#">
+			<td>#node#</td>
+			<td class="txtleft">#jname#</td>
+			<td class="txtleft">#vm_ram#</td>
+			<td>#vm_cpus#</td>
+			<td>#vm_os_type#</td>
+			<td class="jstatus">#vm_status#</td>
+			<td class="ops" width="5"><span class="icon-cnt"><span class="icon-#icon#"></span></span></td>
+<!--			<td width="5" class="op-settings"><span class="icon-cog"></span></td> -->
+			<td width="5" class="op-reboot" title="#reboot_title#"><span class="icon-arrows-cw"></span></td>
+			<td width="5" class="op-del"#protitle#><span class="#protected#"></span></td>
+			<td width="5" class="op-vnc"><span class="icon-desktop" title="#vnc_title#"></span></td>
+		</tr>
+	</tbody>

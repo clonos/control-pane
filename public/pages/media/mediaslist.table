@@ -1,0 +1,9 @@
+	<tbody>
+		<tr id="#mediaid#">
+			<td class="txtleft">#medianame#</td>
+			<td class="txtleft wordwreck"><span class="max-100">#mediapath#</span></td>
+			<td class="ops">
+				<span#deltitle# class="icon-cancel"></span>
+			</td>
+		</tr>
+	</tbody>

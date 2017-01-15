@@ -1,0 +1,12 @@
+	<tbody>
+		<tr id="#logid#">
+			<td class="txtleft">#logid#</td>
+			<td class="txtcenter"><input type="button" value="#buttvalue#"#disabled# class="btn-openlog" /></td>
+			<td class="txtleft wordwreck">#logcmd#</td>
+			<td class="txtleft">#logstarttime#</td>
+			<td class="txtleft">#logendtime#</td>
+			<td class="txtcenter#status#">#logstatus#</td>
+			<td class="txtcenter#status#">#logerrcode#</td>
+			<td class="txtleft">#logsize#</td>
+		</tr>
+	</tbody>

@@ -39,7 +39,7 @@ if($res!==false)
 			$vars['buttvalue']=$this->translate('Open');
 			
 			$disabled='disabled';
-			if($logsize>0 && $logsize<204800)
+			if($logsize>0)	// && $logsize<204800
 			{
 				$disabled='';
 			}

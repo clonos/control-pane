@@ -8,8 +8,8 @@
 	</thead>
 	<tbody>
 		<tr><td>Количество нод:</td><td id="num-nodes"></td></tr>
-		<tr><td>Нод в онлайне:</td><td id="online-nodes"></td></tr>
-		<tr><td>Нод в офлайне:</td><td id="offline-nodes"></td></tr>
+		<tr><td>Нод онлайн:</td><td id="online-nodes"></td></tr>
+		<tr><td>Нод офлайн:</td><td id="offline-nodes"></td></tr>
 		<tr><td>Количество клеток:</td><td id="num-jails"></td></tr>
 		<tr><td>Количество ядер:</td><td id="num-cores"></td></tr>
 		<tr><td>Средняя частота, Mhz:</td><td id="average"></td></tr>
@@ -20,10 +20,10 @@
 		<tr><td colspan="2" class="error_message">Ошибка при выборке из базы данных!</td></tr>
 	</tbody>
 </table>
-<p>Это открытый и свободный проект, использующий в своей работе следующие проекты (наиболее значимые):</p>
+<p>Это открытый и свободный проект, использующий в своей работе такие проекты, как (наиболее значимые):</p>
 <ul>
 	<li><a href="https://www.bsdstore.ru/" target="_blank">CBSD Project</a> — Фреймворк для управления виртуальными окружениями FreeBSD ОС</li>
 	<li><a href="https://www.freebsd.org/" target="_blank">FreeBSD Project</a> —  свободная Unix-подобная операционная система, потомок AT&T Unix по линии BSD, созданной в университете Беркли</li>
-	<li><a href="https://puppet.com/" target="_blank">Puppet</a> — Система управлания конфигурациями</li>
+	<li><a href="https://puppet.com/" target="_blank">Puppet</a> — Система управления конфигурациями</li>
 	<li>и много остального..</li>
 </ul>

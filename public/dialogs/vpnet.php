@@ -7,7 +7,7 @@ err_messages={
 <dialog id="vpnet" class="window-box">
 	<h1><?php echo $this->translate('Create Network');?></h1>
 	<h2><?php echo $this->translate('Settings');?></h2>
-	<form class="win" method="post" id="vpnetSettings">
+	<form class="win" method="post" id="vpnetSettings" onsubmit="return false;">
 		<div class="window-content">
 			<p>
 				<span class="field-name"><?php echo $this->translate('Network name');?>:</span>

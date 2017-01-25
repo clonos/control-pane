@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <?php
 $_REALPATH=realpath('../');
 include($_REALPATH.'/php/clonos.php');
@@ -21,6 +20,7 @@ if(empty($uri))
 
 error_reporting(E_ALL);
 ?>
+<!DOCTYPE html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>ClonOS — <?php echo $clonos->menu->title; ?></title>

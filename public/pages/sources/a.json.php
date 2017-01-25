@@ -29,12 +29,14 @@ if(!empty($nodes))foreach($nodes as $node)
 			if($hres!==false)
 			{
 				$html_tpl=$hres[1];
+				$vers=(preg_match('#\.\d#',$base['ver']))?'release':'stable';
 				$vars=array(
 					'nth-num'=>'nth'.$num,
 					'node'=>$node['nodename'],
 					'name'=>$base['name'],
 					'platform'=>$base['platform'],
 					'ver'=>$base['ver'],
+					'ver1'=>$vers,
 					'rev'=>$base['rev'],
 					'date'=>$base['date'],
 					'maintenance'=>($idle==0)?' maintenance':'',

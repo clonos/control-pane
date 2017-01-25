@@ -8,7 +8,7 @@ err_messages={
 <dialog id="bhyve-new" class="window-box">
 	<h1><?php echo $this->translate('Create Virtual Machine');?></h1>
 	<h2><?php echo $this->translate('Virtual Machine Settings');?></h2>
-	<form class="win" method="post" id="bhyveSettings">
+	<form class="win" method="post" id="bhyveSettings" onsubmit="return false;">
 		<div class="window-content">
 			<p>
 				<span class="field-name"><?php echo $this->translate('VM OS profile');?>:</span>

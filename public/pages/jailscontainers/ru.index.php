@@ -7,13 +7,13 @@ $clonos->useDialogs(array(
 ?>
 <h1>Контейнеры:</h1>
 
-<p><span class="top-button icon-plus id:jail-settings">Создать клетку</span></p>
+<p><span class="top-button icon-plus id:jail-settings">Создать контейнер</span></p>
 
 <table class="tsimple" id="jailslist" width="100%">
 	<thead>
 		<tr>
 			<th class="wdt-200 elastic">Имя сервера</th>
-			<th class="txtleft">Имя джейла</th>
+			<th class="txtleft">Контейнер</th>
 			<th class="txtleft wdt-200">IP-адрес</th>
 			<th class="wdt-120">Статус</th>
 			<th colspan="4" class="wdt-100">Действия</th>

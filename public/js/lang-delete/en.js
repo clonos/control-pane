@@ -1,3 +1,0 @@
-clonos.lang={
-
-}

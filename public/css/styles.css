@@ -446,6 +446,9 @@ thead td:first-child, td:first-child {
 .wdt-80 {
 	width:80px;
 }
+.wdt-90 {
+	width:90px;
+}
 .wdt-100 {
 	width:100px;
 }
@@ -546,6 +549,9 @@ tr.maintenance td {
 tr.maintenance td.jstatus {
 	background-color:#f0f0f0;
 }
+#baseslist tr.maintenance td.jstatus {
+	background-color:inherit;
+}
 
 tr.busy.maintenance .ops span {
 	display:inline-block !important;
@@ -587,16 +593,13 @@ tr.busy.maintenance .ops span {
 
 dialog {
 	display:none;
-/*
-	width:800px;
-	height:630px;
-*/
 	padding:0;
 	border:1px solid rgba(0,0,0,.3);
 	border-radius:2px;
 	box-shadow:0 5px 20px black;
-	/*top:20%;*/
 	background-color:#f0f0f0;
+	font-family: 'trebuchet ms', 'lucida grande', 'lucida sans unicode', arial, helvetica, sans-serif;
+	font-size:90%;
 }
 dialog::backdrop,
 #backdrop {
@@ -611,10 +614,17 @@ dialog::backdrop,
 	-webkit-backdrop-filter:blur(5px);
 	z-index:1000;
 }
-dialog {
-	/*text-align:center;*/
-	font-family: 'trebuchet ms', 'lucida grande', 'lucida sans unicode', arial, helvetica, sans-serif;
-	font-size:90%;
+dialog.new h1 .edit,
+dialog.new .buttons .edit,
+dialog.edit h1 .new,
+dialog.edit .buttons .new {
+	display:none;
+}
+dialog.new h1 .new,
+dialog.new .buttons .new,
+dialog.edit h1 .edit,
+dialog.edit .buttons .edit {
+	display:inline-block;
 }
 .dialog-close:before {
 	font-family:"clonos";
@@ -657,6 +667,7 @@ dialog:not(textarea) {
 	min-height:300px;
 	max-height:600px;
 	padding:10px 30px;
+	overflow-y:auto;
 }
 .window-box .window-content p {
 	margin-bottom:10px;

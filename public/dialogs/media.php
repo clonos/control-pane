@@ -7,7 +7,7 @@ err_messages={
 <dialog id="media" class="window-box">
 	<h1><?php echo $this->translate('Add Storage Media');?></h1>
 	<h2><?php echo $this->translate('Settings');?></h2>
-	<form class="win" method="post" id="mediaSettings">
+	<form class="win" method="post" id="mediaSettings" onsubmit="return false;">
 		<div class="window-content">
 			<p>
 				<span class="field-name"><?php echo $this->translate('Media name');?>:</span>

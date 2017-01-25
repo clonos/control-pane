@@ -7,10 +7,13 @@ err_messages={
 	'rootpass1':'<?php echo $this->translate("Please retype password correctly");?>',
 };
 </script>
-<dialog id="jail-settings" class="window-box">
-	<h1><?php echo $this->translate('Create jail');?></h1>
+<dialog id="jail-settings" class="window-box new">
+	<h1>
+		<span class="new"><?php echo $this->translate('Create jail');?></span>
+		<span class="edit"><?php echo $this->translate('Edit jail');?></span>
+	</h1>
 	<h2><?php echo $this->translate('Jail Settings');?></h2>
-	<form class="win" method="post" id="jailSettings">
+	<form class="win" method="post" id="jailSettings" onsubmit="return false;">
 		<div class="window-content">
 			<p>
 				<span class="field-name"><?php echo $this->translate('Jail name');?>:</span>
@@ -59,7 +62,8 @@ err_messages={
 		</div>
 	</form>
 	<div class="buttons">
-		<input type="button" value="<?php echo $this->translate('Create');?>" class="button ok-but" />
+		<input type="button" value="<?php echo $this->translate('Create');?>" class="new button ok-but" />
+		<input type="button" value="<?php echo $this->translate('Save');?>" class="edit button ok-but" />
 		<input type="button" value="<?php echo $this->translate('Cancel');?>" class="button red cancel-but" />
 	</div>
 </dialog>

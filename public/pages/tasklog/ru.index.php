@@ -5,9 +5,7 @@ $clonos->useDialogs(array(
 ?>
 <h1>Логи задач</h1>
 
-<!--p>
-	<span class="top-button icon-plus id:vpnet">Добавить подсеть</span>
-</p-->
+<p><span class="top-button icon-trash-empty id:flushlog">Очистить лог</span></p>
 
 <table class="tsimple" id="taskloglist" width="100%">
 	<thead><tr>

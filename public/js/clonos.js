@@ -25,13 +25,13 @@ var clonos={
 	
 	addEvents:function()
 	{
-		$('#lng-sel').bind('change',function(){document.cookie="lang="+$(this).val()+";path=/;";location.reload();});
-		$('#content').bind('click',$.proxy(this.bodyClick,this));
-		$('.closer').bind('click',$.proxy(this.closerClick,this));
-		$(window).bind('keypress',$.proxy(this.dialogCloseByKey,this))
-			.bind('resize',$.proxy(this.onResize,this));
-		$('div.menu').bind("touchstart",$.proxy(this.onTouchStart,this))
-			.bind("touchend",$.proxy(this.onTouchEnd,this));
+		$('#lng-sel').on('change',function(){document.cookie="lang="+$(this).val()+";path=/;";location.reload();});
+		$('#content').on('click',$.proxy(this.bodyClick,this));
+		$('.closer').on('click',$.proxy(this.closerClick,this));
+		$(window).on('keypress',$.proxy(this.dialogCloseByKey,this))
+			.on('resize',$.proxy(this.onResize,this));
+		$('div.menu').on("touchstart",$.proxy(this.onTouchStart,this))
+			.on("touchend",$.proxy(this.onTouchEnd,this));
 		
 		this.tasks.init(this);
 	},
@@ -155,11 +155,20 @@ var clonos={
 		
 		this.dialogShow1('vnc',type);
 		$('#vnc-iframe').get(0).focus();
-		$('#vnc-iframe').bind('blur',function(){$('#vnc-iframe').get(0).focus();});
+		$('#vnc-iframe').on('blur',function(){$('#vnc-iframe').get(0).focus();});
 	},
-	dialogShow1:function(id)
+	dialogShow1:function(id,mode)
 	{
 		var dlg=$('dialog#'+id);
+		
+		if(mode=='edit')
+		{
+			$(dlg).removeClass('new').addClass('edit');
+			$(dlg).prop('mode','edit');
+		}else{
+			$(dlg).removeClass('edit').addClass('new');
+			$(dlg).prop('mode','new');
+		}
 		
 		if($('span.close-but',dlg).length==0)
 			$('h1',dlg).before('<span class="close-but">×</span>');
@@ -173,7 +182,7 @@ var clonos={
 		if(typeof res=='function')
 		{
 			$('dialog#'+id).css('display','block').get(0).showModal();
-			$('dialog#'+id).bind('close',$.proxy(this.dialogClose,this));
+			$('dialog#'+id).on('close',$.proxy(this.dialogClose,this));
 		}else{
 			var bkg=$('div#backdrop').get(0);
 			if(typeof bkg=='undefined')
@@ -228,6 +237,7 @@ var clonos={
 		var n,nl;
 		var repDisplaying=false;
 		if(typeof id=='undefined' || id=='') return;
+		var mode=$('dialog#'+id).prop('mode');
 		var inps=$('dialog#'+id+' input:invalid');
 		if(inps.length>0)
 		{
@@ -256,9 +266,10 @@ var clonos={
 			if($('form#jailSettings').length>0)
 			{
 				var jid=$('form#jailSettings input[name="jname"]').val();
+				this.trids=this.getTrIdsForCheck('jailslist');	// !!!
 				if(this.trids.length>0)
 				{
-					if(this.trids.indexOf(jid)!=-1)
+					if(mode!='edit' && this.trids.indexOf(jid)!=-1)
 					{
 						var inp=$('form#jailSettings input[name="jname"]').get(0);
 						inp.setCustomValidity(this.translate('This name is already exists!'));
@@ -278,7 +289,8 @@ var clonos={
 				this.tmp_jail_info[jid]={};
 				this.tmp_jail_info[jid]['runasap']=$('#astart-id:checked').length>0?1:0;
 				var posts=$('form#jailSettings').serializeArray();
-				this.loadData('jailAdd',$.proxy(this.onJailAdd,this),posts);
+				var jmode=(mode=='edit'?'jailEdit':'jailAdd');
+				this.loadData(jmode,$.proxy(this.onJailAdd,this),posts);
 			}
 			if(id=='bhyve-new' && $('form#bhyveSettings').length>0)
 			{
@@ -316,13 +328,27 @@ var clonos={
 				var posts=$('form#vpnetSettings').serializeArray();
 				this.loadData('vpnetAdd',$.proxy(this.onVpnetAdd,this),posts);
 			}
+			if(id=='srcget')
+			{
+				this.srcVerAdd();
+			}
+			if(id=='basescompile')
+			{
+				var posts=$('form#basesSettings').serializeArray();
+				this.loadData('basesCompile',$.proxy(this.onJailAdd,this),posts);
+			}
+			if(id=='getrepo')
+			{
+				var posts=$('form#repoSettings').serializeArray();
+				this.loadData('repoCompile',$.proxy(this.onJailAdd,this),posts);
+			}
 			
 		}
 	},
 	onJailAdd:function(data)
 	{
 		try{
-			var data=$.parseJSON(data);
+			var data=JSON.parse(data);
 		}catch(e){alert(e.message);return;}
 		
 		if(typeof data!='undefined' && !data.error)
@@ -343,11 +369,25 @@ var clonos={
 						var table='bhyveslist';
 						var operation='vm_obtain';
 						break;
+					case 'basesCompile':
+						var table='baseslist';
+						var operation='world';
+						break;
+					case 'repoCompile':
+						var table='baseslist';
+						var operation='repo';
+						break;
 				}
 				
+				var mode='new';
+				if(['basesCompile','repoCompile'].indexOf(data.mode)!=-1)
+				{
+					var trn=$('table#'+table+' tbody tr#'+this.dotEscape(data.jail_id));
+					if(trn.length>0) mode='update';
+				}
 				var injected=false;
 				var n,nl;
-				if(data.html!='undefined')
+				if(data.html!='undefined' && mode=='new')	// && $('table#'+table).length<1
 				{
 					var trs=$('table#'+table+' tbody tr');
 					for(n=0,nl=trs.length;n<nl;n++)
@@ -366,6 +406,13 @@ var clonos={
 						$(data.html).insertAfter(tr);
 					}
 				}
+				if(mode=='update')
+				{
+					var tr=trn;	//$('tr#'+this.dotEscape(data.jail_id));
+					$(tr).addClass('busy');
+					$('.ops .icon-cnt span',tr).addClass('icon-spin6 animate-spin');
+					$('.jstatus',tr).html(data.txt_status);
+				}
 				this.dialogClose();
 				this.enableWait(data.jail_id);
 				this.tasks.add({'operation':operation,'jail_id':data.jail_id,'task_id':data.taskId});
@@ -376,7 +423,7 @@ var clonos={
 	onAuthkeyAdd:function(data)
 	{
 		try{
-			var data=$.parseJSON(data);
+			var data=JSON.parse(data);
 		}catch(e){alert(e.message);return;}
 		
 		if(typeof data!='undefined' && !data.error)
@@ -409,7 +456,7 @@ var clonos={
 	onVpnetAdd:function(data)
 	{
 		try{
-			var data=$.parseJSON(data);
+			var data=JSON.parse(data);
 		}catch(e){alert(e.message);return;}
 		
 		if(typeof data!='undefined' && !data.error)
@@ -439,6 +486,51 @@ var clonos={
 			this.dialogClose();
 		}
 	},
+	srcVerAdd:function()
+	{
+		var n,nl;
+		var posts=$('form#srcSettings').serializeArray();
+		var version=$('form#srcSettings input[name="version"]').val();
+		var html=src_table_pattern;
+		var stable=(parseInt(version)>parseFloat(version))?'stable':'release';
+		if(typeof version!='undefined')
+		{
+			var arr={
+				'nth-num':'nth0',
+				'ver':version,
+				'ver1':stable,
+				'node':'local',
+				'rev':'—',
+				'date':'—',
+				'updtitle':this.translate('Update'),
+				'deltitle':this.translate('Delete'),
+				'maintenance':' busy',
+			};
+			for(key in arr)
+				html=html.replace(new RegExp('#'+key+'#','g'),arr[key]);
+			var trs=$('#srcslist tr');
+			var injected=false;
+			for(n=0,nl=trs.length;n<nl;n++)
+			{
+				this.dialogClose();
+				var tr=trs[n];
+				var tbl_ver=parseFloat($('td.version',tr).html());
+				if(version<tbl_ver)
+				{
+					$(html).insertBefore(tr);
+					this.srcUpdate('src'+version);
+					injected=true;
+					break;
+				}
+			}
+			if(!injected)
+			{
+				$(html).insertAfter(tr);
+				this.srcUpdate('src'+version);
+			}
+		}
+	},
+	
 	
 	getFreeJname:function()
 	{
@@ -447,7 +539,7 @@ var clonos={
 	onGetFreeJname:function(data)
 	{
 		try{
-			var data=$.parseJSON(data);
+			var data=JSON.parse(data);
 		}catch(e){alert(e.message);return;}
 		$('dialog#jail-settings input[name="jname"]').val(data.freejname);
 		$('dialog#jail-settings input[name="host_hostname"]').val(data.freejname+'.my.domain');
@@ -493,7 +585,7 @@ var clonos={
 	onLoadData:function(data)
 	{
 		try{
-			var data=$.parseJSON(data);
+			var data=JSON.parse(data);
 		}catch(e){alert(e.message);return;}
 		
 		if(data.error)
@@ -544,8 +636,8 @@ var clonos={
 	enableWait:function(id,empty)
 	{
 		if(typeof empty=='undefined') empty=false;
-		$('#'+id).addClass('busy');
-		var icon_cnt=$('tr#'+id).find('span.icon-cnt');
+		$('#'+this.dotEscape(id)).addClass('busy');
+		var icon_cnt=$('tr#'+this.dotEscape(id)).find('span.icon-cnt');
 		var icon=$(icon_cnt).find('span');
 		if(!empty)
 		{
@@ -556,24 +648,34 @@ var clonos={
 	},
 	enablePlay:function(id)
 	{
-		var icon_cnt=$('tr#'+id).find('span.icon-cnt');
+		var icon_cnt=$('tr#'+this.dotEscape(id)).find('span.icon-cnt');
 		var icon=$(icon_cnt).find('span');
 		if(icon[0]) icon[0].className='icon-play';
 	},
 	enableStop:function(id)
 	{
-		var icon_cnt=$('tr#'+id).find('span.icon-cnt');
+		var icon_cnt=$('tr#'+this.dotEscape(id)).find('span.icon-cnt');
 		var icon=$(icon_cnt).find('span');
 		if(icon[0]) icon[0].className='icon-stop';
 	},
 	enableRip:function(id)
 	{
-		var icon_cnt=$('tr#'+id).find('span.icon-cnt');
+		var icon_cnt=$('tr#'+this.dotEscape(id)).find('span.icon-cnt');
 		if(typeof icon_cnt!='undefined' && icon_cnt.length>0)
 		{
 			var icon=$(icon_cnt).find('span');
 			if(typeof icon!='undefined')
 				icon[0].className='icon-emo-cry';
+		}
+	},
+	enableClear:function(id)
+	{
+		var icon_cnt=$('tr#'+this.dotEscape(id)).find('span.icon-cnt');
+		if(typeof icon_cnt!='undefined' && icon_cnt.length>0)
+		{
+			var icon=$(icon_cnt).find('span');
+			if(typeof icon!='undefined')
+				icon[0].className='';
 		}
 	},
 	
@@ -706,7 +808,7 @@ var clonos={
 			this.context=context;
 		},
 		
-		add:function(vars)
+		add:function(vars)	//,arr
 		{
 			if(typeof vars['status']=='undefined') vars['status']=-1;
 			if(typeof vars['jail_id']!='undefined')
@@ -720,6 +822,13 @@ var clonos={
 				this.tasks['proj_ops']='projDelete';
 				this.tasks[vars['projects_id']]=vars;
 			}
+			
+			/*
+			if(typeof arr!='undefined')
+			{
+				this.tasks['vars']=arr;
+			}
+			*/
 		},
 		
 		start:function()
@@ -742,7 +851,7 @@ var clonos={
 		update:function(data)
 		{
 			try{
-				var data=$.parseJSON(data);
+				var data=JSON.parse(data);
 			}catch(e){alert(e.message);return;}
 			
 /* 			if(typeof data['mod_ops']!='undefined')
@@ -782,12 +891,12 @@ var clonos={
 			
 			for(key in data)
 			{
-				$('tr#'+key+' .jstatus').html(data[key].txt_status);
-				var errmsg=$('tr#'+key+' .errmsg');
+				$('tr#'+this.context.dotEscape(key)+' .jstatus').html(data[key].txt_status);
+				var errmsg=$('tr#'+this.context.dotEscape(key)+' .errmsg');
 				if(typeof data[key].errmsg!='undefined')
 				{
 					//$(errmsg).html('<span class="label">Error:</span>'+data[key].errmsg);
-					$('tr#'+key).removeClass('busy');
+					$('tr#'+this.context.dotEscape(key)).removeClass('busy').addClass('s-off');
 					this.tasks[key].errmsg=data[key].errmsg;
 				}
 				this.tasks[key].operation=data[key].operation;
@@ -797,6 +906,10 @@ var clonos={
 				
 				if(data[key].status==2)
 				{
+					if(data[key].new_html!='undefined')
+					{
+						this.tasks[key].new_html=data[key].new_html;
+					}
 					this.context.onTaskEnd(this.tasks[key],key);
 					delete this.tasks[key];
 				}
@@ -815,13 +928,16 @@ var clonos={
 	{
 		if(typeof task.errmsg!='undefined' && id!='mod_ops')
 		{
-			this.enablePlay(id);
+			if(['srcup','removebase','world','repo'].indexOf(task.operation)!=-1)
+				this.enableClear(id);
+			else
+				this.enablePlay(id);
 			this.notify(task.errmsg,'error');
 			
 		//	Если ошибка при создании новой записи в таблице, то удаляем её через N секунд
-			if(task.operation=='bcreate' || task.operation=='vm_obtain')
+			if(['bcreate','vm_obtain','srcup'].indexOf(task.operation)!=-1)
 			{
-				setTimeout(function(id){$('#'+id).remove();},5000,id);
+				setTimeout(function(id){$('#'+clonos.dotEscape(id)).remove();},5000,id);
 			}
 		}else{
 			switch(task.operation)
@@ -862,9 +978,21 @@ var clonos={
 				case 'jremove':
 				case 'bremove':
 				case 'removesrc':
-					$('#'+id+' td.jstatus').html(this.translate(task.txt_status));
+				case 'removebase':
+					$('#'+this.dotEscape(id)+' td.jstatus').html(this.translate(task.txt_status));
 					this.enableRip(id);
 					window.setTimeout($.proxy(this.deleteItemsOk,this,id),2000);
+					break;
+				case 'srcup':
+				case 'world':
+				case 'repo':
+					if(task.new_html!='undefined')
+					{
+						$('#'+this.dotEscape(id)).html(task.new_html);
+					}
+					$('#'+this.dotEscape(id)).removeClass('s-off').addClass('s-on').removeClass('busy');
+					$('#'+this.dotEscape(id)+' td.jstatus').html(this.translate(task.txt_status));
+					this.enableClear(id);
 					break;
 				case 'jexport':
 					this.enablePlay(id);
@@ -907,7 +1035,8 @@ var clonos={
 	
 	deleteItemsOk:function(id)
 	{
-		var tr=$('#'+id);
+		var tr=$('#'+this.dotEscape(id));
+		if(tr.length<1) return;
 		var table=$(tr).closest('table');
 		if(table && tr)
 		{
@@ -925,14 +1054,14 @@ var clonos={
 	onAuthkeyRemove:function(data)
 	{
 		try{
-			var data=$.parseJSON(data);
+			var data=JSON.parse(data);
 		}catch(e){alert(e.message);return;}
 		
 		if(typeof data.error!='undefined')
 		{
 			if(data.error)
 			{
-				this.notify($res,'error');
+				this.notify(data.error_message,'error');
 				return;
 			}
 			
@@ -950,14 +1079,14 @@ var clonos={
 	onVpnetRemove:function(data)
 	{
 		try{
-			var data=$.parseJSON(data);
+			var data=JSON.parse(data);
 		}catch(e){alert(e.message);return;}
 		
 		if(typeof data.error!='undefined')
 		{
 			if(data.error)
 			{
-				this.notify($res,'error');
+				this.notify(data.error_message,'error');
 				return;
 			}
 			
@@ -975,14 +1104,14 @@ var clonos={
 	onMediaRemove:function(data)
 	{
 		try{
-			var data=$.parseJSON(data);
+			var data=JSON.parse(data);
 		}catch(e){alert(e.message);return;}
 		
 		if(typeof data.error!='undefined')
 		{
 			if(data.error)
 			{
-				this.notify($res,'error');
+				this.notify(data.error_message,'error');
 				return;
 			}
 			
@@ -994,12 +1123,27 @@ var clonos={
 	{
 		var c=confirm(this.translate('You want to delete selected FreeBSD sources! Are you sure?'));
 		if(!c) return;
-		var ver=$('#srcslist tr#'+id+' .version').html();
-//		alert(ver);
-//		var posts=[{'name':'src_ver','value':ver}];
-//		this.loadData('srcRemove',$.proxy(this.onSrcRemove,this),posts);
-		
+		var ver=$('#srcslist tr#'+this.dotEscape(id)+' .version').html();
 		var op='removesrc';
+		this.enableWait(id);
+		this.tasks.add({'operation':op,'jail_id':id});
+		this.tasks.start();
+	},
+	srcUpdate:function(id,vers)
+	{
+		if(typeof vers=='undefined') vers='stable';
+		var ver=$('#srcslist tr#'+this.dotEscape(id)+' .version').html();
+		var op='srcup';
+		this.enableWait(id);
+		this.tasks.add({'operation':op,'jail_id':id});
+		this.tasks.start();
+	},
+	baseRemove:function(id)
+	{
+		var c=confirm(this.translate('You want to delete selected FreeBSD bases! Are you sure?'));
+		if(!c) return;
+		var ver=$('#baseslist tr#'+this.dotEscape(id)+' .version').html();
+		var op='removebase';
 		this.enableWait(id);
 		this.tasks.add({'operation':op,'jail_id':id});
 		this.tasks.start();
@@ -1014,20 +1158,41 @@ var clonos={
 	onLogLoad:function(data)
 	{
 		try{
-			var data=$.parseJSON(data);
+			var data=JSON.parse(data);
 		}catch(e){alert(e.message);return;}
 		
 		if(typeof data.error!='undefined')
 		{
 			if(data.error)
 			{
-				this.notify($res,'error');
+				this.notify(data.error_message,'error');
 				return;
 			}
 		}
 		
 		$('dialog#tasklog .window-content').html(data.html);
 		this.dialogShow1('tasklog');
+	},
+	logFlush:function()
+	{
+		this.loadData('logFlush',$.proxy(this.onLogFlush,this));
+	},
+	onLogFlush:function(data)
+	{
+		try{
+			var data=JSON.parse(data);
+		}catch(e){alert(e.message);return;}
+		
+		if(typeof data.error!='undefined')
+		{
+			if(data.error)
+			{
+				this.notify(data.error_message,'error');
+				return;
+			}
+		}
+		
+		$('#taskloglist tbody').html('');
 	},
 	
 	bodyClick:function(event)
@@ -1043,7 +1208,7 @@ var clonos={
 			switch(elid)
 			{
 				case 'jddm-edit':
-					alert('Редактируем! :)');
+					this.DDMenuSelect(elid);
 					return;break;
 				case 'jddm-clone':
 					alert('Клонируем! :)');
@@ -1096,7 +1261,7 @@ var clonos={
 				}
 				if(tblid=='baseslist')
 				{
-					//this.mediaRemove(trid);
+					this.baseRemove(trid);
 					return;
 				}
 				if(tblid=='srcslist')
@@ -1107,6 +1272,11 @@ var clonos={
 				this.jailRemove(trid,opt);
 				return;break;
 			case 'icon-arrows-cw':
+				if(tblid=='srcslist')
+				{
+					this.srcUpdate(trid);
+					return;
+				}
 				this.jailRestart(trid,opt);
 				return;break;
 			case 'icon-desktop':
@@ -1138,9 +1308,18 @@ var clonos={
 		
 		if(cl.indexOf('top-button')>-1)
 		{
-			//if(cl.indexOf('id:jail-settings')>-1)
 			if(cl.indexOf('id:')>-1)
 			{
+				var bid=cl.match(/id:([^\s]+)/);
+				if(bid!=null)
+				{
+					switch(bid[1])
+					{
+						case 'flushlog':
+							this.logFlush();
+							return;break;
+					}
+				}
 				this.dialogOpen(event);
 				return;
 			}
@@ -1287,15 +1466,18 @@ var clonos={
 			});
 		}
 		
-		this.test='test context';
-		$(menu).unbind('mouseleave');
-		$(menu).unbind('mouseenter');
-		$(menu).bind('mouseleave',$.proxy(function(){
+		var table_id=$(tr).closest('table').attr('id');
+		$(menu).prop('calEl',{'table_id':table_id,'id':id,'tr':tr});
+		
+		//this.test='test context';
+		$(menu).off('mouseleave');
+		$(menu).off('mouseenter');
+		$(menu).on('mouseleave',$.proxy(function(){
 			this.ddmenu_interval=setInterval($.proxy(this.DDMenuClose,this),2000);
-			$(document).unbind('click',$.proxy(this.DDMenuClose,this));
-			$(document).bind('click',$.proxy(this.DDMenuClose,this));
+			$(document).off('click',$.proxy(this.DDMenuClose,this));
+			$(document).on('click',$.proxy(this.DDMenuClose,this));
 		},this));
-		$(menu).bind('mouseenter',$.proxy(function(){
+		$(menu).on('mouseenter',$.proxy(function(){
 			clearInterval(this.ddmenu_interval);
 		},this));
 	},
@@ -1305,8 +1487,81 @@ var clonos={
 		var menu=$('div#config-menu');
 		$(menu).css('display','none');
 		clearInterval(this.ddmenu_interval);
-		$(document).unbind('click',$.proxy(this.DDMenuClose,this));
-		$(menu).unbind('mouseleave',$.proxy(this.DDMenuClose,this));
+		$(document).off('click',$.proxy(this.DDMenuClose,this));
+		$(menu).off('mouseleave',$.proxy(this.DDMenuClose,this));
+	},
+	DDMenuSelect:function(elid)
+	{
+		var dt=$('div#config-menu').prop('calEl');
+		if(!dt)return;
+		var id=dt.id;
+		var table_id=dt.table_id;
+		switch(table_id)
+		{
+			case 'jailslist':
+				var dialog='jail-settings';
+				var mode='jailEditVars';
+				break;
+		}
+		
+		this.DDMenuClose();
+		var posts=[{'name':'jail_id','value':id},{'name':'dialog','value':dialog},{'name':'elid','value':elid}];
+		this.loadData(mode,$.proxy(this.onDDMenuLoad,this),posts);
+	},
+	onDDMenuLoad:function(data)
+	{
+		try{
+			var data=JSON.parse(data);
+		}catch(e){alert(e.message);return;}
+		
+		if(typeof data.error!='undefined')
+		{
+			if(data.error)
+			{
+				this.notify(data.error_message,'error');
+				return;
+			}
+		}
+		
+		var dialog=data.dialog;
+		this.fillDialogVars(dialog,data.vars);
+		this.dialogShow1(dialog,'edit');
+		
+/*
+ 		var dt=$('div#config-menu').prop('calEl');
+		if(!dt)return;
+		var table_id=dt.table_id;
+		var id=dt.id;
+		var tr=dt.tr;
+*/
+
+	},
+	
+	fillDialogVars:function(dialog,vars)
+	{
+		var d=$('dialog#'+dialog);
+		if(d.length<1) return;
+		
+		var inps=$('input,textarea,select',d);
+		for(n=0,nl=inps.length;n<nl;n++)
+		{
+			var inp=inps[n];
+			var v=vars[inp.name];
+			var type=inp.type.toLowerCase();
+			switch(type)
+			{
+				case 'text':
+				case 'select':
+					$(inp).val(v);
+					break;
+				case 'radio':
+					$(inp).prop('checked',$(inp).val()==v);
+					break;
+				case 'checkbox':
+					$(inp).prop('checked',v==1);
+					break;
+			}
+		}
 	},
 	
 	notify:function(message,type)
@@ -1320,9 +1575,14 @@ var clonos={
 			theme       : 'defaultTheme',
 		});
 	},
+	
+	dotEscape:function(txt)
+	{
+		return txt.replace(/\./,'\\\.');
+	},
 }
 
-$(window).load(function(){clonos.start();});
-$(window).unload(function(){});	/* эта функция заставляет FireFox запускать JS-функции при нажатии кнопки «Назад»
+$(window).on('load',function(){clonos.start();});
+$(window).on('unload',function(){});	/* эта функция заставляет FireFox запускать JS-функции при нажатии кнопки «Назад»
 http://stackoverflow.com/questions/2638292/after-travelling-back-in-firefox-history-javascript-wont-run */
-$(document).ready(function(){clonos.loadData('getJsonPage',$.proxy(clonos.onLoadData,clonos));});
+$(function(){clonos.loadData('getJsonPage',$.proxy(clonos.onLoadData,clonos));});

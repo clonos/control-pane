@@ -3,7 +3,7 @@ $clonos->useDialogs(array(
 	'vnc-bhyve',
 	'bhyve-new',
 	'bhyve-obtain',
-//	'jail-settings-config-menu',
+	'jail-settings-config-menu',
 ));
 ?>
 <h1>Виртуальные машины</h1>
@@ -21,7 +21,7 @@ $clonos->useDialogs(array(
 		<th class="wdt-30">CPU</th>
 		<th class="wdt-100">Тип ОС</th>
 		<th class="wdt-120">Статус</th>
-		<th colspan="3" class="wdt-80">Действия</th>
+		<th colspan="4" class="wdt-100">Действия</th>
 		<th class="wdt-30">VNC</th>
 	</thead>
 	<tbody></tbody>

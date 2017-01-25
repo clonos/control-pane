@@ -3,9 +3,10 @@
 			<td class="wordwreck">#node#</td>
 			<!--td class="txtleft">#platform#</td-->
 			<td class="version">#ver#</td>
+			<td class="version1">#ver1#</td>
 			<td class="txtleft nowrap">#rev#</td>
 			<td class="small">#date#</td>
-			<td class="ops op-update" title="#updtitle#"><span class="icon-download"></span></td>
+			<td class="ops op-update" title="#updtitle#"><span class="icon-arrows-cw"></span></td>
 			<td class="ops op-del" title="#deltitle#"><span class="icon-cancel"></span></td>
 			<td class="ops"><span class="icon-cnt"><span></span></span></td>
 			<td class="jstatus"></td>

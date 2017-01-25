@@ -6,7 +6,7 @@ err_messages={
 <dialog id="authkey" class="window-box">
 	<h1><?php echo $this->translate('Create Authkey');?></h1>
 	<h2><?php echo $this->translate('Settings');?></h2>
-	<form class="win" method="post" id="authkeySettings">
+	<form class="win" method="post" id="authkeySettings" onsubmit="return false;">
 		<div class="window-content">
 			<p>
 				<span class="field-name"><?php echo $this->translate('Authkey name');?>:</span>

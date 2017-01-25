@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /*
 	'news'=>array(
 		'name'=>'Новости',

@@ -1,7 +1,7 @@
 <dialog id="bhyve-obtain" class="window-box">
 	<h1><?php echo $this->translate('Create Virtual Machine from Library');?></h1>
 	<h2><?php echo $this->translate('Virtual Machine Settings');?></h2>
-	<form class="win" method="post" id="bhyveObtSettings">
+	<form class="win" method="post" id="bhyveObtSettings" onsubmit="return false;">
 		<div class="window-content">
 			<p>
 				<span class="field-name"><?php echo $this->translate('VM OS profile');?>:</span>

@@ -6,11 +6,14 @@ err_messages={
 };
 </script>
 <dialog id="bhyve-new" class="window-box">
-	<h1><?php echo $this->translate('Create Virtual Machine');?></h1>
+	<h1>
+		<span class="new"><?php echo $this->translate('Create Virtual Machine');?></span>
+		<span class="edit"><?php echo $this->translate('Edit Virtual Machine');?></span>
+	</h1>
 	<h2><?php echo $this->translate('Virtual Machine Settings');?></h2>
 	<form class="win" method="post" id="bhyveSettings" onsubmit="return false;">
 		<div class="window-content">
-			<p>
+			<p class="new">
 				<span class="field-name"><?php echo $this->translate('VM OS profile');?>:</span>
 				<select name="vm_os_profile">
 <?php echo $this->config->os_types_create(); ?>
@@ -18,11 +21,11 @@ err_messages={
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('Virtual Machine name');?>:</span>
-				<input type="text" name="vm_name" value="" pattern="[^0-9]{1}[a-zA-Z0-9]{1,}" required="required" />
+				<input type="text" name="vm_name" value="" pattern="[^0-9]{1}[a-zA-Z0-9]{1,}" required="required" class="edit-disable" />
 			</p>
-			<p>
+			<p class="new">
 				<span class="field-name"><?php echo $this->translate('VM Image size');?>:</span>
-				<input type="text" name="vm_size" value="" pattern="^[0-9]+g$" placeholder="10g" required="required" />
+				<input type="text" name="vm_size" value="" pattern="^[0-9]+g$" placeholder="10g" required="required" class="edit-disable" />
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('VM CPUs');?>:</span>
@@ -30,7 +33,7 @@ err_messages={
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('VM RAM');?>:</span>
-				<input type="text" name="vm_ram" value="" pattern="^[0-9]+g$" placeholder="1g" required="required" />
+				<input type="text" name="vm_ram" value="" pattern="^[0-9]+\s*(g|G|gb|GB|mb|MB|m|M)$" placeholder="1g" required="required" />
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('VNC PORT');?>:</span>
@@ -50,7 +53,8 @@ err_messages={
 		</div>
 	</form>
 	<div class="buttons">
-		<input type="button" value="<?php echo $this->translate('Create');?>" class="button ok-but" />
+		<input type="button" value="<?php echo $this->translate('Create');?>" class="new button ok-but" />
+		<input type="button" value="<?php echo $this->translate('Save');?>" class="edit button ok-but" />
 		<input type="button" value="<?php echo $this->translate('Cancel');?>" class="button red cancel-but" />
 	</div>
 </dialog>

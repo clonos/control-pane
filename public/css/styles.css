@@ -614,16 +614,12 @@ dialog::backdrop,
 	-webkit-backdrop-filter:blur(5px);
 	z-index:1000;
 }
-dialog.new h1 .edit,
-dialog.new .buttons .edit,
-dialog.edit h1 .new,
-dialog.edit .buttons .new {
+dialog.new .edit,
+dialog.edit .new {
 	display:none;
 }
-dialog.new h1 .new,
-dialog.new .buttons .new,
-dialog.edit h1 .edit,
-dialog.edit .buttons .edit {
+dialog.new .new,
+dialog.edit .edit {
 	display:inline-block;
 }
 .dialog-close:before {

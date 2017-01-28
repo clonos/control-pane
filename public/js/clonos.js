@@ -169,6 +169,8 @@ var clonos={
 			$(dlg).removeClass('edit').addClass('new');
 			$(dlg).prop('mode','new');
 		}
+		$('dialog#'+id+'.edit .edit-disable, dialog#'+id+'.new .new-disable').prop('disabled',true);
+		$('dialog#'+id+'.edit .new-disable, dialog#'+id+'.new .edit-disable').prop('disabled',false);
 		
 		if($('span.close-but',dlg).length==0)
 			$('h1',dlg).before('<span class="close-but">×</span>');
@@ -289,6 +291,7 @@ var clonos={
 				this.tmp_jail_info[jid]={};
 				this.tmp_jail_info[jid]['runasap']=$('#astart-id:checked').length>0?1:0;
 				var posts=$('form#jailSettings').serializeArray();
+				if(mode=='edit') posts.push({'name':'jname','value':jid});
 				var jmode=(mode=='edit'?'jailEdit':'jailAdd');
 				this.loadData(jmode,$.proxy(this.onJailAdd,this),posts);
 			}
@@ -297,7 +300,7 @@ var clonos={
 				var jid=$('form#bhyveSettings input[name="vm_name"]').val();
 				if(typeof this.trids!='undefined' && this.trids.length>0)
 				{
-					if(this.trids.indexOf(jid)!=-1)
+					if(mode!='edit' && this.trids.indexOf(jid)!=-1)
 					{
 						var inp=$('form#bhyveSettings input[name="vm_name"]').get(0);
 						inp.setCustomValidity(this.translate('This name is already exists!'));
@@ -308,7 +311,9 @@ var clonos={
 				this.tmp_jail_info[jid]={};
 				this.tmp_jail_info[jid]['runasap']=0;	// исправить на реальные данные!
 				var posts=$('form#bhyveSettings').serializeArray();
-				this.loadData('bhyveAdd',$.proxy(this.onJailAdd,this),posts);
+				if(mode=='edit') posts.push({'name':'jname','value':jid});
+				var bmode=(mode=='edit'?'bhyveEdit':'bhyveAdd');
+				this.loadData(bmode,$.proxy(this.onJailAdd,this),posts);
 			}
 			if(id=='bhyve-obtain' && $('form#bhyveObtSettings').length>0)
 			{
@@ -345,6 +350,22 @@ var clonos={
 			
 		}
 	},
+	fillFormDataOnChange:function(data)
+	{
+		if(typeof data.form!='undefined')
+		{
+			if(typeof data.form['jname']!='undefined')
+			{
+				var jname=data.form['jname'];
+				delete(data.form['jname']);
+				for(k in data.form)
+				{
+					var v=data.form[k];
+					$('tr#'+jname+' td.'+k).html(v);
+				}
+			}
+		}
+	},
 	onJailAdd:function(data)
 	{
 		try{
@@ -357,6 +378,11 @@ var clonos={
 			{
 				switch(data.mode)
 				{
+					case 'jailEdit':
+					case 'bhyveEdit':
+						this.dialogClose();
+						this.fillFormDataOnChange(data);
+						return;break;
 					case 'jailAdd':
 						var table='jailslist';
 						var operation='jcreate';
@@ -1501,6 +1527,10 @@ var clonos={
 			case 'jailslist':
 				var dialog='jail-settings';
 				var mode='jailEditVars';
+				break;
+			case 'bhyveslist':
+				var dialog='bhyve-new';
+				var mode='bhyveEditVars';
 				break;
 		}
 		

@@ -17,7 +17,7 @@ err_messages={
 		<div class="window-content">
 			<p>
 				<span class="field-name"><?php echo $this->translate('Jail name');?>:</span>
-				<input type="text" name="jname" value="" pattern="[^0-9]{1}[a-zA-Z0-9]{2,}" required="required" />
+				<input type="text" name="jname" value="" pattern="[^0-9]{1}[a-zA-Z0-9]{2,}" required="required" class="edit-disable" />
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('Hostname');?> (FQDN):</span>
@@ -30,11 +30,11 @@ err_messages={
 				<span class="field-name"><?php echo $this->translate('IP address');?>:</span>
 				<input type="text" name="ip4_addr" value="DHCP" pattern="^DHCP$|^(?:[0-9]{1,3}\.){3}[0-9]{1,3}(\/[\d]{1,3})?$" required="required" />
 			</p>
-			<p>
+			<p class="new">
 				<span class="field-name"><?php echo $this->translate('Root password');?>:</span>
 				<input type="password" name="user_pw_root" value="" placeholder="3-20 symbols" pattern=".{3,20}" maxlength="20"></input>
 			</p>
-			<p>
+			<p class="new">
 				<span class="field-name"><?php echo $this->translate('Root password (again)');?>:</span>
 				<input type="password" name="user_pw_root_1" value="" placeholder="3-20 symbols" pattern=".{3,20}" maxlength="20"></input>
 			</p>
@@ -53,7 +53,7 @@ err_messages={
 				<br />
 				<input type="checkbox" name="vnet" id="vnet-id" /><label for="vnet-id"> <?php echo $this->translate('Virtual network stack (VIMAGE)');?></label>
 			</p>
-			<p>
+			<p class="new">
 				<span class="field-name"><?php echo $this->translate('Enabled services');?>:</span>
 				<input type="checkbox" name="serv-ftpd" value="ftpd" id="esrv0" class="inline"><label for="esrv0">ftpd</label></checkbox>
 				<input type="checkbox" name="serv-sshd" value="sshd" id="esrv1" class="inline"><label for="esrv1">sshd</label></checkbox>

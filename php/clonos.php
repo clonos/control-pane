@@ -147,6 +147,12 @@ class ClonOS
 				case 'bhyveAdd':
 					echo json_encode($this->bhyveAdd());
 					return;break;
+				case 'bhyveEdit':
+					echo json_encode($this->bhyveEdit());
+					return;break;
+				case 'bhyveEditVars':
+					echo json_encode($this->bhyveEditVars());
+					return;break;
 				case 'bhyveObtain':
 					echo json_encode($this->bhyveObtain());
 					return;break;
@@ -762,12 +768,27 @@ class ClonOS
 	function jailEdit()
 	{
 		$form=$this->_vars['form_data'];
-		print_r($form);
 		
+		$str=array();
+		$jname=$form['jname'];
+		$arr=array('host_hostname','ip4_addr','allow_mount','interface','mount_ports','astart','vnet');
+		foreach($arr as $a)
+		{
+			if(isset($form[$a]))
+			{
+				$val=$form[$a];
+				if($val=='on') $val=1;
+				$str[]=$a.'='.$val;
+			}else{
+				$str[]=$a.'=0';
+			}
+		}
 		
-		
-		//cbsd jset jname=XXX ip4_addr=192.168.0.1 astart=1 baserw=0
-		//$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd jstart inter=0 jname='.$name);
+		$cmd='jset jname='.$jname.' '.join(' ',$str);
+		$res=$this->cbsd_cmd($cmd);
+		$res['mode']='jailEdit';
+		$res['form']=$form;
+		return $res;
 	}
 
 	function jailStart($name)
@@ -791,6 +812,62 @@ class ClonOS
 		return $res;
 	}
 
+	function bhyveEditVars()
+	{
+		$form=$this->_vars['form_data'];
+		if(!isset($form['jail_id'])) return array('error'=>true,'error_message'=>'Bad jail id!');
+		
+		$db=new Db('base','local');
+		if($db!==false)
+		{
+			$query="SELECT b.jname as vm_name,vm_cpus,vm_ram,vm_vnc_port as vnc_port,interface FROM bhyve as b inner join jails as j on b.jname=j.jname and b.jname='{$form['jail_id']}';";
+			//$query="SELECT jname as vm_name,vm_cpus,vm_ram,vm_vnc_port as vnc_port FROM bhyve WHERE jname='{$form['jail_id']}';";
+			$res['vars']=$db->selectAssoc($query);
+			
+			$res['vars']['vm_ram']=$this->fileSizeConvert($res['vars']['vm_ram']);
+		}
+		
+		$res['error']=false;
+		$res['dialog']=$form['dialog'];
+		$res['jail_id']=$form['jail_id'];
+		return $res;
+	}
+
+	function bhyveEdit()
+	{
+		$form=$this->_vars['form_data'];
+		
+		$str=array();
+		$jname=$form['jname'];
+		
+		$ram=$form['vm_ram'];
+		$ram_tmp=$ram;
+		$ram=str_replace(' ','',$ram);
+		$ram=str_ireplace('mb','m',$ram);
+		$ram=str_ireplace('gb','g',$ram);
+		$form['vm_ram']=$ram;
+		
+		$arr=array('vm_cpus','vm_ram','vnc_port','interface');
+		foreach($arr as $a)
+		{
+			if(isset($form[$a]))
+			{
+				$val=$form[$a];
+				if($val=='on') $val=1;
+				$str[]=$a.'='.$val;
+			}else{
+				$str[]=$a.'=0';
+			}
+		}
+		
+		$form['vm_ram']=$ram_tmp;
+		
+		$cmd='bset jname='.$jname.' '.join(' ',$str);
+		$res=$this->cbsd_cmd($cmd);
+		$res['mode']='bhyveEdit';
+		$res['form']=$form;
+		return $res;
+	}
 	function bhyveAdd()
 	{
 		$form=$this->_vars['form_data'];
@@ -1272,8 +1349,8 @@ class ClonOS
 				$fp=fopen($log_file,'r');
 				if($fp)
 				{
-					fseek($fp,-204800,SEEK_END);
-					$html='<strong>Last 2 KB of big file data:<strong><hr />'.fread($fp,204800);
+					fseek($fp,-1000,SEEK_END);	//204800
+					$html='<strong>Last 1000 Bytes of big file data:<strong><hr />'.fread($fp,1000);	//204800
 				}
 				fclose($fp);
 			}
@@ -1345,7 +1422,8 @@ class ClonOS
 		$res=$this->cbsd_cmd("vm_vncwss jname={$jname} permit={$this->_client_ip}");
 		$res=$this->_db_local->selectAssoc('select nodeip from local');
 		$nodeip=$res['nodeip'];
-		if(strlen($nodeip)<10) $nodeip='127.0.0.1';
+		// need for IPv4/IPv6 regex here, instead of strlen
+		if(strlen($nodeip)<7) $nodeip='127.0.0.1';
 		header('Location: http://'.$nodeip.':6080/vnc_auto.html?host='.$nodeip.'&port=6080');
 		exit;
 	}

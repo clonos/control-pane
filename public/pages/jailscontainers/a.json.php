@@ -49,6 +49,8 @@ if(!empty($nodes))foreach($nodes as $node)
 				foreach($vars as $var=>$val)
 					$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
 				
+				if($node!='local') $html_tpl=str_replace('<span class="icon-cog"></span>','',$html_tpl);
+				
 				$html.=$html_tpl;
 			}
 			

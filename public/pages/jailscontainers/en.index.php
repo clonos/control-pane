@@ -3,6 +3,7 @@ $clonos->useDialogs(array(
 	'vnc',
 	'jail-settings',
 	'jail-settings-config-menu',
+	'jail-clone',
 ));
 ?>
 <h1>Jail containers:</h1>
@@ -11,12 +12,14 @@ $clonos->useDialogs(array(
 
 <table class="tsimple" id="jailslist" width="100%">
 	<thead>
-		<th>Node</th>
-		<th class="txtleft">Jail name</th>
-		<th class="txtleft">IP Address</th>
-		<th>Status</th>
-		<th colspan="4">Action</th>
-		<th>VNC</th>
+		<tr>
+			<th class="wdt-200 elastic">Node name</th>
+			<th class="txtleft">Jail</th>
+			<th class="txtleft wdt-200">IP-address</th>
+			<th class="wdt-120">Status</th>
+			<th colspan="4" class="wdt-100">Action</th>
+			<th class="wdt-30">VNC</th>
+		</tr>
 	</thead>
 	<tbody></tbody>
 </table>

@@ -1,6 +1,4 @@
 <?php
-include_once($_REALPATH.'/db.php');
-
 class Forms
 {
 	private $name='';
@@ -15,6 +13,7 @@ class Forms
 	
 	function generate()
 	{
+		if($this->db->error) return;
 		$query="select * from forms order by group_id asc, order_id asc";
 		$fields=$this->db->select($query);
 		//echo '<pre>';print_r($fields);

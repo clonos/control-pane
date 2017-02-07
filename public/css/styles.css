@@ -428,6 +428,13 @@ thead td:first-child, td:first-child {
 .tsimple tr.sel td {
 	background-color:#fefec0;
 }
+.tsimple td.vmiddle {
+	vertical-align:middle;
+}
+.tsimple tr.helper:hover {
+	background-color:#fcfccc;
+	cursor:pointer;
+}
 .wordwreck {
 	word-wrap:break-word;
 }
@@ -621,6 +628,9 @@ dialog.edit .new {
 dialog.new .new,
 dialog.edit .edit {
 	display:inline-block;
+}
+dialog.new p.new {
+	display:block;
 }
 .dialog-close:before {
 	font-family:"clonos";
@@ -955,4 +965,48 @@ span.top-button::before {
 
 .noty_bar {
 	box-shadow:3px 3px 3px rgba(0,0,0,.5);
+}
+
+
+/* PROGRESS LOADER START */
+.spinner {
+	display:none;
+	width: 60px;
+	height: 60px;
+	background-color:#337ab7;
+	position:absolute;
+	top:50%;
+	left:50%;
+	-webkit-animation: sk-rotateplane 1.2s infinite ease-in-out;
+	animation: sk-rotateplane 1.2s infinite ease-in-out;
+}
+
+@-webkit-keyframes sk-rotateplane {
+  0% { -webkit-transform: perspective(120px) }
+  50% { -webkit-transform: perspective(120px) rotateY(180deg) }
+  100% { -webkit-transform: perspective(120px) rotateY(180deg)  rotateX(180deg) }
+}
+
+@keyframes sk-rotateplane {
+  0% { 
+    transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+    -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg) 
+  } 50% { 
+    transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+    -webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg) 
+  } 100% { 
+    transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+    -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+  }
+}
+/* PROGRESS LOADER END */
+
+
+.warning {
+	background-color:#fff0f0;
+	padding:4px;
+	border:1px solid #d7a0a0;
+}
+strong {
+	font-weight:bold;
 }

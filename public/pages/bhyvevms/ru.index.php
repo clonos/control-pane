@@ -3,6 +3,7 @@ $clonos->useDialogs(array(
 	'vnc-bhyve',
 	'bhyve-new',
 	'bhyve-obtain',
+	'bhyve-clone',
 	'jail-settings-config-menu',
 ));
 ?>

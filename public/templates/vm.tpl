@@ -67,7 +67,7 @@ jprofile="default";
 swapsize="";
 #vm_iso_path="Windows-10-x64";	# must be merged from CBSD profiles
 vm_guestfs="#vm_guestfs#";
-vm_vnc_port="0";
+vm_vnc_port="#vm_vnc_port#";
 
 #bhyve_generate_acpi="1";	# must be merged from CBSD profiles
 #bhyve_wire_memory="0";		# must be merged from CBSD profiles
@@ -79,5 +79,5 @@ vm_vnc_port="0";
 
 cd_vnc_wait="1";
 bhyve_vnc_resolution="1024x768";
-bhyve_vnc_tcp_bind="127.0.0.1";
+bhyve_vnc_tcp_bind="#bhyve_vnc_tcp_bind#";
 

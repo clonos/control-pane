@@ -43,7 +43,7 @@ class Menu
 		
 		$this->html='<ul class="menu">'.PHP_EOL;
 
-		$qstr=trim($_SERVER['REQUEST_URI'],DIRECTORY_SEPARATOR);
+		$qstr=trim($_SERVER['REQUEST_URI'],'/');
 		$this->path=$qstr;	//$_MENU_PATH
 		if(!empty($menu_config))foreach($menu_config as $key=>$val)
 		{

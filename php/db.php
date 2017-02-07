@@ -3,6 +3,7 @@ class Db
 {
 	private $_pdo=null;
 	private $_workdir='';
+	private $_filename='';
 	public $error=false;
 	public $error_message='';
 	
@@ -10,6 +11,11 @@ class Db
 		$place = base (это базовый набор баз данных: local, nodes и т.д.)
 		$place = file (указываем конкретную базу данных по полному пути)
 	*/
+	function __destruct()
+	{
+		//if($this->_pdo) $this->_pdo->close();
+	}
+	
 	function __construct($place='base',$database='')
 	{
 		$this->_workdir=getenv('WORKDIR');	// /usr/jails/
@@ -21,6 +27,12 @@ class Db
 			$connect='sqlite:'.$file_name;
 		}elseif($place=='file'){
 			
+		}elseif($place=='helper'){
+			$file_name=$this->_workdir.'/formfile/'.$database.".sqlite";
+			$connect='sqlite:'.$file_name;
+		}elseif($place=='helpers'){
+			//$file_name=$this->_workdir.'/formfile/'.$database['jname'].'/helpers/'.$database.".sqlite";
+			//$connect='sqlite:'.$file_name;
 		}
 		/*
 		$databases=array(
@@ -69,12 +81,14 @@ class Db
 		}
 		*/
 		
-		if(!file_exists($file_name))
+		if(!isset($file_name) || empty($file_name) || !file_exists($file_name))
 		{
 			$this->error=true;
 			$this->error_message='DB file not found!';
 			return false;
 		}
+		
+		$this->_filename=$file_name;
 		
 		if(!empty($connect))
 		{
@@ -95,6 +109,11 @@ class Db
 	function getWorkdir()
 	{
 		return $this->_workdir;
+	}
+	
+	function getFileName()
+	{
+		return $this->_filename;
 	}
 	
 	function select($query)

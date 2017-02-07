@@ -3,6 +3,7 @@ var clonos={
 	tmp_jail_info:{},
 	manual_close_menu:false,
 	lastX:0,
+	oldHash:'',
 	
 	start:function()
 	{
@@ -14,17 +15,38 @@ var clonos={
 		var rx=new RegExp(/([^\/]+)/g);
 		if(res=hash.match(rx))
 		{
+			/*
 			for(r in res)
 			{
 				var r1=res[r].split('-');
 				if(r1.length==2) args[args.length]={'var':r1[0],'val':r1[1]};
 			}
-			this.route(args);
+			*/
+			this.route(res);
 		}
+	},
+	route:function(args)
+	{
+		if(typeof args=='undefined') return;
+		this.onHashChange();
+	},
+	onHashChange:function(event)
+	{
+		var hash=location.hash;
+		if(hash=='')
+		{
+			$('#tab2').hide();
+			$('#tab1').show();
+		}else{
+			$('#tab1').hide();
+			$('#tab2').show();
+		}
+		this.loadData('getJsonPage',$.proxy(this.onLoadData,this));
 	},
 	
 	addEvents:function()
 	{
+		$(window).on('hashchange',$.proxy(this.onHashChange,this));
 		$('#lng-sel').on('change',function(){document.cookie="lang="+$(this).val()+";path=/;";location.reload();});
 		$('#content').on('click',$.proxy(this.bodyClick,this));
 		$('.closer').on('click',$.proxy(this.closerClick,this));
@@ -107,12 +129,6 @@ var clonos={
 				return this.lang[phrase];
 		}
 		return phrase;
-	},
-	
-	route:function(args)
-	{
-		if(typeof args=='undefined') return;
-		//alert(args.length);
 	},
 	
 	getTrIdsForCheck:function(table_id)
@@ -265,7 +281,21 @@ var clonos={
 				}
 			}
 		}else{
-			if($('form#jailSettings').length>0)
+			if(id=='jail-clone')
+			{
+				var inp=$('form#jailCloneSettings input[name="jname"]');
+				var jid=$(inp).val();
+				if(this.isJnameExists('jailslist',jid))
+				{
+					inp.get(0).setCustomValidity(this.translate('This name is already exists!'));
+					inp.get(0).reportValidity();
+					return;
+				}
+				var posts=$('form#jailCloneSettings').serializeArray();
+				posts.push({'name':'oldJail','value':this.clonedOldName});
+				this.loadData('jailClone',$.proxy(this.onJailAdd,this),posts);
+			}
+			if(id=='jail-settings')
 			{
 				var jid=$('form#jailSettings input[name="jname"]').val();
 				this.trids=this.getTrIdsForCheck('jailslist');	// !!!
@@ -280,7 +310,7 @@ var clonos={
 					}
 					var pass1=$('form#jailSettings input[name="user_pw_root"]').val();
 					var pass2=$('form#jailSettings input[name="user_pw_root_1"]').val();
-					if(pass1!='' || pass2!='' && pass1!=pass2)
+					if(pass1!=pass2)
 					{
 						var inp=$('form#jailSettings input[name="user_pw_root"]').get(0);
 						inp.setCustomValidity(this.translate('Passwords must match!'));
@@ -307,6 +337,14 @@ var clonos={
 						inp.reportValidity();
 						return;
 					}
+					var port=$('form#bhyveSettings input[name="vm_vnc_port"]').val();
+					if(port!=0 && (port<1025 || port >65534))
+					{
+						var inp=$('form#bhyveSettings input[name="vm_vnc_port"]').get(0);
+						inp.setCustomValidity(this.translate('VNC Port must be in interval: 0,1025—65534!'));
+						inp.reportValidity();
+						return;
+					}
 				}
 				this.tmp_jail_info[jid]={};
 				this.tmp_jail_info[jid]['runasap']=0;	// исправить на реальные данные!
@@ -322,6 +360,26 @@ var clonos={
 				this.tmp_jail_info[jid]['runasap']=0;	// исправить на реальные данные!
 				var posts=$('form#bhyveObtSettings').serializeArray();
 				this.loadData('bhyveObtain',$.proxy(this.onJailAdd,this),posts);
+			}
+			if(id=='bhyve-clone')
+			{
+				var inp=$('form#bhyveCloneSettings input[name="vm_name"]');
+				var jid=$(inp).val();
+				if(this.isJnameExists('bhyveslist',jid))
+				{
+					inp.get(0).setCustomValidity(this.translate('This name is already exists!'));
+					inp.get(0).reportValidity();
+					return;
+				}
+				var vm_ram=$('#bhyveslist tr#'+this.clonedOldName+' .vm_ram').html();
+				var vm_cpus=$('#bhyveslist tr#'+this.clonedOldName+' .vm_cpus').html();
+				var vm_os_type=$('#bhyveslist tr#'+this.clonedOldName+' .vm_os_type').html();
+				var posts=$('form#bhyveCloneSettings').serializeArray();
+				posts.push({'name':'oldBhyve','value':this.clonedOldName});
+				posts.push({'name':'vm_ram','value':vm_ram});
+				posts.push({'name':'vm_cpus','value':vm_cpus});
+				posts.push({'name':'vm_os_type','value':vm_os_type});
+				this.loadData('bhyveClone',$.proxy(this.onJailAdd,this),posts);
 			}
 			if(id=='authkey')
 			{
@@ -347,7 +405,7 @@ var clonos={
 				var posts=$('form#repoSettings').serializeArray();
 				this.loadData('repoCompile',$.proxy(this.onJailAdd,this),posts);
 			}
-			
+
 		}
 	},
 	fillFormDataOnChange:function(data)
@@ -365,6 +423,11 @@ var clonos={
 				}
 			}
 		}
+	},
+	isJnameExists:function(table,jname)
+	{
+		var trs=$('#'+table+' #'+jname);
+		return trs.length>0;
 	},
 	onJailAdd:function(data)
 	{
@@ -386,6 +449,14 @@ var clonos={
 					case 'jailAdd':
 						var table='jailslist';
 						var operation='jcreate';
+						break;
+					case 'jailClone':
+						var table='jailslist';
+						var operation='jclone';
+						break;
+					case 'bhyveClone':
+						var table='bhyveslist';
+						var operation='bclone';
 						break;
 					case 'bhyveAdd':
 						var table='bhyveslist';
@@ -434,7 +505,7 @@ var clonos={
 				}
 				if(mode=='update')
 				{
-					var tr=trn;	//$('tr#'+this.dotEscape(data.jail_id));
+					var tr=trn;
 					$(tr).addClass('busy');
 					$('.ops .icon-cnt span',tr).addClass('icon-spin6 animate-spin');
 					$('.jstatus',tr).html(data.txt_status);
@@ -571,10 +642,11 @@ var clonos={
 		$('dialog#jail-settings input[name="host_hostname"]').val(data.freejname+'.my.domain');
 	},
 	
-	loadData:function(mode,return_func,arr)
+	loadData:function(mode,return_func,arr,spinner)
 	{
+		if(spinner!==false) $('.spinner').show();
 		var path='/json.php';
-		var posts={'mode':mode,'path':location.pathname};
+		var posts={'mode':mode,'path':location.pathname,'hash':window.location.hash};
 		//if(typeof this.helper!='undefined') posts['helper']=this.helper;
 		if(typeof arr=='object')
 		{
@@ -583,7 +655,7 @@ var clonos={
 				posts['form_data'][arr[n]['name']]=arr[n]['value'];
 		}
 		$.post(path,posts,
-			$.proxy(function(data){return_func(data);},this)
+			$.proxy(function(data){return_func(data);$('.spinner').hide();},this)
 		);
 	},
 	
@@ -656,6 +728,14 @@ var clonos={
 				this.tasks.context=this;
 				this.tasks.start();
 			}
+		}
+	},
+	
+	fillTab:function(data)
+	{
+		if(typeof data.html!='undefined')
+		{
+			$('#tab2').html(data.html);
 		}
 	},
 	
@@ -871,7 +951,7 @@ var clonos={
 			}
 			
 			var vars=JSON.stringify(this.tasks);
-			this.context.loadData('getTasksStatus',$.proxy(this.update,this),[{'name':'jsonObj','value':vars}]);
+			this.context.loadData('getTasksStatus',$.proxy(this.update,this),[{'name':'jsonObj','value':vars}],false);
 		},
 		
 		update:function(data)
@@ -971,12 +1051,19 @@ var clonos={
 				case 'jcreate':
 				case 'bcreate':
 				case 'vm_obtain':
+				case 'jclone':
+				case 'bclone':
 					var disp='s-off';
 					if(typeof this.tmp_jail_info[id]!='undefined')
 					{
 						var runasap=this.tmp_jail_info[id]['runasap'];
 						if(runasap==1) disp='s-on';
 					}
+					if(task.new_html!='undefined')
+					{
+						$('#'+this.dotEscape(id)).html(task.new_html);
+					}
+
 					$('#'+id).removeClass('s-off').removeClass('s-on')
 					$('#'+id).addClass(disp).removeClass('busy').removeClass('maintenance');
 					this.enablePlay(id);
@@ -1026,7 +1113,7 @@ var clonos={
 				case 'jimport':
 					this.enablePlay(id);
 					break;
-				case 'jclone':
+/*				case 'jclone':
 					var num=this.getJailNumById(id);
 					var j=this.jailsList[num];
 					if(typeof j.task_status!='undefined')
@@ -1043,6 +1130,7 @@ var clonos={
 					}
 					this.currentPage='jails';
 					break;
+*/
 /*
 				case 'modremove':
 				case 'modinstall':
@@ -1237,7 +1325,7 @@ var clonos={
 					this.DDMenuSelect(elid);
 					return;break;
 				case 'jddm-clone':
-					alert('Клонируем! :)');
+					this.DDMenuSelect(elid);
 					return;break;
 				case 'jddm-export':
 					alert('Экспортируем! :)');
@@ -1351,6 +1439,11 @@ var clonos={
 			}
 		}
 
+		if(tblid=='instanceslist')
+		{
+			location.hash='#'+trid;
+			return;
+		}
 		
 /* 		if(target.tagName=='SPAN')
 		{
@@ -1522,21 +1615,63 @@ var clonos={
 		if(!dt)return;
 		var id=dt.id;
 		var table_id=dt.table_id;
+		var preloadVars=false;
 		switch(table_id)
 		{
 			case 'jailslist':
-				var dialog='jail-settings';
-				var mode='jailEditVars';
+				switch(elid)
+				{
+					case 'jddm-edit':
+						var dialog='jail-settings';
+						var mode='jailEditVars';
+						preloadVars=true;
+						break;
+					case 'jddm-clone':
+						var dialog='jail-clone';
+						var mode='jailClone';
+						this.clonedOldName=dt.id;
+						$('dialog#jail-clone input[name="jname"]').val(dt.id+'clone');
+						if($(dt.tr).hasClass('s-on'))
+						{
+							$('dialog#jail-clone .warning').show();
+						}else{
+							$('dialog#jail-clone .warning').hide();
+						}
+						break;
+				}
 				break;
 			case 'bhyveslist':
-				var dialog='bhyve-new';
-				var mode='bhyveEditVars';
+				switch(elid)
+				{
+					case 'jddm-edit':
+						var dialog='bhyve-new';
+						var mode='bhyveEditVars';
+						preloadVars=true;
+						break;
+					case 'jddm-clone':
+						var dialog='bhyve-clone';
+						var mode='bhyveClone';
+						this.clonedOldName=dt.id;
+						$('dialog#bhyve-clone input[name="vm_name"]').val(dt.id+'clone');
+						if($(dt.tr).hasClass('s-on'))
+						{
+							$('dialog#bhyve-clone .warning').show();
+						}else{
+							$('dialog#bhyve-clone .warning').hide();
+						}
+						break;
+				}
 				break;
 		}
 		
 		this.DDMenuClose();
-		var posts=[{'name':'jail_id','value':id},{'name':'dialog','value':dialog},{'name':'elid','value':elid}];
-		this.loadData(mode,$.proxy(this.onDDMenuLoad,this),posts);
+		if(preloadVars)
+		{
+			var posts=[{'name':'jail_id','value':id},{'name':'dialog','value':dialog},{'name':'elid','value':elid}];
+			this.loadData(mode,$.proxy(this.onDDMenuLoad,this),posts);
+		}else{
+			this.dialogShow1(dialog);
+		}
 	},
 	onDDMenuLoad:function(data)
 	{
@@ -1549,6 +1684,11 @@ var clonos={
 			if(data.error)
 			{
 				this.notify(data.error_message,'error');
+				if(typeof data.reload!='undefined')
+				{
+					if(data.reload)
+						this.loadData('getJsonPage',$.proxy(this.onLoadData,this));
+				}
 				return;
 			}
 		}

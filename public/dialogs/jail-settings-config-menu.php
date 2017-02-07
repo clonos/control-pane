@@ -5,5 +5,6 @@
 		<li class="icon-docs" id="jddm-clone"> <?php echo $this->translate('clone');?></li>
 		<li class="icon-gift" id="jddm-export"> <?php echo $this->translate('export');?></li>
 		<li class="icon-cubes" id="jddm-helpers"> <?php echo $this->translate('helpers');?></li>
+		<li class="icon-edit" id="jddm-rename"> <?php echo $this->translate('rename');?></li>
 	</ul>
 </div>

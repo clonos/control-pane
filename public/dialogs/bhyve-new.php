@@ -36,8 +36,13 @@ err_messages={
 				<input type="text" name="vm_ram" value="" pattern="^[0-9]+\s*(g|G|gb|GB|mb|MB|m|M)$" placeholder="1g" required="required" />
 			</p>
 			<p>
+				<span class="field-name"><?php echo $this->translate('VNC IP address');?>:</span>
+				<input type="radio" name="bhyve_vnc_tcp_bind" value="127.0.0.1" id="vncip0" checked="checked" class="inline"><label for="vncip0">127.0.0.1</label></radio>
+				<input type="radio" name="bhyve_vnc_tcp_bind" value="0.0.0.0" id="vncip1" class="inline"><label for="vncip1">0.0.0.0</label></radio>
+			</p>
+			<p>
 				<span class="field-name"><?php echo $this->translate('VNC PORT');?>:</span>
-				<input type="text" name="vnc_port" value="" placeholder="0" />
+				<input type="text" name="vm_vnc_port" value="" placeholder="0" maxlength="5" />
 			</p>
 <!--			<p>
 				<span class="field-name"><?php echo $this->translate('CD-ROM ISO');?>:</span>
@@ -58,4 +63,3 @@ err_messages={
 		<input type="button" value="<?php echo $this->translate('Cancel');?>" class="button red cancel-but" />
 	</div>
 </dialog>
-<?php

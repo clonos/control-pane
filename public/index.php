@@ -1,12 +1,17 @@
 <?php
 $_REALPATH=realpath('../');
+$uri=trim($_SERVER['REQUEST_URI'],'/');
 include($_REALPATH.'/php/clonos.php');
-$clonos=new ClonOS($_REALPATH);
+$clonos=new ClonOS($_REALPATH,$uri);
 
 $lang=$clonos->getLang();
-$uri=trim($_SERVER['REQUEST_URI'],DIRECTORY_SEPARATOR);
 $root=trim($_SERVER['DOCUMENT_ROOT'],DIRECTORY_SEPARATOR);
 $_ds=DIRECTORY_SEPARATOR;
+/*
+$chunks=$clonos->uri_chunks;
+if(!empty($chunks) && count($chunks)>1) $uri=$chunks[0];
+*/
+
 $file_path=$_ds.$root.$_ds.'pages'.$_ds.$uri.$_ds;
 $file_name=$file_path.$lang.'.index.php';
 $json_name=$file_path.'a.json.php';
@@ -78,6 +83,6 @@ if(isset($_languages))foreach($_languages as $lng=>$lngname)
 	</ul>
 </div></header>
 
-
+<div class="spinner"></div>
 </body>
 </html>

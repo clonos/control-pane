@@ -3,6 +3,7 @@ $clonos->useDialogs(array(
 	'vnc',
 	'jail-settings',
 	'jail-settings-config-menu',
+	'jail-clone',
 ));
 ?>
 <h1>Контейнеры:</h1>

@@ -7,6 +7,7 @@ class ClonOS
 	public $realpath_php='';
 	public $realpath_public='';
 	public $realpath_page='';
+	public $uri_chunks=array();
 	public $json_name='';
 	public $language='en';
 	public $language_file_loaded=false;
@@ -17,7 +18,7 @@ class ClonOS
 	private $_db=null;
 	private $_client_ip='';
 	private $_dialogs=array();
-	private $_cmd_array=array('jcreate','jstart','jstop','jrestart','jedit','jremove','jexport','jimport','jclone','madd','sstart','sstop','projremove','bcreate','bstart','bstop','brestart','bremove','vm_obtain','removesrc','srcup','removebase','world','repo');
+	private $_cmd_array=array('jcreate','jstart','jstop','jrestart','jedit','jremove','jexport','jimport','jclone','madd','sstart','sstop','projremove','bcreate','bstart','bstop','brestart','bremove','bclone','vm_obtain','removesrc','srcup','removebase','world','repo');
 	
 /*
 	public $projectId=0;
@@ -72,7 +73,7 @@ class ClonOS
 		}
 	}
 	
-	function __construct($_REALPATH)	# /usr/home/web/cp/clonos
+	function __construct($_REALPATH,$uri='')	# /usr/home/web/cp/clonos
 	{
 		$this->_post=($_SERVER['REQUEST_METHOD']=='POST');
 		$this->_vars=$_POST;
@@ -86,6 +87,14 @@ class ClonOS
 			
 		$this->realpath_public=$_REALPATH.'/public/';
 			# /usr/home/web/cp/clonos/public/
+		
+		/*
+		if(!empty($uri))
+		{
+			$str=str_replace('/index.php','',$uri);
+			$this->uri_chunks=explode('/',$str);
+		}
+		*/
 		
 		$translate_filename=$this->realpath_public.'/lang/'.$this->language.'.php';
 		$translate_filename_alt=$this->realpath_public.'/lang/en.php';
@@ -109,6 +118,7 @@ class ClonOS
 		
 		include('config.php');
 		include('db.php');
+		include('forms.php');
 		include('menu.php');
 		
 		$this->_db_tasks=new Db('base','cbsdtaskd');
@@ -138,6 +148,9 @@ class ClonOS
 				case 'jailAdd':
 					echo json_encode($this->jailAdd());
 					return;break;
+				case 'jailClone':
+					echo json_encode($this->jailClone());
+					return;break;
 				case 'jailEdit':
 					echo json_encode($this->jailEdit());
 					return;break;
@@ -156,6 +169,10 @@ class ClonOS
 				case 'bhyveObtain':
 					echo json_encode($this->bhyveObtain());
 					return;break;
+				case 'bhyveClone':
+					echo json_encode($this->bhyveClone());
+					return;break;
+
 				
 				case 'authkeyAdd':
 					echo json_encode($this->authkeyAdd());
@@ -456,6 +473,7 @@ class ClonOS
 			'bstop'=>'Stopping',
 			'brestart'=>'Restarting',
 			'bremove'=>'Removing',
+			'bclone'=>'Cloning',
 			'vm_obtain'=>'Creating',
 			'removesrc'=>'Removing',
 			'srcup'=>'Updating',
@@ -547,6 +565,7 @@ class ClonOS
 		$stat_array['bstop']=&$stat_array['jstop'];
 		$stat_array['brestart']=&$stat_array['jrestart'];
 		$stat_array['bremove']=&$stat_array['jremove'];
+		$stat_array['bclone']=&$stat_array['jclone'];
 		$stat_array['removesrc']=&$stat_array['jremove'];
 		$stat_array['removebase']=&$stat_array['jremove'];
 		
@@ -638,7 +657,12 @@ class ClonOS
 							switch($task['operation'])
 							{
 								case 'jclone':
-									//$obj[$key]['new_ip']=$this->getJailIpOnJcloneEnd($key);
+									$res=$this->getJailInfo($obj[$key]['jail_id']);
+									if(isset($res['html'])) $obj[$key]['new_html']=$res['html'];
+									break;
+								case 'bclone':
+									$res=$this->getBhyveInfo($obj[$key]['jail_id']);
+									if(isset($res['html'])) $obj[$key]['new_html']=$res['html'];
 									break;
 								case 'repo':
 									$res=$this->fillRepoTr($obj[$key]['jail_id'],true,false);
@@ -658,6 +682,89 @@ class ClonOS
 		return $obj;
 	}
 	
+	function jailClone()
+	{
+		$form=$this->_vars['form_data'];
+		
+		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd jclone checkstate=0 old='.$form['oldJail'].' new='.$form['jname'].' host_hostname='.$form['host_hostname'].' ip4_addr='.$form['ip4_addr']);
+		
+		$err='Jail is not create!';
+		$taskId=-1;
+		if($res['retval']==0)
+		{
+			$err='Jail was created!';
+			$taskId=$res['message'];
+		}else{
+			$err=$res['error'];
+		}
+		
+		$html='';
+		$hres=$this->getTableChunk('jailslist','tbody');
+		if($hres!==false)
+		{
+			$html_tpl=$hres[1];
+			$vars=array(
+				'nth-num'=>'nth0',				// исправить на актуальные данные!
+				'node'=>'local',				// исправить на актуальные данные!
+				'ip4_addr'=>str_replace(',',',<wbr />',$form['ip4_addr']),
+				'jname'=>$form['jname'],
+				'jstatus'=>$this->translate('Cloning'),
+				'icon'=>'spin6 animate-spin',
+				'desktop'=>'s-on',
+				'maintenance'=>' maintenance',
+				'protected'=>'icon-cancel',
+				'protitle'=>$this->translate('Delete'),
+				'vnc_title'=>$this->translate('Open VNC'),
+				'reboot_title'=>$this->translate('Restart jail'),
+			);
+			
+			foreach($vars as $var=>$val)
+				$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
+			
+			$html=$html_tpl;
+		}
+		
+		return array('errorMessage'=>$err,'jail_id'=>$form['jname'],'taskId'=>$taskId,'mode'=>$this->mode,'html'=>$html);
+	}
+	function getJailInfo($jname)
+	{
+		$html='';
+		$db=new Db('base','local');
+		if($db!==false)
+		{
+			$jail=$db->selectAssoc("SELECT jname,ip4_addr,status,protected FROM jails WHERE jname='{$jname}'");
+			$hres=$this->getTableChunk('jailslist','tbody');
+			if($hres!==false)
+			{
+				$html_tpl=$hres[1];
+//				$status=$jail['status'];
+				$vars=array(
+					'nth-num'=>'nth0',
+					'node'=>'local',
+					'ip4_addr'=>str_replace(',',',<wbr />',$jail['ip4_addr']),
+					'jname'=>$jail['jname'],
+					'jstatus'=>$this->translate('Cloned'),
+					'icon'=>'spin6 animate-spin',
+					'desktop'=>' s-off',
+					'maintenance'=>' maintenance',
+					'protected'=>($jail['protected']==1)?'icon-lock':'icon-cancel',
+					'protitle'=>($jail['protected']==1)?' title="'.$this->translate('Protected jail').'"':' title="'.$this->translate('Delete').'"',
+					'vnc_title'=>$this->translate('Open VNC'),
+					'reboot_title'=>$this->translate('Restart jail'),
+				);
+				
+				foreach($vars as $var=>$val)
+					$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
+				
+				$html.=$html_tpl;
+			}
+		}
+		
+		$html=preg_replace('#<tr[^>]*>#','',$html);
+		$html=str_replace(array('</tr>',"\n","\r","\t"),'',$html);
+		
+		return array('html'=>$html);
+	}
 	function jailAdd()
 	{
 		$form=$this->_vars['form_data'];
@@ -753,11 +860,26 @@ class ClonOS
 		$form=$this->_vars['form_data'];
 		if(!isset($form['jail_id'])) return array('error'=>true,'error_message'=>'Bad jail id!');
 		
+		$err=false;
 		$db=new Db('base','local');
 		if($db!==false)
 		{
 			$query="SELECT jname,host_hostname,ip4_addr,allow_mount,interface,mount_ports,astart,vnet FROM jails WHERE jname='{$form['jail_id']}';";
 			$res['vars']=$db->selectAssoc($query);
+		}else{
+			$err=true;
+		}
+		if(empty($res['vars']))
+		{
+			$err=true;
+		}
+		if($err)
+		{
+			$res['error']=true;
+			$res['error_message']=$this->translate('Jail '.$form['jail_id'].' is not present.');
+			$res['jail_id']=$form['jail_id'];
+			$res['reload']=true;
+			return $res;
 		}
 		
 		$res['error']=false;
@@ -812,19 +934,123 @@ class ClonOS
 		return $res;
 	}
 
+	function bhyveClone()
+	{
+		$form=$this->_vars['form_data'];
+		
+		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd bclone checkstate=0 old='.$form['oldBhyve'].' new='.$form['vm_name']);
+		
+		$err='Bhyve is not create!';
+		$taskId=-1;
+		if($res['retval']==0)
+		{
+			$err='Bhyve was created!';
+			$taskId=$res['message'];
+		}else{
+			$err=$res['error'];
+		}
+		
+		$html='';
+		$hres=$this->getTableChunk('bhyveslist','tbody');
+		if($hres!==false)
+		{
+			$html_tpl=$hres[1];
+			$vars=array(
+				'nth-num'=>'nth0',				// исправить на актуальные данные!
+				'node'=>'local',				// исправить на актуальные данные!
+				'jname'=>$form['vm_name'],
+				'vm_ram'=>$form['vm_ram'],
+				'vm_cpus'=>$form['vm_cpus'],
+				'vm_os_type'=>$form['vm_os_type'],
+				'jstatus'=>$this->translate('Cloning'),
+				'icon'=>'spin6 animate-spin',
+				'desktop'=>'s-on',
+				'maintenance'=>' maintenance',
+				'protected'=>'icon-cancel',
+				'protitle'=>$this->translate('Delete'),
+				'vnc_title'=>$this->translate('Open VNC'),
+				'reboot_title'=>$this->translate('Restart VM'),
+			);
+			
+			foreach($vars as $var=>$val)
+				$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
+			
+			$html=$html_tpl;
+		}
+		
+		return array('errorMessage'=>$err,'vm_name'=>$form['vm_name'],'jail_id'=>$form['vm_name'],'taskId'=>$taskId,'mode'=>$this->mode,'html'=>$html);
+	}
+	function getBhyveInfo($jname)
+	{
+		$statuses=array('Not Launched','Launched','unknown-1','Maintenance','unknown-3','unknown-4','unknown-5','unknown-6');
+		$html='';
+		$db=new Db('base','local');
+		if($db!==false)
+		{
+			$bhyve=$db->selectAssoc("SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden FROM bhyve WHERE jname='{$jname}'");
+			$hres=$this->getTableChunk('bhyveslist','tbody');
+			if($hres!==false)
+			{
+				$html_tpl=$hres[1];
+				$status=$this->check_vmonline($bhyve['jname']);
+				$vars=array(
+					'jname'=>$bhyve['jname'],
+					'nth-num'=>'nth0',
+					'desktop'=>'',
+					'maintenance'=>'',
+					'node'=>'local',
+					'vm_name'=>'',
+					'vm_ram'=>$this->fileSizeConvert($bhyve['vm_ram']),
+					'vm_cpus'=>$bhyve['vm_cpus'],
+					'vm_os_type'=>$bhyve['vm_os_type'],
+					'vm_status'=>$this->translate($statuses[$status]),
+					'desktop'=>($status==0)?' s-off':' s-on',
+					'icon'=>($status==0)?'play':'stop',
+					'protected'=>'icon-cancel',
+					'protitle'=>' title="'.$this->translate('Delete').'"',
+					'vnc_title'=>$this->translate('Open VNC'),
+					'reboot_title'=>$this->translate('Restart bhyve'),
+				);
+				
+				foreach($vars as $var=>$val)
+					$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
+				
+				$html.=$html_tpl;
+			}
+		}
+		
+		$html=preg_replace('#<tr[^>]*>#','',$html);
+		$html=str_replace(array('</tr>',"\n","\r","\t"),'',$html);
+		
+		return array('html'=>$html);
+	}
 	function bhyveEditVars()
 	{
 		$form=$this->_vars['form_data'];
 		if(!isset($form['jail_id'])) return array('error'=>true,'error_message'=>'Bad jail id!');
 		
+		$err=false;
 		$db=new Db('base','local');
 		if($db!==false)
 		{
-			$query="SELECT b.jname as vm_name,vm_cpus,vm_ram,vm_vnc_port as vnc_port,interface FROM bhyve as b inner join jails as j on b.jname=j.jname and b.jname='{$form['jail_id']}';";
-			//$query="SELECT jname as vm_name,vm_cpus,vm_ram,vm_vnc_port as vnc_port FROM bhyve WHERE jname='{$form['jail_id']}';";
+			$query="SELECT b.jname as vm_name,vm_cpus,vm_ram,vm_vnc_port,bhyve_vnc_tcp_bind,interface FROM bhyve as b inner join jails as j on b.jname=j.jname and b.jname='{$form['jail_id']}';";
 			$res['vars']=$db->selectAssoc($query);
 			
 			$res['vars']['vm_ram']=$this->fileSizeConvert($res['vars']['vm_ram']);
+		}else{
+			$err=true;
+		}
+		if(empty($res['vars']))
+		{
+			$err=true;
+		}
+		if($err)
+		{
+			$res['error']=true;
+			$res['error_message']=$this->translate('Jail '.$form['jail_id'].' is not present.');
+			$res['jail_id']=$form['jail_id'];
+			$res['reload']=true;
+			return $res;
 		}
 		
 		$res['error']=false;
@@ -847,7 +1073,7 @@ class ClonOS
 		$ram=str_ireplace('gb','g',$ram);
 		$form['vm_ram']=$ram;
 		
-		$arr=array('vm_cpus','vm_ram','vnc_port','interface');
+		$arr=array('vm_cpus','vm_ram','bhyve_vnc_tcp_bind','vm_vnc_port','interface');
 		foreach($arr as $a)
 		{
 			if(isset($form[$a]))
@@ -896,6 +1122,8 @@ class ClonOS
 			'vm_efi'=>'uefi',
 			'vm_os_profile'=>$os_items['profile'],
 			'vm_guestfs'=>'',
+			'bhyve_vnc_tcp_bind'=>$form['bhyve_vnc_tcp_bind'],
+			'vm_vnc_port'=>$form['vm_vnc_port'],
 		);
 		
 		/* create vm */

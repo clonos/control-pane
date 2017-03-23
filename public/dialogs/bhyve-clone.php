@@ -1,7 +1,7 @@
 <script type="text/javascript">
-err_messages={
+err_messages.add({
 	'vm_name':'<?php echo $this->translate("Can not be empty. Name must begin with a letter / a-z / and not have any special symbols: -,.=%");?>',
-};
+});
 </script>
 <dialog id="bhyve-clone" class="window-box new">
 	<h1>

@@ -20,20 +20,37 @@ class Db
 	{
 		$this->_workdir=getenv('WORKDIR');	// /usr/jails/
 		
-		// sqlite:/usr/jails/var/db/local.sqlite
-		if($place=='base')
+		switch($place)
 		{
-			$file_name=$this->_workdir.'/var/db/'.$database.'.sqlite';
-			$connect='sqlite:'.$file_name;
-		}elseif($place=='file'){
-			
-		}elseif($place=='helper'){
-			$file_name=$this->_workdir.'/formfile/'.$database.".sqlite";
-			$connect='sqlite:'.$file_name;
-		}elseif($place=='helpers'){
-			//$file_name=$this->_workdir.'/formfile/'.$database['jname'].'/helpers/'.$database.".sqlite";
-			//$connect='sqlite:'.$file_name;
+			case 'base':
+				$file_name=$this->_workdir.'/var/db/'.$database.'.sqlite';
+				$connect='sqlite:'.$file_name;
+				break;
+			case 'file':
+				$file_name=$database;
+				$connect='sqlite:'.$file_name;
+				break;
+			case 'helper':
+				if(is_array($database))
+				{
+					///usr/jails/jails-system/cbsdpuppet1/helpers/redis.sqlite
+					$file_name=$this->_workdir.'/jails-system/'.$database['jname'].'/helpers/'.$database['helper'].".sqlite";
+					$connect='sqlite:'.$file_name;
+				}else{
+					$file_name=$this->_workdir.'/formfile/'.$database.".sqlite";
+					$connect='sqlite:'.$file_name;
+				}
+				break;
+			case 'cbsd-settings':
+				$file_name=$this->_workdir.'/jails-system/CBSDSYS/helpers/cbsd.sqlite';
+				$connect='sqlite:'.$file_name;
+				break;
+			case 'clonos':
+				$file_name='/var/db/clonos/clonos.sqlite';
+				$connect='sqlite:'.$file_name;
+				break;
 		}
+		
 		/*
 		$databases=array(
 			'tasks'=>'cbsdtaskd',
@@ -81,14 +98,15 @@ class Db
 		}
 		*/
 		
+		$this->_filename=$file_name;
+		//echo $file_name,PHP_EOL,PHP_EOL;
+		
 		if(!isset($file_name) || empty($file_name) || !file_exists($file_name))
 		{
 			$this->error=true;
 			$this->error_message='DB file not found!';
 			return false;
 		}
-		
-		$this->_filename=$file_name;
 		
 		if(!empty($connect))
 		{

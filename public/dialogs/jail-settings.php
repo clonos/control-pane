@@ -1,11 +1,11 @@
 <script type="text/javascript">
-err_messages={
+err_messages.add({
 	'jname':'<?php echo $this->translate("Can not be empty. Name must begin with a letter / a-z / and not have any special symbols: -,.=%");?>',
 	'hostname':'<?php echo $this->translate("This field can not be empty");?>',
 	'ip':'<?php echo $this->translate("Write correct ip address, e.g: 10.0.0.2");?>',
 	'rootpass':'<?php echo $this->translate("Password can not be less than 3 symbols");?>',
 	'rootpass1':'<?php echo $this->translate("Please retype password correctly");?>',
-};
+});
 </script>
 <dialog id="jail-settings" class="window-box new">
 	<h1>

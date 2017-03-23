@@ -40,11 +40,10 @@ clonos.lang={
 	"Delete":"Delete",
 	"Save":"Save",
 	
-	//"Create jail":"Создание контейнера",
-	//"Edit jail":"Редактирование параметров контейнера",
-	
 	"end":"end",
 	
 	"This name is already exists!":"This name is already exists!",
 	"Passwords must match!":"Passwords must match!",
+	
+	"@redirect_alert@":"You will be redirected to jails list in 3 seconds!",
 }

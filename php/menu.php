@@ -43,7 +43,8 @@ class Menu
 		
 		$this->html='<ul class="menu">'.PHP_EOL;
 
-		$qstr=trim($_SERVER['REQUEST_URI'],'/');
+		//$qstr=trim($_SERVER['REQUEST_URI'],'/');
+		$qstr=trim($parent->uri_chunks[0],'/');
 		$this->path=$qstr;	//$_MENU_PATH
 		if(!empty($menu_config))foreach($menu_config as $key=>$val)
 		{
@@ -86,5 +87,11 @@ class Menu
 		}
 
 		$this->html.='</ul>';
+		
+		if($this->title=='Error')
+		{
+			if(isset($parent->config->other_titles[$qstr]))
+				$this->title=$parent->translate($parent->config->other_titles[$qstr]);
+		}
 	}
 }

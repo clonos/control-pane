@@ -6,6 +6,10 @@ class Config
 		'en'=>'English',
 		'ru'=>'Russian',
 	);
+	
+	public $other_titles=array(
+		'settings'=>'CBSD Settings',
+	);
 
 	/* Меню проекта */
 	/* Так же можно использовать подменю (в menu.php есть пример) */
@@ -56,13 +60,13 @@ class Config
 			'title'=>'Virtual Media Manager',
 			'icon'=>'icon-inbox',
 		),
-		
+/*		
 		'repo'=>array(
 			'name'=>'Repository',
 			'title'=>'Remote repository',
 			'icon'=>'icon-globe',
 		),
-		
+*/		
 		'bases'=>array(
 			'name'=>'FreeBSD Bases',
 			'title'=>'FreeBSD bases manager',
@@ -102,6 +106,13 @@ class Config
 	);
 	
 	public $os_types=array(
+		array(
+			'os'=>'DragonflyBSD',
+			'items'=>array(
+				array('name'=>'DragonflyBSD Daily SNAPSHOT','type'=>'dflybsd',
+						'profile'=>'x86-LATEST','obtain'=>false),
+			),
+		),
 		array(
 			'os'=>'FreeBSD',
 			'items'=>array(

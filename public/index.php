@@ -1,4 +1,10 @@
 <?php
+if(preg_match('/(?i)msie [5-9]/',$_SERVER['HTTP_USER_AGENT']))
+{
+	echo '<!DOCTYPE html><div style="margin-top:10%;text-align:center;font-size:large;color:darkred;"><p>Sorry, your browser is not supported!</p><p>Please, use last version of any browser.</p></html>';
+	exit;
+}
+
 $_REALPATH=realpath('../');
 $uri=trim($_SERVER['REQUEST_URI'],'/');
 include($_REALPATH.'/php/clonos.php');
@@ -7,10 +13,11 @@ $clonos=new ClonOS($_REALPATH,$uri);
 $lang=$clonos->getLang();
 $root=trim($_SERVER['DOCUMENT_ROOT'],DIRECTORY_SEPARATOR);
 $_ds=DIRECTORY_SEPARATOR;
-/*
+
+
 $chunks=$clonos->uri_chunks;
 if(!empty($chunks) && count($chunks)>1) $uri=$chunks[0];
-*/
+
 
 $file_path=$_ds.$root.$_ds.'pages'.$_ds.$uri.$_ds;
 $file_name=$file_path.$lang.'.index.php';
@@ -41,6 +48,10 @@ error_reporting(E_ALL);
 	<style type="text/css">html{background-color:#aaa;} .hide{display:none;}</style>
 	<meta name="keywords" content="" />
 	<meta name="description" content="" />
+	<script type="text/javascript">
+		_server_name='<?php echo $clonos->server_name; ?>';_first_start=true;
+		err_messages={add:function(arr){for(n in arr){err_messages[n]=arr[n];}}};
+	</script>
 </head>
 <body class="gadget1">
 
@@ -48,7 +59,7 @@ error_reporting(E_ALL);
 <?php
 if(file_exists($file_name)) include($file_name); else
 {
-	echo '<h1>'.$clonos->translate('File not found').'!</h1>';
+	echo '<h1>'.$clonos->translate('Not implemented yet').'!</h1>';
 }
 $clonos->placeDialogs();
 ?>
@@ -66,8 +77,10 @@ echo $clonos->menu->html;
 	<ul>
 		<li class="mhome"><a href="/">Home</a></li>
 		<li><a href="/settings/"><?php echo $clonos->translate('Settings'); ?></a></li>
+<!--
 		<li><a href="/profile/"><?php echo $clonos->translate('Profile'); ?></a></li>
 		<li><a href="/support/"><?php echo $clonos->translate('Support'); ?></a></li>
+-->
 		<li><a name="">
 			<select id="lng-sel">
 <?php
@@ -84,5 +97,6 @@ if(isset($_languages))foreach($_languages as $lng=>$lngname)
 </div></header>
 
 <div class="spinner"></div>
+<div class="online icon-online" id="net-stat"></div>
 </body>
 </html>

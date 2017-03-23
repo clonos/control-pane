@@ -1,7 +1,7 @@
 	<tbody>
 		<tr class="#nth-num##desktop##maintenance#" id="#jname#">
-			<td class="wordwreck">#node#</td>
-			<td class="txtleft">#jname#</td>
+			<td class="wordwreck node">#node#</td>
+			<td class="txtleft jname">#jname#</td>
 			<td class="txtleft wordwreck ip4_addr">#ip4_addr#</td>
 			<td class="jstatus">#jstatus#</td>
 			<td class="ops" width="5"><span class="icon-cnt"><span class="icon-#icon#"></span></span></td>

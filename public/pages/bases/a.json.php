@@ -26,12 +26,14 @@ if(!empty($nodes))foreach($nodes as $node)
 			}
 			
 			$ids[]=$base['idx'];
+			$bid=$base['ver'].'-'.$base['arch'].'-'.$base['stable'];
 			
 			$hres=$this->getTableChunk('baseslist','tbody');
 			if($hres!==false)
 			{
 				$html_tpl=$hres[1];
 				$vars=array(
+					'bid'=>$bid,
 					'nth-num'=>'nth'.$num,
 					'node'=>$node['nodename'],
 					'name'=>$base['name'],
@@ -52,7 +54,7 @@ if(!empty($nodes))foreach($nodes as $node)
 				$html.=$html_tpl;
 			}
 			
-			$ids[]='#base'.$base['ver'];
+			$ids[]='#base'.$bid;
 		}
 		
 		$nth++;

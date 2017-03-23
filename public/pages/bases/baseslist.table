@@ -1,5 +1,5 @@
 	<tbody>
-		<tr class="#nth-num##maintenance#" id="#name##ver#">
+		<tr class="#nth-num##maintenance#" id="#name##bid#">
 			<td class="wordwreck">#node#</td>
 			<td class="txtleft">#name#</td>
 			<td class="txtleft">#platform#</td>

@@ -27,3 +27,9 @@
 	<li><a href="https://puppet.com/" target="_blank">Puppet</a> — Система управления конфигурациями</li>
 	<li>и много остального..</li>
 </ul>
+
+<!--
+CHAT:
+<input type="text" id="wsinp" />
+<input type="button" onclick="clonos.wssend($('#wsinp').val());$('#wsinp').val('');" value="Отправить" />
+-->

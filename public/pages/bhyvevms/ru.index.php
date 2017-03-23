@@ -4,6 +4,7 @@ $clonos->useDialogs(array(
 	'bhyve-new',
 	'bhyve-obtain',
 	'bhyve-clone',
+	'bhyve-rename',
 	'jail-settings-config-menu',
 ));
 ?>

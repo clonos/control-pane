@@ -4,6 +4,7 @@ $clonos->useDialogs(array(
 	'bhyve-new',
 	'bhyve-obtain',
 	'bhyve-clone',
+	'bhyve-rename',
 	'jail-settings-config-menu',
 ));
 ?>
@@ -18,10 +19,10 @@ $clonos->useDialogs(array(
 	<thead>
 		<th class="wdt-120">Имя сервера</th>
 		<th class="txtleft">Виртуальная машина</th>
-		<th class="txtleft wdt-70">RAM</th>
+		<th class="txtcenter wdt-70">RAM</th>
 		<th class="wdt-30">CPU</th>
-		<th class="wdt-100">Тип ОС</th>
-		<th class="wdt-120">Статус</th>
+		<th class="txtcenter wdt-100">Тип ОС</th>
+		<th class="txtcenter wdt-120">Статус</th>
 		<th colspan="4" class="wdt-100">Действия</th>
 		<th class="wdt-30">VNC</th>
 	</thead>

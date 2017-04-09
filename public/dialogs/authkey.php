@@ -1,7 +1,7 @@
 <script type="text/javascript">
-err_messages={
+err_messages.add({
 	'keyname':'<?php echo $this->translate("Can not be empty. Name must begin with a letter / a-z / and not have any special symbols: -,.=%");?>',
-};
+});
 </script>
 <dialog id="authkey" class="window-box">
 	<h1><?php echo $this->translate('Create Authkey');?></h1>

@@ -19,8 +19,17 @@
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('VM CPUs');?>:</span>
+				<span class="range">
+					<input type="range" name="vm_cpus" class="vHorizon" min="1" max="16" value="1" style="margin:6px 0;" id="rngCpus" oninput="rngCpusShow.value=rngCpus.value" />
+					<input type="text" disabled="disabled" id="rngCpusShow" value="1" />
+				</span>
+			</p>
+<!--
+			<p>
+				<span class="field-name"><?php echo $this->translate('VM CPUs');?>:</span>
 				<input type="text" name="vm_cpus" value="" pattern="[0-9]+" placeholder="1" required="required" />
 			</p>
+-->
 			<p>
 				<span class="field-name"><?php echo $this->translate('VM RAM');?>:</span>
 				<input type="text" name="vm_ram" value="" pattern="^[0-9]+g$" placeholder="1g" required="required" />

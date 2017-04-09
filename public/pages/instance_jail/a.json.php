@@ -5,9 +5,24 @@ if(!empty($this->_vars['hash']))
 	return;
 }
 
-$sys_helpers=array(
-	'network','cbsd','bhyvenet','general','zfsinstall','userspw','sudo','natcfg','jconstruct',
-);
+$sys_helpers=array();
+//	'network','cbsd','bhyvenet','general','zfsinstall','userspw','natcfg','jconstruct',
+//);
+
+$db=new Db('clonos');
+if($db!==false)
+{
+	$query="select module from sys_helpers_list";
+	if(!$db->error)
+	{
+		$res=$db->select($query);
+		if(!empty($res))
+		{
+			foreach($res as $r)	$sys_helpers[]=$r['module'];
+			
+		}
+	}
+}
 
 $html='';
 $arr=array();
@@ -20,7 +35,7 @@ if($res['retval']==0)
 	$n=0;
 	if(!empty($lst)) foreach($lst as $item)
 	{
-		if(!in_array($item,$sys_helpers))
+		if(in_array($item,$sys_helpers))
 		{
 			$description='';
 			$db=new Db('helper',$item);
@@ -41,6 +56,8 @@ if($res['retval']==0)
 				if($db!==false && !$db->error) $res=$db->selectAssoc("select longdesc from system limit 1");
 				
 				if(isset($res['longdesc'])) $description=$res['longdesc']; else $description=$this->translate('no data').'&hellip; ('.$file_name.')';
+			}else{
+				$description='helper connection error!';
 			}
 
 			$hres=$this->getTableChunk('instances','tbody');
@@ -66,7 +83,7 @@ if($res['retval']==0)
 	}
 }
 
-$html=str_replace(array('\n','\r','\t'),'',$html);
+$html=str_replace(array("\n","\r","\t"),'',$html);
 
 echo json_encode(array(
 	'tbody'=>$html,

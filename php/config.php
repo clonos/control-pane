@@ -6,6 +6,10 @@ class Config
 		'en'=>'English',
 		'ru'=>'Russian',
 	);
+	
+	public $other_titles=array(
+		'settings'=>'CBSD Settings',
+	);
 
 	/* Меню проекта */
 	/* Так же можно использовать подменю (в menu.php есть пример) */
@@ -32,13 +36,13 @@ class Config
 			'title'=>'Virtual machine control panel',
 			'icon'=>'icon-th-list',
 		),
-		
+/*
 		'nodes'=>array(
 			'name'=>'Nodes',
 			'title'=>'Nodes control panel',
 			'icon'=>'icon-buffer',
 		),
-		
+*/
 		'vpnet'=>array(
 			'name'=>'Virtual Private Network',
 			'title'=>'Manage for virtual private networks',
@@ -56,13 +60,13 @@ class Config
 			'title'=>'Virtual Media Manager',
 			'icon'=>'icon-inbox',
 		),
-		
+/*		
 		'repo'=>array(
 			'name'=>'Repository',
 			'title'=>'Remote repository',
 			'icon'=>'icon-globe',
 		),
-		
+*/		
 		'bases'=>array(
 			'name'=>'FreeBSD Bases',
 			'title'=>'FreeBSD bases manager',
@@ -74,19 +78,19 @@ class Config
 			'title'=>'FreeBSD sources manager',
 			'icon'=>'icon-edit',
 		),
-		
+/*
 		'jail_marketplace'=>array(
 			'name'=>'Jail Marketplace',
 			'title'=>'Public remote containers marketplace',
 			'icon'=>'icon-flag',
 		),
-		
+*//*
 		'bhyve_marketplace'=>array(
 			'name'=>'Bhyve Marketplace',
 			'title'=>'Public remote virtual machine marketplace',
 			'icon'=>'icon-flag-checkered',
 		),
-		
+*/
 		'tasklog'=>array(
 			'name'=>'TaskLog',
 			'title'=>'System task log',
@@ -102,6 +106,13 @@ class Config
 	);
 	
 	public $os_types=array(
+		array(
+			'os'=>'DragonflyBSD',
+			'items'=>array(
+				array('name'=>'DragonflyBSD 4','type'=>'dflybsd',
+						'profile'=>'x86-4','obtain'=>false),
+			),
+		),
 		array(
 			'os'=>'FreeBSD',
 			'items'=>array(
@@ -120,8 +131,6 @@ class Config
 						'profile'=>'ArchLinux-x86-2016','obtain'=>false),
 				array('name'=>'Linux CentOS 7','type'=>'linux',
 						'profile'=>'CentOS-7-x86_64','obtain'=>false),
-				array('name'=>'Linux Debian 7','type'=>'linux',
-						'profile'=>'Debian-x86-7','obtain'=>false),
 				array('name'=>'Linux Debian 8','type'=>'linux',
 						'profile'=>'Debian-x86-8','obtain'=>false),
 				array('name'=>'Linux Open Suse 42','type'=>'linux',

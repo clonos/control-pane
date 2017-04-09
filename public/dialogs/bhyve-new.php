@@ -1,9 +1,9 @@
 <script type="text/javascript">
-err_messages={
+err_messages.add({
 	'vm_name':'<?php echo $this->translate("Can not be empty. Name must begin with a letter / a-z / and not have any special symbols: -,.=%");?>',
 	'vm_size':'You need type «g» char after numbers',
 	'vm_ram':'You need type «g» char after numbers',
-};
+});
 </script>
 <dialog id="bhyve-new" class="window-box">
 	<h1>
@@ -29,11 +29,23 @@ err_messages={
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('VM CPUs');?>:</span>
-				<input type="text" name="vm_cpus" value="" pattern="[0-9]+" placeholder="1" required="required" />
+				<span class="range">
+					<input type="range" name="vm_cpus" class="vHorizon" min="1" max="16" value="1" style="margin:6px 0;" id="rngCpus" oninput="rngCpusShow.value=rngCpus.value" />
+					<input type="text" disabled="disabled" id="rngCpusShow" value="1" />
+					<!-- input type="text" name="vm_cpus" value="" pattern="[0-9]+" placeholder="1" required="required" / -->
+				</span>
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('VM RAM');?>:</span>
 				<input type="text" name="vm_ram" value="" pattern="^[0-9]+\s*(g|G|gb|GB|mb|MB|m|M)$" placeholder="1g" required="required" />
+			</p>
+			<p>
+				<span class="field-name"><?php echo $this->translate('Attached boot ISO image');?>:</span>
+				<select name="vm_iso_image">
+					<option value="-2"></option>
+					<option value="-1" selected>Profile default ISO</option>
+<?php echo $this->media_iso_list_html(); ?>
+				</select>
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('VNC IP address');?>:</span>

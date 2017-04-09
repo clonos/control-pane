@@ -1,7 +1,7 @@
 <script type="text/javascript">
-err_messages={
+err_messages.add({
 	'version':'<?php echo $this->translate("Can not be empty. Name must be with a numbers and dot symbol");?>',
-};
+});
 src_table_pattern='<?php $res=$this->getTableChunk('srcslist','tbody'); echo str_replace(array("\n","\r","\t"),'',$res[1]);?>';
 </script>
 <dialog id="srcget" class="window-box">

@@ -4,6 +4,30 @@ var clonos={
 	manual_close_menu:false,
 	lastX:0,
 	oldHash:'',
+	commands:
+	{
+		'jstart':{stat:['Not launched','Starting','Launched'],cmd:'jailStart'},
+		'jstop':{stat:['Launched','Stopping','Stopped'],cmd:'jailStop'},
+		'jcreate':{stat:['Create','Creating','Created'],cmd:'jailAdd'},
+		'jremove':{stat:['Remove','Removing','Removed'],cmd:'jailRemove'},
+		'jrestart':{stat:['Restart','Restarting','Restarted'],cmd:'jailRestart'},
+		'jclone':{stat:['Clone','Cloning','Cloned'],cmd:'jailClone'},
+		'jexport':{stat:['Export','Exporting','Exported'],cmd:'jailExport'},
+		'jrename':{stat:['Rename','Renaming','Renamed'],cmd:'jailRename'},
+		'bstart':{stat:['Not launched','Starting','Launched'],cmd:'bhyveStart'},
+		'bstop':{stat:['Launched','Stopping','Stopped'],cmd:'bhyveStop'},
+		'brestart':{stat:['Restart','Restarting','Restarted'],cmd:'bhyveRestart'},
+		'bcreate':{stat:['Create','Creating','Created'],cmd:'bhyveAdd'},
+		'bremove':{stat:['Remove','Removing','Removed'],cmd:'bhyveRemove'},
+		'bclone':{stat:['Clone','Cloning','Cloned'],cmd:'bhyveClone'},
+		'brename':{stat:['Rename','Renaming','Renamed'],cmd:'bhyveRename'},
+		'vm_obtain':{stat:['Create','Creating','Created'],cmd:'bhyveObtain'},
+		'srcup':{stat:['Update','Updating','Updated'],cmd:'srcUpdate'},
+		'world':{stat:['Compile','Compiling','Compiled'],cmd:'basesCompile'},
+		'repo':{stat:['Fetch','Fetching','Fetched'],cmd:'repoCompile'},
+		'removesrc':{stat:['Remove','Removing','Removed'],cmd:'srcRemove'},
+		'removebase':{stat:['Remove','Removing','Removed'],cmd:'baseRemove'},
+	},
 	
 	start:function()
 	{
@@ -22,20 +46,20 @@ var clonos={
 				if(r1.length==2) args[args.length]={'var':r1[0],'val':r1[1]};
 			}
 			*/
-			this.route(res);
+			//this.route(res);
 		}
 	},
 	route:function(args)
 	{
 		if(typeof args=='undefined') return;
-		this.onHashChange();
+		//this.onHashChange();
 	},
 	onHashChange:function(event)
 	{
 		var hash=location.hash;
 		if(hash=='')
 		{
-			$('#tab2').hide();
+			$('#tab2').hide().html('');
 			$('#tab1').show();
 		}else{
 			$('#tab1').hide();
@@ -47,7 +71,7 @@ var clonos={
 	addEvents:function()
 	{
 		$(window).on('hashchange',$.proxy(this.onHashChange,this));
-		$('#lng-sel').on('change',function(){document.cookie="lang="+$(this).val()+";path=/;";location.reload();});
+		$('#lng-sel').on('change',$.proxy(this.setLang,this));	//function(){document.cookie="lang="+$(this).val()+";path=/;";location.reload();});
 		$('#content').on('click',$.proxy(this.bodyClick,this));
 		$('.closer').on('click',$.proxy(this.closerClick,this));
 		$(window).on('keypress',$.proxy(this.dialogCloseByKey,this))
@@ -56,6 +80,7 @@ var clonos={
 			.on("touchend",$.proxy(this.onTouchEnd,this));
 		
 		this.tasks.init(this);
+		this.wsconnect();
 	},
 	
 	onResize:function()
@@ -160,6 +185,8 @@ var clonos={
 			if(id=='bhyve-new')
 			{
 				this.trids=this.getTrIdsForCheck('bhyveslist');
+				this.updateBhyveISO();
+				this.updateBhyveOSProfile();
 			}
 			this.dialogShow1(id);
 		}
@@ -281,6 +308,20 @@ var clonos={
 				}
 			}
 		}else{
+			if(id=='jail-rename')
+			{
+				var inp=$('form#jailRenameSettings input[name="jname"]');
+				var jid=$(inp).val();
+				if(this.isJnameExists('jailslist',jid))
+				{
+					inp.get(0).setCustomValidity(this.translate('This name is already exists!'));
+					inp.get(0).reportValidity();
+					return;
+				}
+				var posts=$('form#jailRenameSettings').serializeArray();
+				posts.push({'name':'oldJail','value':this.renamedOldName});
+				this.loadData('jailRename',$.proxy(this.onJailAdd,this),posts);
+			}
 			if(id=='jail-clone')
 			{
 				var inp=$('form#jailCloneSettings input[name="jname"]');
@@ -325,8 +366,23 @@ var clonos={
 				var jmode=(mode=='edit'?'jailEdit':'jailAdd');
 				this.loadData(jmode,$.proxy(this.onJailAdd,this),posts);
 			}
+			if(id=='bhyve-rename')
+			{
+				var inp=$('form#bhyveRenameSettings input[name="jname"]');
+				var jid=$(inp).val();
+				if(this.isJnameExists('bhyveslist',jid))
+				{
+					inp.get(0).setCustomValidity(this.translate('This name is already exists!'));
+					inp.get(0).reportValidity();
+					return;
+				}
+				var posts=$('form#bhyveRenameSettings').serializeArray();
+				posts.push({'name':'oldJail','value':this.renamedOldName});
+				this.loadData('bhyveRename',$.proxy(this.onJailAdd,this),posts);
+			}
 			if(id=='bhyve-new' && $('form#bhyveSettings').length>0)
 			{
+				this.storageBhyveOSProfile();
 				var jid=$('form#bhyveSettings input[name="vm_name"]').val();
 				if(typeof this.trids!='undefined' && this.trids.length>0)
 				{
@@ -393,7 +449,11 @@ var clonos={
 			}
 			if(id=='srcget')
 			{
-				this.srcVerAdd();
+				//this.srcVerAdd();
+				var inp=$('form#srcSettings input[name="version"]');
+				var id=$(inp).val();
+				this.dialogClose();
+				this.srcUpdate(id);
 			}
 			if(id=='basescompile')
 			{
@@ -404,6 +464,11 @@ var clonos={
 			{
 				var posts=$('form#repoSettings').serializeArray();
 				this.loadData('repoCompile',$.proxy(this.onJailAdd,this),posts);
+			}
+			if(id=='helpers-add')
+			{
+				var posts=$('form#helpersAddSettings').serializeArray();
+				this.loadData('helpersAdd',$.proxy(this.onHelpersAdd,this),posts);
 			}
 
 		}
@@ -433,7 +498,7 @@ var clonos={
 	{
 		try{
 			var data=JSON.parse(data);
-		}catch(e){alert(e.message);return;}
+		}catch(e){this.debug(e.message,data);return;}
 		
 		if(typeof data!='undefined' && !data.error)
 		{
@@ -446,31 +511,33 @@ var clonos={
 						this.dialogClose();
 						this.fillFormDataOnChange(data);
 						return;break;
-					case 'jailAdd':
+					case 'jailAdd': 	this.dialogClose();return;
 						var table='jailslist';
 						var operation='jcreate';
 						break;
 					case 'jailClone':
+					case 'bhyveRename':
+					case 'jailRename':	this.dialogClose();return;
 						var table='jailslist';
 						var operation='jclone';
 						break;
-					case 'bhyveClone':
+					case 'bhyveClone':	this.dialogClose();return;
 						var table='bhyveslist';
 						var operation='bclone';
 						break;
-					case 'bhyveAdd':
+					case 'bhyveAdd':	this.dialogClose();return
 						var table='bhyveslist';
 						var operation='bcreate';
 						break;
-					case 'bhyveObtain':
+					case 'bhyveObtain':	this.dialogClose();return;
 						var table='bhyveslist';
 						var operation='vm_obtain';
 						break;
-					case 'basesCompile':
+					case 'basesCompile':	this.dialogClose();return;
 						var table='baseslist';
 						var operation='world';
 						break;
-					case 'repoCompile':
+					case 'repoCompile':	this.dialogClose();return;
 						var table='baseslist';
 						var operation='repo';
 						break;
@@ -512,16 +579,28 @@ var clonos={
 				}
 				this.dialogClose();
 				this.enableWait(data.jail_id);
-				this.tasks.add({'operation':operation,'jail_id':data.jail_id,'task_id':data.taskId});
-				this.tasks.start();
+				//this.tasks.add({'operation':operation,'jail_id':data.jail_id,'task_id':data.taskId});
+				//this.tasks.start();
+				// 01.03.17
+				
 			}
 		}
+	},
+	onHelpersAdd:function(data)
+	{
+		try{
+			var data=JSON.parse(data);
+		}catch(e){this.debug(e.message,data);return;}
+		
+		this.dialogClose();
+		
+		this.loadData('getJsonPage',$.proxy(this.onLoadData,this));
 	},
 	onAuthkeyAdd:function(data)
 	{
 		try{
 			var data=JSON.parse(data);
-		}catch(e){alert(e.message);return;}
+		}catch(e){this.debug(e.message,data);return;}
 		
 		if(typeof data!='undefined' && !data.error)
 		{
@@ -554,7 +633,7 @@ var clonos={
 	{
 		try{
 			var data=JSON.parse(data);
-		}catch(e){alert(e.message);return;}
+		}catch(e){this.debug(e.message,data);return;}
 		
 		if(typeof data!='undefined' && !data.error)
 		{
@@ -584,7 +663,7 @@ var clonos={
 		}
 	},
 	srcVerAdd:function()
-	{
+	{return;
 		var n,nl;
 		var posts=$('form#srcSettings').serializeArray();
 		var version=$('form#srcSettings input[name="version"]').val();
@@ -622,13 +701,51 @@ var clonos={
 			}
 			if(!injected)
 			{
-				$(html).insertAfter(tr);
+				//$(html).insertAfter(tr);
+				if(trs.length==0)
+				{
+					$('table#srcslist tbody').append(html);
+				}else{
+					$(html).insertAfter(tr);
+				}
 				this.srcUpdate('src'+version);
 			}
 		}
 	},
 	
-	
+	updateBhyveOSProfile:function()
+	{
+		if(localStorage)
+		{
+			var pos=localStorage['vm_os_profile_pos'];
+			if(typeof pos!='undefined')
+				$('#bhyveSettings select[name="vm_os_profile"]').val(pos);
+		}
+		
+		//if(localStorage) db_path=localStorage[var_name];
+	},
+	storageBhyveOSProfile:function()
+	{
+		if(localStorage)
+		{
+			var pos=$('#bhyveSettings select[name="vm_os_profile"]').val();
+			localStorage['vm_os_profile_pos']=pos;
+		}
+	},
+	updateBhyveISO:function()
+	{
+		this.loadData('updateBhyveISO',$.proxy(this.onUpdateBhyveISO,this));
+	},
+	onUpdateBhyveISO:function(data)
+	{
+		try{
+			var data=JSON.parse(data);
+		}catch(e){this.debug(e.message,data);return;}
+		if(typeof data.iso_list!='undefined')
+		{
+			$('dialog #bhyveSettings select[name="vm_iso_image"]').html(data.iso_list);
+		}
+	},
 	getFreeJname:function()
 	{
 		this.loadData('freejname',$.proxy(this.onGetFreeJname,this));
@@ -637,7 +754,7 @@ var clonos={
 	{
 		try{
 			var data=JSON.parse(data);
-		}catch(e){alert(e.message);return;}
+		}catch(e){this.debug(e.message,data);return;}
 		$('dialog#jail-settings input[name="jname"]').val(data.freejname);
 		$('dialog#jail-settings input[name="host_hostname"]').val(data.freejname+'.my.domain');
 	},
@@ -646,8 +763,8 @@ var clonos={
 	{
 		if(spinner!==false) $('.spinner').show();
 		var path='/json.php';
-		var posts={'mode':mode,'path':location.pathname,'hash':window.location.hash};
-		//if(typeof this.helper!='undefined') posts['helper']=this.helper;
+		var db_path=this.getDbPath();
+		var posts={'mode':mode,'path':location.pathname,'hash':window.location.hash,'db_path':db_path};
 		if(typeof arr=='object')
 		{
 			posts['form_data']={};
@@ -684,7 +801,7 @@ var clonos={
 	{
 		try{
 			var data=JSON.parse(data);
-		}catch(e){alert(e.message);return;}
+		}catch(e){this.debug(e.message,data);return;}
 		
 		if(data.error)
 		{
@@ -692,6 +809,8 @@ var clonos={
 			if(typeof(data.error_message)!='undefined' && data.error_message!='') t.html(data.error_message);
 			$(t).parents('table').addClass('error');
 		}else{
+			if(isset(data.template)) this.template=data.template;
+			if(isset(data.protected)) this.tpl_protected=data.protected;
 			if(typeof data.func!='undefined')
 			{
 				this[data.func](data);
@@ -719,22 +838,40 @@ var clonos={
 					if(typeof task.task_cmd!='undefined')
 					{
 						var txt_status=task.txt_status;
-						this.tasks.add({'operation':task.task_cmd,'jail_id':t,'status':status,'task_id':task.task_id,'txt_status':txt_status});
-						$('tr#'+t+' .jstatus').html(this.translate(txt_status));
+						//this.tasks.add({'operation':task.task_cmd,'jail_id':t,'status':status,'task_id':task.task_id,'txt_status':txt_status});
+						$('tr#'+this.dotEscape(t)+' .jstatus').html(this.translate(txt_status));
 						this.enableWait(t);
 					}
 				}
 				
-				this.tasks.context=this;
-				this.tasks.start();
+				//this.tasks.context=this;
+				//this.tasks.start();
+				// 01.03.17
 			}
 		}
+		
+		if(typeof data.helpers_list!='undefined')
+		{
+			$('dialog#helpers-add div.window-content').html(data.helpers_list);
+		}
+		// ---
+		var arr=[];
+		var trs=$('table#'+data.id+' tbody tr');
+		if(trs.length>1)
+		{
+			for(n=0;n<trs.length;n++) arr[n]=$(trs[n]).attr('id');
+			var res=this.alphanumSort(arr,true);
+		}
+		//debugger;
+		// ---
+
 	},
 	
 	fillTab:function(data)
 	{
 		if(typeof data.html!='undefined')
 		{
+			$('#tab1').hide();
 			$('#tab2').html(data.html);
 		}
 	},
@@ -805,10 +942,18 @@ var clonos={
 		
 		if(op!='')
 		{
-			this.tasks.add({'operation':op,'jail_id':id});
-			this.tasks.start();
+			//this.tasks.add({'operation':op,'jail_id':id});
+			//this.tasks.start();
+			var posts=[{'name':'operation','value':op},{'name':'jname','value':id}];
+			if(typeof this.commands[op]!='undefined')
+			{
+				this.loadData(this.commands[op]['cmd'],$.proxy(this.onJailStart,this),posts,false);
+				$('tr#'+id+' .jstatus').html(this.translate(this.commands[op]['stat'][1]));
+			}
 		}
 	},
+	onJailStart:function(){},
+	
 	jailRestart:function(id,opt)
 	{
 		if(typeof opt=='undefined') opt='jail';
@@ -818,8 +963,15 @@ var clonos={
 		var c=confirm(this.translate('You want to restart selected '+txt+'! Are you sure?'));
 		if(!c) return;
 		this.enableWait(id);
-		this.tasks.add({'operation':op,'jail_id':id});	//'jrestart'
-		this.tasks.start();
+		var posts=[{'name':'operation','value':op},{'name':'jname','value':id}];
+		if(typeof this.commands[op]!='undefined')
+		{
+			this.loadData(this.commands[op]['cmd'],$.proxy(this.onJailStart,this),posts,false);
+			$('tr#'+id+' .jstatus').html(this.translate(this.commands[op]['stat'][1]));
+		}
+
+		//this.tasks.add({'operation':op,'jail_id':id});	//'jrestart'
+		//this.tasks.start();
 	},
 	jailRemove:function(id,opt)
 	{
@@ -830,8 +982,16 @@ var clonos={
 		var c=confirm(this.translate('You want to delete selected '+txt+'! Are you sure?'));
 		if(!c) return;
 		this.enableWait(id);
-		this.tasks.add({'operation':op,'jail_id':id});	//'jremove'
-		this.tasks.start();
+		// ---
+		var posts=[{'name':'operation','value':op},{'name':'jname','value':id}];
+		if(typeof this.commands[op]!='undefined')
+		{
+			this.loadData(this.commands[op]['cmd'],$.proxy(this.onJailStart,this),posts,false);
+			$('tr#'+id+' .jstatus').html(this.translate(this.commands[op]['stat'][1]));
+		}
+		// ---
+		//this.tasks.add({'operation':op,'jail_id':id});	//'jremove'
+		//this.tasks.start();
 	},
 	
 	
@@ -840,10 +1000,12 @@ var clonos={
 		var id=-1;
 		id=$(obj).attr('id');
 		return id;
+		/*
 		var cl=obj[0].className;
 		var rx=new RegExp(/id-(\d+)/);
 		if(res=cl.match(rx)) id=res[1];
 		return id;
+		*/
 	},
 	getJailById:function(id)
 	{
@@ -878,6 +1040,7 @@ var clonos={
 		return;
 		//if(!this.jail) return;
 		//var jail=this.getJailById(this.jail);
+		/*
 		if(typeof jail.status!='undefined')
 		{
 			var status=jail.status;
@@ -893,6 +1056,7 @@ var clonos={
 			}
 			$('#left-menu .jail'+this.jail+'.status').removeClass('on off').addClass(status).attr('title',status_txt);
 		}
+		*/
 	},
 	playButt2Status:function(icon,txt)
 	{
@@ -958,7 +1122,7 @@ var clonos={
 		{
 			try{
 				var data=JSON.parse(data);
-			}catch(e){alert(e.message);return;}
+			}catch(e){this.debug(e.message,data);return;}
 			
 /* 			if(typeof data['mod_ops']!='undefined')
 			{
@@ -1019,6 +1183,19 @@ var clonos={
 					this.context.onTaskEnd(this.tasks[key],key);
 					delete this.tasks[key];
 				}
+				
+				if(data[key].status==0)
+				{
+					this.context.wssend({
+						'cmd':'update',
+						'jail_id':key,
+						'status':data[key].status,
+						'task_id':data[key].task_id,
+						'operation':data[key].operation,
+						'status':data[key].txt_status,
+						'path':location.pathname,
+					},'system');
+				}
 			}
 			
 			this.checkTasks=false;
@@ -1027,7 +1204,7 @@ var clonos={
 			{
 				this.interval=setInterval($.proxy(this.start,this),1000);
 			}
-
+			
 		},
 	},
 	onTaskEnd:function(task,id)
@@ -1059,6 +1236,7 @@ var clonos={
 						var runasap=this.tmp_jail_info[id]['runasap'];
 						if(runasap==1) disp='s-on';
 					}
+					if(task.operation=='jcreate') disp='s-on';	// сделать зависимым от параметра в форме!
 					if(task.new_html!='undefined')
 					{
 						$('#'+this.dotEscape(id)).html(task.new_html);
@@ -1169,7 +1347,7 @@ var clonos={
 	{
 		try{
 			var data=JSON.parse(data);
-		}catch(e){alert(e.message);return;}
+		}catch(e){this.debug(e.message,data);return;}
 		
 		if(typeof data.error!='undefined')
 		{
@@ -1194,7 +1372,7 @@ var clonos={
 	{
 		try{
 			var data=JSON.parse(data);
-		}catch(e){alert(e.message);return;}
+		}catch(e){this.debug(e.message,data);return;}
 		
 		if(typeof data.error!='undefined')
 		{
@@ -1219,7 +1397,7 @@ var clonos={
 	{
 		try{
 			var data=JSON.parse(data);
-		}catch(e){alert(e.message);return;}
+		}catch(e){this.debug(e.message,data);return;}
 		
 		if(typeof data.error!='undefined')
 		{
@@ -1239,18 +1417,23 @@ var clonos={
 		if(!c) return;
 		var ver=$('#srcslist tr#'+this.dotEscape(id)+' .version').html();
 		var op='removesrc';
-		this.enableWait(id);
-		this.tasks.add({'operation':op,'jail_id':id});
-		this.tasks.start();
+		//this.enableWait(id);
+		//this.tasks.add({'operation':op,'jail_id':id});
+		//this.tasks.start();
+		var posts=[{'name':'operation','value':op},{'name':'jname','value':id}];
+		if(typeof this.commands[op]!='undefined')
+			this.loadData(this.commands[op]['cmd'],$.proxy(this.onJailStart,this),posts,false);
 	},
 	srcUpdate:function(id,vers)
 	{
 		if(typeof vers=='undefined') vers='stable';
 		var ver=$('#srcslist tr#'+this.dotEscape(id)+' .version').html();
 		var op='srcup';
-		this.enableWait(id);
-		this.tasks.add({'operation':op,'jail_id':id});
-		this.tasks.start();
+		//this.tasks.add({'operation':op,'jail_id':id});
+		//this.tasks.start();
+		var posts=[{'name':'operation','value':op},{'name':'jname','value':id}];
+		if(typeof this.commands[op]!='undefined')
+			this.loadData(this.commands[op]['cmd'],$.proxy(this.onJailStart,this),posts,false);
 	},
 	baseRemove:function(id)
 	{
@@ -1258,14 +1441,22 @@ var clonos={
 		if(!c) return;
 		var ver=$('#baseslist tr#'+this.dotEscape(id)+' .version').html();
 		var op='removebase';
-		this.enableWait(id);
-		this.tasks.add({'operation':op,'jail_id':id});
-		this.tasks.start();
+		//this.enableWait(id);
+		//this.tasks.add({'operation':op,'jail_id':id});
+		//this.tasks.start();
+		var posts=[{'name':'operation','value':op},{'name':'jname','value':id}];
+		if(typeof this.commands[op]!='undefined')
+		{
+			this.loadData(this.commands[op]['cmd'],$.proxy(this.onJailStart,this),posts,false);
+			$('tr#'+id+' .jstatus').html(this.translate(this.commands[op]['stat'][1]));
+		}
 	},
 
 	
 	logOpen:function(id)
 	{
+		$('#taskloglist tr.sel').removeClass('sel');
+		$('#taskloglist tr#'+id).addClass('sel');
 		var posts=[{'name':'log_id','value':id}];
 		this.loadData('logLoad',$.proxy(this.onLogLoad,this),posts);
 	},
@@ -1273,7 +1464,7 @@ var clonos={
 	{
 		try{
 			var data=JSON.parse(data);
-		}catch(e){alert(e.message);return;}
+		}catch(e){this.debug(e.message,data);return;}
 		
 		if(typeof data.error!='undefined')
 		{
@@ -1295,7 +1486,7 @@ var clonos={
 	{
 		try{
 			var data=JSON.parse(data);
-		}catch(e){alert(e.message);return;}
+		}catch(e){this.debug(e.message,data);return;}
 		
 		if(typeof data.error!='undefined')
 		{
@@ -1307,13 +1498,49 @@ var clonos={
 		}
 		
 		$('#taskloglist tbody').html('');
+		this.wssend({'cmd':'reload','path':location.pathname},'system');
 	},
 	
 	bodyClick:function(event)
 	{
 		//debugger;
 		var target=event.target;
-		if($(target).parents('form').length>0) return;
+		if($(target).parents('form').length>0)
+		{
+			var cl=$(target).attr('class');
+			var form=$(target).parents('form').get(0);
+			if($(form).hasClass('helper'))
+			{
+				switch(cl)
+				{
+					case 'clear-helper':
+						this.clearHelperForm(target);
+						break;
+					case 'save-helper-values':
+						this.saveHelperValues(form);
+						break;
+					case 'fgroup-del-butt':
+						var parent=$(target).closest('fieldset');
+						var id=$(parent).attr('id');
+						this.deleteHelperGroup(form,id);
+						break;
+					case 'fgroup-add-butt':
+						this.addHelperGroup(form);
+						break;
+				}
+			}
+			
+			if(cl && cl.indexOf('default')>=0)
+			{
+				var res=cl.match(new RegExp(/val-(.*)/));
+				if(res)
+				{
+					this.fillHelperDefault(target,res[1]);
+					return;
+				}
+			}
+			return;
+		}
 		var elid=$(target).attr('id');
 		
 		/* ловим клики по выпадающему меню */
@@ -1322,16 +1549,13 @@ var clonos={
 			switch(elid)
 			{
 				case 'jddm-edit':
-					this.DDMenuSelect(elid);
-					return;break;
 				case 'jddm-clone':
+				case 'jddm-rename':
+				case 'jddm-helpers':
 					this.DDMenuSelect(elid);
 					return;break;
 				case 'jddm-export':
 					alert('Экспортируем! :)');
-					return;break;
-				case 'jddm-helpers':
-					alert('Хэлперы! :)');
 					return;break;
 			}
 		}
@@ -1439,7 +1663,7 @@ var clonos={
 			}
 		}
 
-		if(tblid=='instanceslist')
+		if(tblid=='instanceslist' || tblid=='helperslist')
 		{
 			location.hash='#'+trid;
 			return;
@@ -1568,6 +1792,7 @@ var clonos={
 	},
 	
 	ddmenu_interval:null,
+	cnt_mode:'new',
 	DDMenuShow:function(id,td,tr,event)
 	{
 		$(tr).addClass('sel');
@@ -1616,6 +1841,9 @@ var clonos={
 		var id=dt.id;
 		var table_id=dt.table_id;
 		var preloadVars=false;
+		
+		this.DDMenuClose();
+		
 		switch(table_id)
 		{
 			case 'jailslist':
@@ -1624,19 +1852,40 @@ var clonos={
 					case 'jddm-edit':
 						var dialog='jail-settings';
 						var mode='jailEditVars';
+						this.cnt_mode='edit';
 						preloadVars=true;
 						break;
 					case 'jddm-clone':
 						var dialog='jail-clone';
-						var mode='jailClone';
+						var mode='jailCloneVars';
+						this.cnt_mode='new';
 						this.clonedOldName=dt.id;
-						$('dialog#jail-clone input[name="jname"]').val(dt.id+'clone');
+						//$('dialog#jail-clone input[name="jname"]').val(dt.id+'clone');
 						if($(dt.tr).hasClass('s-on'))
 						{
 							$('dialog#jail-clone .warning').show();
 						}else{
 							$('dialog#jail-clone .warning').hide();
 						}
+						preloadVars=true;
+						break;
+					case 'jddm-rename':
+						var dialog='jail-rename';
+						var mode='jailRenameVars';
+						this.cnt_mode='new';
+						if($(dt.tr).hasClass('s-on'))
+						{
+							$('dialog#jail-rename .warning').show();
+						}else{
+							$('dialog#jail-rename .warning').hide();
+						}
+						preloadVars=true;
+						this.renamedOldName=dt.id;
+						break;
+					case 'jddm-helpers':
+						//elid
+						location.href='/jailscontainers/'+id+'/';
+						return;
 						break;
 				}
 				break;
@@ -1647,11 +1896,13 @@ var clonos={
 						var dialog='bhyve-new';
 						var mode='bhyveEditVars';
 						preloadVars=true;
+						this.cnt_mode='edit';
 						break;
 					case 'jddm-clone':
 						var dialog='bhyve-clone';
 						var mode='bhyveClone';
 						this.clonedOldName=dt.id;
+						this.cnt_mode='new';
 						$('dialog#bhyve-clone input[name="vm_name"]').val(dt.id+'clone');
 						if($(dt.tr).hasClass('s-on'))
 						{
@@ -1660,11 +1911,23 @@ var clonos={
 							$('dialog#bhyve-clone .warning').hide();
 						}
 						break;
+					case 'jddm-rename':
+						var dialog='bhyve-rename';
+						var mode='bhyveRenameVars';
+						this.cnt_mode='new';
+						if($(dt.tr).hasClass('s-on'))
+						{
+							$('dialog#bhyve-rename .warning').show();
+						}else{
+							$('dialog#bhyve-rename .warning').hide();
+						}
+						preloadVars=true;
+						this.renamedOldName=dt.id;
+						break;
 				}
 				break;
 		}
 		
-		this.DDMenuClose();
 		if(preloadVars)
 		{
 			var posts=[{'name':'jail_id','value':id},{'name':'dialog','value':dialog},{'name':'elid','value':elid}];
@@ -1677,7 +1940,7 @@ var clonos={
 	{
 		try{
 			var data=JSON.parse(data);
-		}catch(e){alert(e.message);return;}
+		}catch(e){this.debug(e.message,data);return;}
 		
 		if(typeof data.error!='undefined')
 		{
@@ -1686,8 +1949,8 @@ var clonos={
 				this.notify(data.error_message,'error');
 				if(typeof data.reload!='undefined')
 				{
-					if(data.reload)
-						this.loadData('getJsonPage',$.proxy(this.onLoadData,this));
+					if(data.reload) this.dataReload();
+						//this.loadData('getJsonPage',$.proxy(this.onLoadData,this));
 				}
 				return;
 			}
@@ -1695,7 +1958,9 @@ var clonos={
 		
 		var dialog=data.dialog;
 		this.fillDialogVars(dialog,data.vars);
-		this.dialogShow1(dialog,'edit');
+		if(data.dialog=='bhyve-new' && typeof data.iso_list!='undefined')
+			$('dialog#bhyve-new select[name="vm_iso_image"]').html(data.iso_list);
+		this.dialogShow1(dialog,this.cnt_mode);
 		
 /*
  		var dt=$('div#config-menu').prop('calEl');
@@ -1707,6 +1972,36 @@ var clonos={
 
 	},
 	
+	dataReload:function()
+	{
+		this.loadData('getJsonPage',$.proxy(this.onLoadData,this));
+	},
+	
+	fillFormVars:function(form,data)
+	{
+		var n=0,
+			f=$(form);
+		if(f.length<1) return;
+		
+		for(n=0,nl=data.length;n<nl;n++)
+		{
+			var $el=$('[name="'+data[n].name+'"]'),
+				type=$el.attr('type'),
+				val=data[n].value;
+			
+			switch(type)
+			{
+				case 'checkbox':
+					$el.attr('checked', val);
+					break;
+				case 'radio':
+					$el.filter('[value="'+val+'"]').attr('checked', 'checked');
+					break;
+				default:
+					$el.val(val);
+			}
+		}
+	},
 	fillDialogVars:function(dialog,vars)
 	{
 		var d=$('dialog#'+dialog);
@@ -1722,7 +2017,7 @@ var clonos={
 			{
 				case 'text':
 				case 'select':
-					$(inp).val(v);
+					if(typeof v!='undefined') $(inp).val(v);
 					break;
 				case 'radio':
 					$(inp).prop('checked',$(inp).val()==v);
@@ -1730,13 +2025,187 @@ var clonos={
 				case 'checkbox':
 					$(inp).prop('checked',v==1);
 					break;
+				case 'range':
+					$(inp).val(v);
+					$(inp).next().val(v);
+					break;
 			}
+		}
+	},
+	
+	clearHelperForm:function(el)
+	{
+		if(!el) return;
+		var form=$(el).closest('form');
+		if(form.length) form[0].reset();
+	},
+	fillHelperDefault:function(el,def)
+	{
+		if(!el) return;
+		var par=null;
+		
+		var inp=$(el).prev('input');
+		if(inp.length) par=inp;
+		
+		var sel=$(el).prev('select');
+		if(sel.length) par=sel;
+		
+		if(par.length)
+		{
+			$(par).val(def);
+			return;
+		}
+	},
+	
+	saveHelperValues:function(frm)
+	{
+		var mode='saveHelperValues';
+		var posts=$('form.helper').serializeArray();
+		var jform=$('form#newJailSettings').serializeArray();
+		if(jform.length<1)
+		{
+			mode='saveJailHelperValues';
+		}else{
+			posts=posts.concat(jform);
+		}
+		this.loadData(mode,$.proxy(this.onSaveHelperValues,this),posts);
+	},
+	onSaveHelperValues:function(data)
+	{
+		try{
+			var data=JSON.parse(data);
+		}catch(e){this.debug(e.message,data);return;}
+		
+		if(typeof data.error!='undefined' && data.error)
+		{
+			this.notify(data.errorMessage,'error');
+		}
+		if(typeof data.redirect!='undefined')
+		{
+			if(data.redirect!='')
+			{
+				var redir=$('<dialog id="redirect_alert" class="window-box" style="height:60px;"><div class="window-content" style="line-height:40px;">'+this.translate('@redirect_alert@')+' </div></dialog>');
+				$('body').append(redir);
+				this.dialogShow1('redirect_alert','new');
+				setTimeout(function(){location.href=data.redirect;},3000);
+			}
+		}
+	},
+	
+	deleteHelperGroup:function(form,id)
+	{
+		this.tmp_formdata=$(form).serializeArray();
+		this.tmp_form=form;
+		
+		var mode='deleteHelperGroup';
+		var fh=$('form#newJailSettings');
+		if(fh.length==0)
+		{
+			mode='deleteJailHelperGroup';
+			posts=[{'name':'index','value':id}];
+		}else{
+			var db_path=this.getDbPath();
+			posts=[{'name':'index','value':id},{'name':'db_path','value':db_path}];
+		}
+		this.loadData(mode,$.proxy(this.onDeleteHelperGroup,this),posts);
+	},
+	onDeleteHelperGroup:function(data)
+	{
+		try{
+			var data=JSON.parse(data);
+		}catch(e){this.debug(e.message,data);return;}
+		
+		if(!data) return;
+		if(typeof data.error!='undefined')
+		{
+			if(data.error)
+			{
+				this.notify(data.error_message,'error');
+				return;
+			}
+		}
+		if(typeof data.db_path!='undefined')
+		{
+			this.saveDbPath(data.db_path);
+		}
+		if(typeof data.html!='undefined')
+		{
+			$('form.helper').html(data.html);
+		}
+		if(this.tmp_form)
+		{
+			this.fillFormVars(this.tmp_form,this.tmp_formdata);
+		}
+	},
+	
+	getDbPath:function()
+	{
+		if(location.hash=='') return '';
+		var hash=location.hash.substr(1);
+		var db_path='';
+		var var_name='h-'+hash;
+		if(localStorage) db_path=localStorage[var_name];
+		return db_path;
+	},
+	saveDbPath:function(db_path)
+	{
+		if(location.hash=='') return false;
+		var hash=location.hash.substr(1);
+		var var_name='h-'+hash;
+		if(localStorage) localStorage[var_name]=db_path;
+		return true;
+	},
+	
+	addHelperGroup:function(form)
+	{
+		this.tmp_formdata=$(form).serializeArray();
+		this.tmp_form=form;
+		
+		var mode='addHelperGroup';
+		var fh=$('form#newJailSettings');
+		var posts=[];
+		if(fh.length==0)
+		{
+			mode='addJailHelperGroup';
+		}else{
+			var db_path=this.getDbPath();
+			posts=[{'name':'db_path','value':db_path}];
+		}
+		this.loadData(mode,$.proxy(this.onAddHelperGroup,this),posts);
+	},
+	onAddHelperGroup:function(data)
+	{
+		try{
+			var data=JSON.parse(data);
+		}catch(e){this.debug(e.message,data);return;}
+		
+		if(!data) return;
+		if(typeof data.error!='undefined')
+		{
+			if(data.error)
+			{
+				this.notify(data.error_message,'error');
+				return;
+			}
+		}
+		if(typeof data.db_path!='undefined')
+		{
+			this.saveDbPath(data.db_path);
+		}
+		if(typeof data.html!='undefined')
+		{
+			$('form.helper').html(data.html);
+		}
+		if(this.tmp_form)
+		{
+			this.fillFormVars(this.tmp_form,this.tmp_formdata);
 		}
 	},
 	
 	notify:function(message,type)
 	{
-		if(typeof type!='undefined') type='warning';
+	//	alert, success, warning, error, information
+		if(typeof type=='undefined') type='warning';
 		noty({
 			text        : message,
 			type        : type,
@@ -1750,7 +2219,527 @@ var clonos={
 	{
 		return txt.replace(/\./,'\\\.');
 	},
+	
+	wsconnect:function()
+	{
+		this.client_id=Math.random(10000);	// поменять на сессию
+		this.socket = new WebSocket("ws://"+_server_name+":8023/clonos"+location.pathname);
+		$(this.socket).on('open',$.proxy(this.wsopen,this))
+			.on('close',$.proxy(this.wsclose,this))
+			.on('error',$.proxy(this.wserror,this))
+			.on('message',$.proxy(this.wsmessage,this));
+	},
+	wsopen:function(event)
+	{
+		//this.notify('Соединение по вебсокету успешно открыто!','success');
+		this.connected=true;
+		setTimeout($.proxy(this.if_wsopened,this),500);
+	},
+	if_wsopened:function()
+	{
+		if(!this.connected) return;
+		if(!_first_start) this.dataReload();	//this.loadData('getJsonPage',$.proxy(this.onLoadData,this));
+		_first_start=false;
+		$('#net-stat').attr('class','online icon-online');
+
+	},
+	wsclose:function(event)
+	{
+		if(event.wasClean)
+		{
+			var msg_type='warning';
+			var msg='Сервер закрыл соединение!';
+		}else{
+			var msg_type='error';
+			var msg='Соединение с сервером разорвано аварийно! Перезагрузите страницу!';
+		}
+		//this.notify(msg,msg_type);
+		this.connected=false;
+		setTimeout($.proxy(this.wsconnect,this),5000);
+		$('#net-stat').attr('class','offline icon-online');
+	},
+	wserror:function(error)
+	{
+		this.connected=false;
+		//this.notify(error.message,'error');
+	},
+	wsmessage:function(event)
+	{
+		try{
+			var msg=JSON.parse(event.originalEvent.data);
+		}catch(e){
+/*
+			var msg=event.originalEvent.data;
+			if(msg.substr(0,5)=='JSON:')
+			{
+				data=JSON.parse(msg.substr(5));
+				this.onEndOperation(data);
+			}
+
+			//this.notify(msg,'warning');
+			return;
+*/
+		}
+		
+		if(msg && typeof msg.cmd!='undefined')
+		{
+			this.onChangeStatus(msg);
+			return;
+		}
+		
+		if(msg && msg.author=='system')
+		{
+			var msg=JSON.parse(msg.body);
+			if(this.client_id!=msg.client_id && msg.path==location.pathname)
+			{
+				if(msg.cmd=='update')
+				{
+					this.enableWait(msg.jail_id);
+					this.tasks.add({'operation':msg.operation,'jail_id':msg.jail_id,'status':msg.status,'task_id':msg.task_id,'txt_status':msg.txt_status});
+					this.tasks.start();
+				}
+				if(msg.cmd=='reload')
+				{
+					this.loadData('getJsonPage',$.proxy(this.onLoadData,this));
+				}
+			}
+			return;
+		}
+		
+		if(msg)
+		{
+			var txt='<storng>'+msg.author+':</storng> '+msg.body;
+			this.notify(txt,'information');
+		}
+	},
+	wssend:function(txt,user)
+	{
+		var author='user';
+		if(typeof user!='undefined') author=user;
+		if(typeof txt=='object')
+		{
+			txt.client_id=this.client_id;
+			txt=JSON.stringify(txt);
+return;
+		}
+		var msg=JSON.stringify({'author':author,'body':txt});
+		this.socket.send(msg);
+	},
+	
+	jArr:{},
+	onChangeStatus:function(data)	// publish /clonos/jailscontainers/ '{"cmd":"refresh"}'
+	{
+		var cmd=data.cmd;
+		var id=data.id;
+		var status=data.status;
+		if(isset(this.commands[cmd]))
+			$('#'+this.dotEscape(id)+' td.jstatus').html(this.translate(this.commands[cmd]['stat'][status]));
+		if(['jstart','jstop','bstart','bstop','update','refresh'].indexOf(cmd)==-1)
+		{
+			if(status==1)
+			{
+				if(!isset(this.jArr[id])) this.jArr[id]=[];
+				if(this.jArr[id].indexOf(cmd)==-1) this.jArr[id].push(cmd);
+			}
+			if(status==2) this.jArr[id]=[];
+		}
+		if(isset(data.data))
+		{
+			if(typeof data.data['vm_ram']!='undefined')
+			{
+				var ram=data.data['vm_ram'];
+				if(isNaN(ram))
+				{
+					data.data['vm_ram']=ram.replace(/^\d+([gmt])$/gi,function(orig,lett)
+					{
+						var a={'m':' MB','g':' GB','t':' TB'}[lett.toLowerCase()];
+						return orig.replace(lett,a);
+					});
+				}else{
+					data.data['vm_ram']=this.formatBytes(ram,0);
+				}
+			}
+			if(typeof data.data['hidden'] && data.data['hidden']==1) return;
+		}
+		switch(cmd)
+		{
+			case 'refresh':
+				this.loadData('getJsonPage',$.proxy(this.onLoadData,this));
+				return;break;
+			case 'delete':
+				this.deleteItemsOk(id);
+				return;break;
+			case 'jrename':
+			case 'brename':
+				if(status==1)
+				{
+					if(isset(data.data))
+					{
+						var d=data.data;
+						if(isset(d.jname))
+						{
+							$('#'+id).attr('id',d.jname);
+							$('#'+d.jname+' td.jname').html(d.jname);
+							var oldID=id;
+							id=d.jname;
+							this.jArr[id]=this.jArr[oldID];
+							delete(this.jArr[oldID]);
+						}
+					}
+				}
+			case 'jrestart':
+			case 'brestart':
+				if(status==2)
+				{
+					this.evtStatus2(id,status,data);
+				}
+			case 'jstart':
+			case 'bstart':
+				if(status==1)
+				{
+					$('#'+this.dotEscape(id)).removeClass('s-on').addClass('s-off').addClass('busy');
+					this.enableWait(id);
+				}
+				if(status==2)
+				{
+					if(typeof this.jArr[id]=='undefined' || this.jArr[id].length==0)
+						this.evtStatus2(id,status,data);
+				}
+				break;
+			case 'jstop':
+			case 'bstop':
+				if(status==1)
+				{
+					$('#'+this.dotEscape(id)).removeClass('s-on').addClass('s-off').addClass('busy');
+					this.enableWait(id);
+				}
+				if(status==2)
+				{
+					if(typeof this.jArr[id]=='undefined' || this.jArr[id].length==0)
+					{
+						this.evtStatus2(id,status,data);
+					}
+				}
+				break;
+			case 'jcreate':
+			case 'bcreate':
+			case 'vm_obtain':
+			case 'jclone':
+			case 'bclone':
+			case 'jexport':
+			case 'srcup':
+			case 'world':
+			case 'repo':
+				if(status==1)
+				{
+					if(isset(data.data))
+					{
+						this.addNewJail(data,cmd);
+					}
+					if(['srcup','world','repo'].indexOf(cmd)!=-1)
+					{
+						this.enableWait(id);
+					}
+				}
+				if(status==2)
+				{
+					this.evtStatus2(id,status,data);
+				}
+				break;
+			case 'jremove':
+			case 'bremove':
+			case 'removesrc':
+			case 'removebase':
+				if(status==1)
+				{
+					$('#'+this.dotEscape(id)).removeClass('s-on').addClass('s-off').addClass('busy');
+					this.enableWait(id);
+				}
+				if(status==2)
+				{
+					this.enableRip(id);
+					window.setTimeout($.proxy(this.deleteItemsOk,this,id),2000);
+				}
+				break;
+			case 'update':
+				if(isset(data.data))
+				{
+					for(n in data.data)
+					{
+						$('#'+this.dotEscape(id)+' .'+n).html(data.data[n]);
+					}
+				}
+				break;
+		}
+		if(isset(this.tpl_protected,data.data['protected']))
+		{
+			var table=$('table.tsimple').attr('id');
+			var p=this.tpl_protected[data.data['protected']];
+			$('table#'+table+' tr#'+id+' td.op-del').attr('title',p['title']);
+			$('table#'+table+' tr#'+id+' td.op-del span').attr('class',p['icon']);
+		}
+	},
+	
+	evtStatus2:function(id,status,data)
+	{
+		if(status==2)
+		{
+			var cmd=data.cmd;
+			
+			if(['srcup','repo','world'].indexOf(cmd)!=-1)
+			{
+				$('#'+this.dotEscape(id))
+					.removeClass('s-off').removeClass('busy').removeClass('maintenance')
+					.addClass('s-on');
+				this.enableClear(id);
+				return;
+			}
+			
+			var stat_cl='s-off';
+			if(isset(data.data))
+			{
+				if(isset(data.data['status']))
+				{
+					var stat=data.data['status'];
+					var stat_cl=(stat==0?'s-off':'s-on');
+				}
+			}
+			$('#'+this.dotEscape(id))
+				.removeClass('maintenance').removeClass('s-on').removeClass('s-off').removeClass('busy')
+				.addClass(stat_cl);
+			if(stat==0) this.enablePlay(id); else this.enableStop(id);
+		}
+	},
+	
+	addNewJail:function(data,cmd)
+	{
+		var injected=false,
+			status=false;
+		var n,nl;
+		
+		var id=data.id;
+		
+		var html=this.template;
+		if(typeof html=='undefined') html='no data!';
+		var table='jailslist';
+		if(['bcreate','bclone'].indexOf(cmd)!=-1) table='bhyveslist';
+		if(['srcup'].indexOf(cmd)!=-1) table='srcslist';
+		if(['repo','world'].indexOf(cmd)!=-1) table='baseslist';
+
+		if(isset(data.data))
+		{
+			if(isset(this.commands[cmd]['stat']))
+				data.data['jstatus']=this.translate(this.commands[cmd]['stat'][1]);
+			if(!isset(data.data['id'])) data.data['id']=data['id'];
+			for(n in data.data)
+				html=html.replace(new RegExp('#'+n+'#','g'),data.data[n]);
+		}
+		
+		var el=$('#'+this.dotEscape(id));
+		if(el.length>0) return;
+		
+		var trs=$('table#'+table+' tbody tr');
+		for(n=0,nl=trs.length;n<nl;n++)
+		{
+			var tr=trs[n];
+			var tid=$(tr).attr('id');
+			if(data.id<tid)
+			{
+				$(html).insertBefore(tr);
+				injected=true;
+				status=true;
+				break;
+			}
+		}
+		if(!injected)	//	Вставляем запись в конец таблицы
+		{
+			if(trs.length==0)
+			{
+				$('table#'+table+' tbody').append(html);
+			}else{
+				$(html).insertAfter(tr);
+			}
+			status=true;
+		}
+	},
+	
+	formatBytes:function(bytes,decimals)
+	{
+		if(bytes == 0) return '0 Bytes';
+		var k = 1024,
+			dm = decimals + 1 || 3,
+			sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+			i = Math.floor(Math.log(bytes) / Math.log(k));
+	   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+	},
+	
+	alphanumSort:function(arr,caseInsensitive)
+	{
+		for (var z = 0, t; t = arr[z]; z++)
+		{
+			arr[z] = [];
+			var x = 0, y = -1, n = 0, i, j;
+
+			while (i = (j = t.charAt(x++)).charCodeAt(0))
+			{
+				var m = (i == 46 || (i >=48 && i <= 57));
+				if (m !== n)
+				{
+					arr[z][++y] = "";
+					n = m;
+				}
+				arr[z][y] += j;
+			}
+		}
+
+		arr.sort(function(a, b)
+		{
+			for (var x = 0, aa, bb; (aa = a[x]) && (bb = b[x]); x++)
+			{
+				if (caseInsensitive)
+				{
+					aa = aa.toLowerCase();
+					bb = bb.toLowerCase();
+				}
+				if (aa !== bb)
+				{
+					var c = Number(aa), d = Number(bb);
+					if (c == aa && d == bb)
+					{
+						return c - d;
+					} else return (aa > bb) ? 1 : -1;
+				}
+			}
+			return a.length - b.length;
+		});
+
+		for (var z = 0; z < arr.length; z++)
+			arr[z] = arr[z].join("");
+		return arr;
+	},
+	
+	fileUploadPrepare:function()
+	{
+		$('#drag-and-drop-zone').dmUploader(
+		{
+			url: '/?upload',
+			dataType: 'json',
+			//allowedTypes: 'iso/*',
+			extFilter: 'iso',	//iso;jpg;jpeg;
+			onInit: function(){
+				clonos.add_log('Penguin initialized :)');
+			},
+			onBeforeUpload: function(id){
+				//add_log('Starting the upload of #' + id);
+				
+				clonos.update_file_status(id, 'uploading', 'Uploading...');
+			},
+			onNewFile: function(id, file){
+				clonos.add_log('New file added to queue #' + id);
+				
+				clonos.add_file(id, file);
+			},
+			onComplete: function(){
+				clonos.add_log('All pending tranfers finished');
+			},
+			onUploadProgress: function(id, percent){
+				var percentStr = percent + '%';
+				clonos.update_file_progress(id, percentStr);
+			},
+			onUploadSuccess: function(id, data){
+				clonos.add_log('Upload of file #p-' + id + ' completed');
+				
+				clonos.add_log('Server Response for file #' + id + ': ' + JSON.stringify(data));
+				
+				clonos.update_file_status(id, 'success', 'Upload Complete');
+				
+				//clonos.update_file_progress(id, '0');
+				//window.setTimeout($.proxy(this.deleteItemsOk,this,id),2000);
+				setTimeout($.proxy(clonos.delete_file,this,id),3000);
+				clonos.dataReload();
+			},
+			onUploadError: function(id, message){
+				clonos.add_log('Failed to Upload file #p-' + id + ': ' + message);
+				
+				clonos.update_file_status(id, 'error', message);
+			},
+			onFileTypeError: function(file){
+				clonos.notify('File \'' + file.name + '\' cannot be added: must be an ISO','error');
+			},
+			onFileSizeError: function(file){
+				clonos.notify('File \'' + file.name + '\' cannot be added: size excess limit','error');
+			},
+			onFileExtError: function(file){
+				clonos.notify('File \'' + file.name + '\' has a Not Allowed Extension','error');
+			},
+			onFallbackMode: function(message){
+				alert('Browser not supported(do something else here!): ' + message);
+			}
+		});
+	},
+	update_file_status:function(id,type,message)
+	{
+		console.log(message);
+		if(type=='error')
+		{
+			this.notify(message,'error');
+			$('#p-'+id+'.line').css('background-color','red');
+		}
+		if(type=='success')
+		{
+			$('#p-'+id+'.line').css('background-color','green');
+		}
+	},
+	update_file_progress:function(id, percent)
+	{
+		$('#p-'+id+'.line').width(percent);
+		console.log(percent);
+	},
+	add_log:function(message)
+	{
+		console.log(message);
+	},
+	add_file:function(id, file)
+	{
+		$('.uploader-progress').append('<div class="file" id="f-'+id+'"><div class="file-name">'+file.name+'</div><div id="p-'+id+'" class="line"></div></div>');
+	},
+	delete_file:function(id)
+	{
+		$('.uploader-progress #f-'+id).remove();
+	},
+	
+	debug:function(message,data)
+	{
+		this.dialogClose();
+		$('body').append('<div id="debug" onclick="clonos.closeDebug();"><h1>'+message+'</h1><div>'+data+'</div>');
+	},
+	closeDebug:function()
+	{
+		$('#debug').remove();
+	},
+	
+	setLang:function(event)
+	{
+		var target=event.target;
+		var lang=$(target).val();
+		if(localStorage)
+		{
+			//localStorage['lang']=lang;
+		}
+		document.cookie="lang="+lang+";path=/;";
+		location.reload();
+	},
 }
+
+function isset(varr){for(a in arguments){if(typeof arguments[a]=='undefined')return false;}return true;}
+
+function ws_debug(){
+	var res=prompt('Введите JSON строку','');
+	if(res=='' || res==null) return;
+	var data=JSON.parse(res);
+	clonos.onChangeStatus(data);
+}
+
 
 $(window).on('load',function(){clonos.start();});
 $(window).on('unload',function(){});	/* эта функция заставляет FireFox запускать JS-функции при нажатии кнопки «Назад»

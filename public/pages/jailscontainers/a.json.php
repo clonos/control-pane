@@ -1,4 +1,13 @@
 <?php
+$jail_name='';
+if(isset($this->uri_chunks[1])) $jail_name=$this->uri_chunks[1];
+if(!empty($jail_name))
+{
+	include('helpers.json.php');
+	return;
+}
+
+
 $html='';
 //$hres=$this->getTableChunk('jailslist','thead');
 //if($hres!==false) $thead=$hres[1];
@@ -13,6 +22,7 @@ $allnodes=array();
 
 $jail_ids=array();
 $nth=0;
+$hres=$this->getTableChunk('jailslist','tbody');
 if(!empty($nodes))foreach($nodes as $node)
 {
 	$db1=new Db('base',$node);
@@ -24,8 +34,6 @@ if(!empty($nodes))foreach($nodes as $node)
 		$num=$nth & 1;
 		if(!empty($jails)) foreach($jails as $jail)
 		{
-			
-			$hres=$this->getTableChunk('jailslist','tbody');
 			if($hres!==false)
 			{
 				$html_tpl=$hres[1];
@@ -98,6 +106,37 @@ if(!empty($jail_ids))
 	$tasks=$this->getRunningTasks($jail_ids);
 }
 
+$html_tpl_1=str_replace(array("\n","\r","\t"),'',$hres[1]);
+if($hres!==false)
+{
+	$vars=array(
+		'nth-num'=>'nth0',
+		'status'=>'',
+		'jstatus'=>$this->translate('Creating'),
+		'icon'=>'spin6 animate-spin',
+		'desktop'=>' s-off',
+		'maintenance'=>' maintenance busy',
+		'protected'=>'icon-cancel',
+		'protitle'=>'',
+		'vnc_title'=>$this->translate('Open VNC'),
+		'reboot_title'=>$this->translate('Restart jail'),
+	);
+	
+	foreach($vars as $var=>$val)
+		$html_tpl_1=str_replace('#'.$var.'#',$val,$html_tpl_1);
+}
+
+$protected=array(
+	0=>array(
+		'icon'=>'icon-cancel',
+		'title'=>$this->translate('Delete')
+	),
+	1=>array(
+		'icon'=>'icon-lock',
+		'title'=>$this->translate('Protected jail')
+	)
+);
+
 echo json_encode(array(
 //	'thead'=>$thead,
 	'tbody'=>$html,
@@ -105,4 +144,6 @@ echo json_encode(array(
 	'func'=>'fillTable',
 	'id'=>'jailslist',
 	'tasks'=>$tasks,
+	'template'=>$html_tpl_1,
+	'protected'=>$protected,
 ));

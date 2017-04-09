@@ -1,8 +1,8 @@
 	<tbody>
 		<tr class="#nth-num##desktop##maintenance#" id="#jname#">
-			<td>#node#</td>
-			<td class="txtleft">#jname#</td>
-			<td class="txtleft vm_ram">#vm_ram#</td>
+			<td class="node">#node#</td>
+			<td class="txtleft jname">#jname#</td>
+			<td class="txtcenter vm_ram">#vm_ram#</td>
 			<td class="vm_cpus">#vm_cpus#</td>
 			<td class="vm_os_type">#vm_os_type#</td>
 			<td class="jstatus">#vm_status#</td>

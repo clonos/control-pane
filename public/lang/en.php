@@ -25,7 +25,7 @@ $lang=array(
 	'Repository'=>'Repository',
 		'Remote repository'=>'Remote repository',
 	'FreeBSD Bases'=>'FreeBSD Bases',
-		'FreeBSD bases manager'=>'Управление базами FreeBSD',
+		'FreeBSD bases manager'=>'FreeBSD bases manager',
 	'FreeBSD Sources'=>'FreeBSD Sources',
 		'FreeBSD sources manager'=>'FreeBSD sources manager',
 	'Jail Marketplace'=>'Jail Marketplace',
@@ -35,7 +35,7 @@ $lang=array(
 	'TaskLog'=>'TaskLog',
 		'System task log'=>'System task log',
 	
-	'File not found'=>'File not found',
+	'Not implemented yet'=>'Not implemented yet',
 	
 
 	'Not Launched'=>'Not Launched',

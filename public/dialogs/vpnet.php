@@ -1,8 +1,8 @@
 <script type="text/javascript">
-err_messages={
+err_messages.add({
 	'netname':'<?php echo $this->translate("Can not be empty. Name must begin with a letter / a-z / and not have any special symbols: -,.=%");?>',
 	'network':'<?php echo $this->translate("Write correct ip address, e.g: 10.0.0.2");?>',
-};
+});
 </script>
 <dialog id="vpnet" class="window-box">
 	<h1><?php echo $this->translate('Create Network');?></h1>

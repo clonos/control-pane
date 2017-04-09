@@ -27,7 +27,7 @@ clonos.lang={
 	"Removing":"Удаляется",
 	"Removed":"Удалено",
 	"Creating":"Создаётся",
-	"Created":"Создано;",
+	"Created":"Создано",
 	"Starting":"Запускается",
 	"Exporting":"Экспортируется",
 	"Cloning":"Клонируется",
@@ -39,6 +39,15 @@ clonos.lang={
 	"Updated":"Обновлено",
 	"Delete":"Удалить",
 	"Save":"Сохранить",
+	"Rename":"Переименовать",
+	"Renaming":"Переименовываем",
+	"Renamed":"Переименовано",
+	"Fetch":"Получить",
+	"Fetching":"Получаем",
+	"Fetched":"Получено",
+	"Compile":"Собрать",
+	"Compiling":"Собираем",
+	"Compiled":"Собрано",
 	
 	//"Create jail":"Создание контейнера",
 	//"Edit jail":"Редактирование параметров контейнера",
@@ -47,4 +56,6 @@ clonos.lang={
 	
 	"This name is already exists!":"Такое имя уже существует!",
 	"Passwords must match!":"Пароли должны совпадать!",
+	
+	"@redirect_alert@":"Вы будете перенаправлены на список контейнеров через 3 секунды!",
 }

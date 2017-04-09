@@ -57,6 +57,9 @@ vm_efi="uefi";
 #iso_img="";			# must be merged from CBSD profiles
 #register_iso_name=""		# must be merged from CBSD profiles
 #register_iso_as=""		# must be merged from CBSD profiles
+#register_iso_name#		# template for iso name variable
+#register_iso_as#		# template for iso path variable
+#iso_var_block#			# template for block of vars: iso_extract, iso_img_dist, iso_img, iso_site
 
 #vm_hostbridge="hostbridge";	# must be merged from CBSD profiles
 #bhyve_flags="";		# must be merged from CBSD profiles

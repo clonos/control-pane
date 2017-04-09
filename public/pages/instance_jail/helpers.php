@@ -1,19 +1,21 @@
 <?php
 
 $hash=$this->url_hash;	//=preg_replace('/^#/','',$this->_vars['hash']);
-
+ 
 $db_path=false;
-if(isset($this->_vars['db_path']) && !empty($this->_vars['db_path']))
+if(!isset($this->_vars['db_path']))
 {
-	$db_path=$this->_vars['db_path'];
+	//$db_path=$this->_vars['db_path'];
 	$res=$this->cbsd_cmd('make_tmp_helper module='.$hash);
 	if($res['retval']==0)
 	{
 		$db_path=$res['message'];
 	}else{
-		echo json_encode(array('error'=>true,'errorMessage'=>'Error on open temporary form file!'));
+		echo json_encode(array('error'=>true,'errorMessage'=>'Error on open temporary form database!'));
 		return;
 	}
+}else{
+	$db_path=$this->_vars['db_path'];
 }
 
 $form=new Forms('',$hash,$db_path);

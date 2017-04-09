@@ -10,6 +10,13 @@ $uri=trim($_SERVER['REQUEST_URI'],'/');
 include($_REALPATH.'/php/clonos.php');
 $clonos=new ClonOS($_REALPATH,$uri);
 
+if(isset($_GET['upload']))
+{
+	include('upload.php');
+	$clonos->register_media($path,$file,$ext);
+	exit;
+}
+
 $lang=$clonos->getLang();
 $root=trim($_SERVER['DOCUMENT_ROOT'],DIRECTORY_SEPARATOR);
 $_ds=DIRECTORY_SEPARATOR;
@@ -39,6 +46,7 @@ error_reporting(E_ALL);
 	<link href="/images/favicon.ico?" rel="shortcut icon" type="image/x-icon" />
 	<script src="/js/jquery.js" type="text/javascript"></script>
 	<script src="/js/clonos.js" type="text/javascript"></script>
+	<script src="/js/dmuploader.js" type="text/javascript"></script>
 	<script src="/js/noty/packaged/jquery.noty.packaged.min.js" type="text/javascript"></script>
 	<link type="text/css" href="/css/reset.css" rel="stylesheet" />
 	<link type="text/css" href="/css/styles.css" rel="stylesheet" />
@@ -97,6 +105,6 @@ if(isset($_languages))foreach($_languages as $lng=>$lngname)
 </div></header>
 
 <div class="spinner"></div>
-<div class="online icon-online" id="net-stat"></div>
+<div class="online icon-online" id="net-stat" onclick="ws_debug();"></div>
 </body>
 </html>

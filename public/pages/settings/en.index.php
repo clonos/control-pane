@@ -1,4 +1,4 @@
-<h1>Настройки ClonOS</h1>
+<h1>ClonOS Settings</h1>
 <?php
 
 $form=new Forms('cbsd-settings');

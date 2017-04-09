@@ -20,7 +20,7 @@ class ClonOS
 	private $_db=null;
 	private $_client_ip='';
 	private $_dialogs=array();
-	private $_cmd_array=array('jcreate','jstart','jstop','jrestart','jedit','jremove','jexport','jimport','jclone','jrename','madd','sstart','sstop','projremove','bcreate','bstart','bstop','brestart','bremove','bclone','brename','vm_obtain','removesrc','srcup','removebase','world','repo');
+	private $_cmd_array=array('jcreate','jstart','jstop','jrestart','jedit','jremove','jexport','jimport','jclone','jrename','madd','sstart','sstop','projremove','bcreate','bstart','bstop','brestart','bremove','bclone','brename','vm_obtain','removesrc','srcup','removebase','world','repo','forms');
 	
 /*
 	public $projectId=0;
@@ -90,7 +90,7 @@ class ClonOS
 		$this->realpath_public=$_REALPATH.'/public/';
 			# /usr/home/web/cp/clonos/public/
 		
-		if(isset($_SERVER['SERVER_NAME']))
+		if(isset($_SERVER['SERVER_NAME']) && !empty(trim($_SERVER['SERVER_NAME'])))
 			$this->server_name=$_SERVER['SERVER_NAME'];
 		else
 			$this->server_name=$_SERVER['SERVER_ADDR'];
@@ -266,6 +266,9 @@ class ClonOS
 					echo json_encode($this->vpnetRemove());
 					return;break;
 					
+				case 'updateBhyveISO':
+					echo json_encode($this->updateBhyveISO());
+					return;break;
 				case 'mediaAdd':
 					//echo json_encode($this->mediaAdd());
 					return;break;
@@ -283,6 +286,15 @@ class ClonOS
 					return;break;
 				case 'repoCompile':
 					echo json_encode($this->repoCompile());
+					return;break;
+				case 'srcUpdate':
+					echo json_encode($this->srcUpdate());
+					return;break;
+				case 'srcRemove':
+					echo json_encode($this->srcRemove());
+					return;break;
+				case 'baseRemove':
+					echo json_encode($this->baseRemove());
 					return;break;
 					
 /*				case 'saveHelperValues':
@@ -456,7 +468,7 @@ class ClonOS
 */
 	function _getTasksStatus($jsonObj)
 	{
-		return $jsonObj;
+		//return $jsonObj;
 		$tasks=array();
 		$obj=json_decode($jsonObj,true);
 		
@@ -767,6 +779,7 @@ class ClonOS
 		$form=$this->form;
 		$helper=preg_replace('/^#/','',$this->_vars['hash']);
 		
+		$db_path='';
 		$with_img_helpers='';
 		if($this->mode=='saveHelperValues')
 		{
@@ -774,6 +787,22 @@ class ClonOS
 			{
 				return $this->saveSettingsCBSD();
 			}
+			
+			if(!isset($this->_vars['db_path']))
+			{
+				$res=$this->cbsd_cmd('make_tmp_helper module='.$helper);
+				if($res['retval']==0)
+				{
+					$db_path=$res['message'];
+				}else{
+					echo json_encode(array('error'=>true,'errorMessage'=>'Error on open temporary form database!'));
+					return;
+				}
+			}else{
+				$db_path=$this->_vars['db_path'];
+			}
+			
+			/*
 			$file_name=$this->workdir.'/formfile/'.$helper.'.sqlite';
 			if(file_exists($file_name))
 			{
@@ -797,6 +826,24 @@ class ClonOS
 					//echo $with_img_helpers;
 				}
 			}
+			*/
+			
+			$db=new Db('file',$db_path);
+			if($db!==false)
+			{
+				foreach($form as $key=>$val)
+				{
+					if($key!='jname' && $key!='ip4_addr')
+					{
+						$query="update forms set new='{$val}' where param='{$key}'";
+						$db->update($query);
+						unset($form[$key]);
+					}
+				}
+				
+				$with_img_helpers=$db_path;
+			}
+			
 			$form['interface']='auto';
 			$form['user_pw_root']='';
 			$form['astart']=1;
@@ -861,6 +908,7 @@ class ClonOS
 			$err='Jail was created!';
 			$taskId=$res['message'];
 		}
+		
 		// local - поменять на реальный сервер, на котором создаётся клетка!
 		$jid=$arr['jname'];
 		
@@ -901,7 +949,7 @@ class ClonOS
 		)));
 		*/
 		
-		return array('errorMessage'=>$err,'jail_id'=>$jid,'taskId'=>$taskId,'mode'=>$this->mode,'redirect'=>$redirect);	//,'html'=>$html
+		return array('errorMessage'=>$err,'jail_id'=>$jid,'taskId'=>$taskId,'mode'=>$this->mode,'redirect'=>$redirect,'db_path'=>$db_path);	//,'html'=>$html
 	}
 	function jailRenameVars()
 	{
@@ -1192,6 +1240,7 @@ class ClonOS
 		$res['error']=false;
 		$res['dialog']=$form['dialog'];
 		$res['jail_id']=$form['jail_id'];
+		$res['iso_list']=$this->updateBhyveISO($form['jail_id']);
 		return $res;
 	}
 	function bhyveRename()
@@ -1251,7 +1300,7 @@ class ClonOS
 	}
 	function bhyveEdit()
 	{
-		$form=$this->_vars['form_data'];
+		$form=$this->form;
 		
 		$str=array();
 		$jname=$form['jname'];
@@ -1278,6 +1327,26 @@ class ClonOS
 		
 		$form['vm_ram']=$ram_tmp;
 		
+		/* check mounted ISO */
+		$db=new Db('base','storage_media');
+		$res=$db->selectAssoc('select * from media where jname="'.$jname.'" and type="iso"');
+		if($res!==false && !empty($res))
+		{
+			$cmd1="cbsd media mode=unregister name=\"${res['name']}\" path=\"${res['path']}\" jname=${jname} type=${res['type']}";
+			//echo $cmd1,PHP_EOL,PHP_EOL;
+			$this->cbsd_cmd($cmd1);
+			$res=$db->selectAssoc('select * from media where idx='.$form['vm_iso_image']);
+			if($res!==false && !empty($res) && $form['vm_iso_image']!=-2)
+			{
+				$cmd2="cbsd media mode=register name=\"${res['name']}\" path=\"${res['path']}\" jname=${jname} type=${res['type']}";
+				$this->cbsd_cmd($cmd2);
+				//echo $cmd2;
+			}
+		}
+		//exit;
+
+		/* end check */
+		
 		$cmd='bset jname='.$jname.' '.join(' ',$str);
 		$res=$this->cbsd_cmd($cmd);
 		$res['mode']='bhyveEdit';
@@ -1286,7 +1355,8 @@ class ClonOS
 	}
 	function bhyveAdd()
 	{
-		$form=$this->_vars['form_data'];
+		$form=$this->form;
+		
 		
 		$os_types=$this->config->os_types;
 		$sel_os=$form['vm_os_profile'];
@@ -1316,6 +1386,33 @@ class ClonOS
 			'vm_vnc_port'=>$form['vm_vnc_port'],
 		);
 		
+		$iso=true;
+		$res=array('name'=>'','path'=>'','iso_var_block'=>'');
+		$crlf="\r\n";
+		$iso_var_block='iso_extract=""'.$crlf.'iso_img_dist=""'.$crlf.'iso_img=""'.$crlf.'iso_site=""';
+		$iso_id=$form['vm_iso_image'];
+		if(!empty($iso_id))
+		{
+			if($iso_id>0)
+			{
+				$db=new Db('base','storage_media');
+				$res=$db->selectAssoc('select name,path from media where idx='.$iso_id);
+				if($res===false || empty($res)) $iso=false;
+			}
+			
+			if($iso_id==-1)
+			{
+				$iso=false;
+			}
+			
+			if($iso)
+			{
+				$arr['register_iso_as']='register_iso_as="'.$res['name'].'"';
+				$arr['register_iso_name']='register_iso_name="'.$res['path'].'"';
+				if($iso_id!=-2) $arr['iso_var_block']=$iso_var_block;
+			}
+		}
+		
 		/* create vm */
 		$file_name='/tmp/'.$arr['jname'].'.conf';
 		
@@ -1327,6 +1424,7 @@ class ClonOS
 				$file=str_replace('#'.$var.'#',$val,$file);
 			}
 		}
+		//echo $file;exit;
 		file_put_contents($file_name,$file);
 		
 		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd bcreate inter=0 jconf='.$file_name);
@@ -1438,28 +1536,28 @@ class ClonOS
 	}
 	function bhyveStart()
 	{
-		$form=$this->_vars['form_data'];
+		$form=$this->form;
 		$name=$form['jname'];
 		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd bstart inter=0 jname='.$name);	// autoflush=2
 		return $res;
 	}
 	function bhyveStop()
 	{
-		$form=$this->_vars['form_data'];
+		$form=$this->form;
 		$name=$form['jname'];
 		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd bstop inter=0 jname='.$name);	// autoflush=2
 		return $res;
 	}
 	function bhyveRestart()
 	{
-		$form=$this->_vars['form_data'];
+		$form=$this->form;
 		$name=$form['jname'];
 		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd brestart inter=0 jname='.$name);	// autoflush=2
 		return $res;
 	}
 	function bhyveRemove()	//$name
 	{
-		$form=$this->_vars['form_data'];
+		$form=$this->form;
 		$name=$form['jname'];
 		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd bremove inter=0 jname='.$name);	// autoflush=2
 		return $res;
@@ -1467,7 +1565,7 @@ class ClonOS
 
 	function authkeyAdd()
 	{
-		$form=$this->_vars['form_data'];
+		$form=$this->form;
 		
 		$query="insert into authkey (name,authkey) values ('{$form['keyname']}','{$form['keysrc']}')";
 		
@@ -1558,24 +1656,49 @@ class ClonOS
 	
 	function mediaRemove()
 	{
-		$form=$this->_vars['form_data'];
-		/*
+		$form=$this->form;
 		$db=new Db('base','storage_media');
-		$res=$db->update('delete from media where idx='.$form['media_id']);
-		if($res===false) return array('error'=>true,'res'=>print_r($res,true));
-		*/
-		return array('error'=>false,'media_id'=>$form['media_id']);
+		//$res=$db->update('delete from media where idx='.$form['media_id']);
+		$res=$db->selectAssoc('select * from media where idx='.$form['media_id']);
+		if($res===false || empty($res)) return array('error'=>true,'res'=>print_r($res,true));
+		
+		//if($res['jname']=='-')	// если медиа отвязана, то просто удаляем 
+		//print_r($res);exit;
+		$cmd='media mode=remove name="'.$res['name'].'" path="'.$res['path'].'" jname="'.$res['jname'].'" type="'.$res['type'].'"';	//.$res['name']
+		//echo $cmd;exit;
+		
+		$res=$this->cbsd_cmd($cmd);
+		
+		if($res['error'])
+		{
+			$arr['error']=true;
+			$arr['error_message']='File image was not deleted! '.$res['error_message'];
+		}else{
+			$arr['error']=false;
+		}
+		$arr['media_id']=$form['media_id'];
+		$arr['cmd']=$res;
+		//echo json_encode($arr);
+
+		
+		//return array('error'=>false,'media_id'=>$form['media_id']);
+		return $arr;
 	}
 	
-	function srcRemove($ver)
+	function srcRemove()
 	{
+		$form=$this->form;
+		$ver=$form['jname'];
 		$ver=str_replace('src','',$ver);
 		if(empty($ver)) return array('error'=>true,'errorMessage'=>'Version of sources is emtpy!');
 		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd removesrc inter=0 ver='.$ver.' jname=#src'.$ver);
 		return $res;
 	}
-	function srcUpdate($ver)
+	function srcUpdate()
 	{
+		$form=$this->form;
+		$ver=$form['jname'];
+		//$ver=str_replace('src','',$ver);
 		$ver=str_replace('src','',$ver);
 		$stable=(preg_match('#\.\d#',$ver))?0:1;
 		if(empty($ver)) return array('error'=>true,'errorMessage'=>'Version of sources is emtpy!');
@@ -1620,9 +1743,12 @@ class ClonOS
 		
 		return array('html'=>$html,'arr'=>$res);
 	}
-	function baseRemove($id)
+	function baseRemove()	//$id
 	{
 		//$id=str_replace('base','',$id);
+		//base10.3-amd64-0
+		$form=$this->form;
+		$id=$form['jname'];
 		$orig_id=$id;
 		preg_match('#base([0-9\.]+)-([^-]+)-(\d+)#',$id,$res);
 		$ver=$res[1];
@@ -1636,7 +1762,7 @@ class ClonOS
 	
 	function basesCompile()
 	{
-		$form=$this->_vars['form_data'];
+		$form=$this->form;
 		if(!isset($form['sources']) || !is_numeric($form['sources'])) return array('error'=>true,'errorMessage'=>'Wrong OS type selected!');
 		$id=$form['sources'];
 		
@@ -1647,7 +1773,6 @@ class ClonOS
 		}else{
 			return array('error'=>true,'errorMessage'=>'Database connect error!');
 		}
-		
 		$ver=$base['ver'];
 		$stable_arr=array('release','stable');
 		$stable_num=strlen(intval($ver))<strlen($ver)?0:1;
@@ -1732,7 +1857,7 @@ class ClonOS
 	
 	function repoCompile()
 	{
-		$form=$this->_vars['form_data'];
+		$form=$this->form;
 		if(!isset($form['version']) || !is_numeric($form['version'])) return array('error'=>true,'errorMessage'=>'Wrong OS type input!');
 		
 		$stable_arr=array('release','stable');
@@ -1881,7 +2006,7 @@ class ClonOS
 	function addHelperGroup($mode)
 	{
 		$module=$this->url_hash;
-		$form=$this->form;
+		if(isset($this->form)) $form=$this->form; else $form=array();
 		if(isset($form['db_path']) && !empty($form['db_path']))
 		{
 			$db_path=$form['db_path'];
@@ -1904,12 +2029,14 @@ class ClonOS
 	function deleteHelperGroup($mode)
 	{
 		$module=$this->url_hash;
-		$form=$this->form;
-		$index=$form['index'];
-		$index=str_replace('ind-','',$index);
+		if(isset($this->form)) $form=$this->form; else $form=array();
 		if(!isset($form['db_path']) || empty($form['db_path'])) return;
+
 		if(!file_exists($form['db_path']))
 			return array('error'=>true,'errorMessage'=>'Error on open temporary form file!');
+		
+		$index=$form['index'];
+		$index=str_replace('ind-','',$index);
 
 		$db_path=$form['db_path'];
 		$res=$this->cbsd_cmd('forms inter=0 module='.$module.' formfile='.$db_path.' group=del index='.$index);
@@ -1973,10 +2100,13 @@ class ClonOS
 	function runVNC($jname)
 	{
 		$res=$this->cbsd_cmd("vm_vncwss jname={$jname} permit={$this->_client_ip}");
-		$res=$this->_db_local->selectAssoc('select nodeip from local');
-		$nodeip=$res['nodeip'];
+		//$res=$this->_db_local->selectAssoc('select nodeip from local');
+		//$nodeip=$res['nodeip'];
 		// need for IPv4/IPv6 regex here, instead of strlen
-		if(strlen($nodeip)<7) $nodeip='127.0.0.1';
+		//if(strlen($nodeip)<7) $nodeip='127.0.0.1';
+		//if(strlen($nodeip)<7) $nodeip=$this->server_name;
+		$nodeip=$this->server_name;
+		
 		header('Location: http://'.$nodeip.':6080/vnc_auto.html?host='.$nodeip.'&port=6080');
 		exit;
 	}
@@ -2058,5 +2188,61 @@ class ClonOS
 		$cmd_string=preg_replace('#(\/.+/cbsd)#','<span class="cbsd-lnch">$1</span>',$cmd_string);
 		
 		return '<span class="cbsd-str">'.$cmd_string.'</span>';
+	}
+	
+	
+	function register_media($path,$file,$ext)
+	{
+		$cmd='cbsd media mode=register name='.$file.' path='.$path.$file.' type='.$ext;
+		$res=$this->cbsd_cmd($cmd);
+		if($res['error'])
+		{
+			$arr['error']=true;
+			$arr['error_message']='File image not registered!';
+		}else{
+			$arr['error']=false;
+		}
+		echo json_encode($arr);
+	}
+	function media_iso_list_html()
+	{
+//		$form=$this->form;
+		$db=new Db('base','storage_media');
+		$res=$db->select('select * from media where type="iso"');
+		if($res===false || empty($res)) return;
+		
+		$html='';
+		foreach($res as $r)
+		{
+			$html.='<option value="'.$r['idx'].'">'.$r['name'].'.'.$r['type'].'</option>';
+		}
+		return $html;
+	}
+	function updateBhyveISO($iso='')
+	{
+		$db=new Db('base','storage_media');
+		$res=$db->select('select * from media where type="iso"');
+		if($res===false || empty($res)) return;
+		
+		$sel='';
+		//if(empty($iso)) $sel='#sel#';
+		$html='<option value="-2"></option><option value="-1"#sel#>Profile default ISO</option>';
+		foreach($res as $r)
+		{
+			$sel1='';
+			if(empty($sel) && $iso==$r['jname']) $sel1='#sel1#';
+			$html.='<option value="'.$r['idx'].'"'.$sel1.'>'.$r['name'].'.'.$r['type'].'</option>';
+		}
+		
+		if(strpos($html,'#sel1#')!==false)
+		{
+			$html=str_replace('#sel1#',' selected="selected"',$html);
+			$html=str_replace('#sel#','',$html);
+		}else{
+			$html=str_replace('#sel1#','',$html);
+			$html=str_replace('#sel#',' selected="selected"',$html);
+		}
+		
+		return $html;
 	}
 }

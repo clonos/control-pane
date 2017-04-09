@@ -1,16 +1,16 @@
 	<tbody>
-		<tr class="#nth-num##maintenance#" id="#name##bid#">
-			<td class="wordwreck">#node#</td>
-			<td class="txtleft">#name#</td>
-			<td class="txtleft">#platform#</td>
-			<td>#arch#</td>
-			<td>#targetarch#</td>
-			<td class="version">#ver#</td>
-			<td class="txtleft">#stable#</td>
-			<td>#elf#</td>
-			<td class="small">#date#</td>
+		<tr class="#nth-num##maintenance#" id="#id#"> <!-- #name# -->
+			<td class="wordwreck node">#node#</td>
+			<td class="txtleft name">#name#</td>
+			<td class="txtleft platform">#platform#</td>
+			<td class="arch">#arch#</td>
+			<td class="targetarch">#targetarch#</td>
+			<td class="version">#version#</td>
+			<td class="txtleft version1">#version1#</td>
+			<td class="elf">#elf#</td>
+			<td class="small date">#date#</td>
 			<td width="5" class="ops op-del" title="#deltitle#"><span class="icon-cancel"></span></td>
 			<td class="ops"><span class="icon-cnt"><span></span></span></td>
-			<td class="jstatus wdt-90"></td>
+			<td class="jstatus wdt-90">#jstatus#</td>
 		</tr>
 	</tbody>

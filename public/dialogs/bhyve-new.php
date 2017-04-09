@@ -40,6 +40,14 @@ err_messages.add({
 				<input type="text" name="vm_ram" value="" pattern="^[0-9]+\s*(g|G|gb|GB|mb|MB|m|M)$" placeholder="1g" required="required" />
 			</p>
 			<p>
+				<span class="field-name"><?php echo $this->translate('Attached boot ISO image');?>:</span>
+				<select name="vm_iso_image">
+					<option value="-2"></option>
+					<option value="-1" selected>Profile default ISO</option>
+<?php echo $this->media_iso_list_html(); ?>
+				</select>
+			</p>
+			<p>
 				<span class="field-name"><?php echo $this->translate('VNC IP address');?>:</span>
 				<input type="radio" name="bhyve_vnc_tcp_bind" value="127.0.0.1" id="vncip0" checked="checked" class="inline"><label for="vncip0">127.0.0.1</label></radio>
 				<input type="radio" name="bhyve_vnc_tcp_bind" value="0.0.0.0" id="vncip1" class="inline"><label for="vncip1">0.0.0.0</label></radio>

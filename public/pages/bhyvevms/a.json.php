@@ -13,6 +13,7 @@ $allnodes=array();
 
 $jail_ids=array();
 $nth=0;
+$hres=$this->getTableChunk('bhyveslist','tbody');
 if(!empty($nodes))foreach($nodes as $node)
 {
 	$db1=new Db('base',$node);
@@ -25,7 +26,6 @@ if(!empty($nodes))foreach($nodes as $node)
 		if(!empty($bhyves)) foreach($bhyves as $bhyve)
 		{
 			
-			$hres=$this->getTableChunk('bhyveslist','tbody');
 			if($hres!==false)
 			{
 				$html_tpl=$hres[1];

@@ -91,7 +91,7 @@ if(empty($hash))
 	$db_path=$db->getFileName();
 	$form=new Forms($jail_name,$hash,$db_path);
 	$res=$form->generate();
-	$res['html']='<h1>'.$this->translate('Helper settings').'</h1>'.$res['html'];
+	$res['html']='<h1>'.$this->translate('Helper settings: '.$hash).'</h1>'.$res['html'];
 }
 
 

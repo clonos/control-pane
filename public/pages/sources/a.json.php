@@ -8,6 +8,7 @@ $nodes=array_reverse($nodes);
 
 $ids=array();
 $nth=0;
+$hres=$this->getTableChunk('srcslist','tbody');
 if(!empty($nodes))foreach($nodes as $node)
 {
 	$db1=new Db('base',$node['nodename']);
@@ -25,7 +26,6 @@ if(!empty($nodes))foreach($nodes as $node)
 				$idle=$this->check_locktime($node['ip']);
 			}
 			
-			$hres=$this->getTableChunk('srcslist','tbody');
 			if($hres!==false)
 			{
 				$html_tpl=$hres[1];
@@ -35,10 +35,12 @@ if(!empty($nodes))foreach($nodes as $node)
 					'node'=>$node['nodename'],
 					'name'=>$base['name'],
 					'platform'=>$base['platform'],
-					'ver'=>$base['ver'],
-					'ver1'=>$vers,
+					'version'=>$base['ver'],
+					'version1'=>$vers,
 					'rev'=>$base['rev'],
 					'date'=>$base['date'],
+					'jstatus'=>'',
+					'icon'=>'',
 					'maintenance'=>($idle==0)?' maintenance':'',
 					'deltitle'=>$this->translate('Delete'),
 					'updtitle'=>$this->translate('Update'),
@@ -57,10 +59,30 @@ if(!empty($nodes))foreach($nodes as $node)
 	}
 }
 
+$html=str_replace(array("\n","\r","\t"),'',$html);
+
 $tasks='';
 if(!empty($ids))
 {
 	$tasks=$this->getRunningTasks($ids);
+}
+
+$html_tpl=str_replace(array("\n","\r","\t"),'',$hres[1]);
+if($hres!==false)
+{
+	$vars=array(
+		'nth-num'=>'nth0',
+		'status'=>'',
+		'jstatus'=>$this->translate('Updating'),
+		//'icon'=>'spin6 animate-spin',
+		'desktop'=>' s-off',
+		'maintenance'=>' maintenance busy',
+		'updtitle'=>$this->translate('Update'),
+		'deltitle'=>$this->translate('Delete'),
+	);
+	
+	foreach($vars as $var=>$val)
+		$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
 }
 
 echo json_encode(array(
@@ -69,4 +91,5 @@ echo json_encode(array(
 	'func'=>'fillTable',
 	'id'=>'srcslist',
 	'tasks'=>$tasks,
+	'template'=>$html_tpl,
 ));

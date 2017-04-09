@@ -1,7 +1,7 @@
 <?php
 
 $db=new Db('base','storage_media');
-$res=$db->select('SELECT idx,name,path FROM media');
+$res=$db->select('SELECT idx,name,path,jname FROM media where type="iso"');
 
 $html='';
 if($res!==false)
@@ -20,6 +20,7 @@ if($res!==false)
 				'mediaid'=>$item['idx'],
 				'medianame'=>$item['name'],
 				'mediapath'=>$item['path'],
+				'jname'=>$item['jname'],
 				'deltitle'=>' title="'.$this->translate('Delete').'"',
 			);
 			

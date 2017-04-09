@@ -411,7 +411,7 @@ thead td:first-child, td:first-child {
 .tsimple thead th,
 .tsimple thead td {
 	border-bottom:3px solid #337ab7;
-	padding:10px;
+	padding:8px 8px 8px 0;
 	text-align:left;
 }
 .tsimple tbody td {
@@ -423,11 +423,14 @@ thead td:first-child, td:first-child {
 .tsimple tbody tr:nth-child(2n){
 	background-color: #fafafa;
 }
-.tsimple td.txtleft {
+.tsimple .txtleft {
 	text-align:left;
 }
-.tsimple td.txtright {
+.tsimple .txtright {
 	text-align:right;
+}
+.tsimple .txtcenter {
+	text-align:center;
 }
 .tsimple td input[type="button"] {
 	font-size:86%;
@@ -959,6 +962,7 @@ http://dimox.name/custom-checkboxes-and-radio-buttons-using-css-only/
 #config-menu li {
 	padding:6px !important;
 	line-height:110%;
+	white-space:nowrap;
 }
 #config-menu li:hover {
 	background:#f0f0f0;
@@ -1208,3 +1212,86 @@ input[type=range]::-moz-range-track {
 }
 .online:before {content: '\e82c';color:green;}
 .offline:before {content: '\e82d';color:red;}
+
+
+#drag-and-drop-zone {
+	width:400px;
+	border:1px dotted gray;
+}
+.uploader div {
+	padding:10px;
+	text-align:center;
+}
+.uploader .browser label {
+	background-color: #337ab7;
+	padding: 5px 15px;
+	color: white;
+	padding: 6px 0px;
+	font-weight: bold;
+	cursor: pointer;
+	position: relative;
+	overflow: hidden;
+	display: block;
+	width: 300px;
+	margin: 10px auto 0px auto;
+	box-shadow: 2px 2px 2px #888888;
+}
+.uploader div.browser input {
+	position: absolute;
+	top: 0;
+	right: 0;
+	margin: 0;
+	border: solid transparent;
+	border-width: 0 0 100px 200px;
+	opacity: .0;
+	filter: alpha(opacity= 0);
+	-o-transform: translate(250px,-50px) scale(1);
+	-moz-transform: translate(-300px,0) scale(4);
+	direction: ltr;
+	cursor: pointer;
+}
+.uploader-progress {
+	width:100%;
+	background-color:white;
+}
+.uploader-progress .file {
+	padding:4px;
+	border:1px solid silver;
+	margin-top:4px;
+}
+.uploader-progress .file-name {
+	overflow:hidden;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	width:390px;
+}
+.uploader-progress .line {
+	background-color:#337ab7;
+	height:10px;
+	opacity:.7;
+	margin-top:4px;
+	width:0;
+}
+
+
+
+
+#debug {
+	position:fixed;
+	top:20%;
+	bottom:20%;
+	left:30%;
+	right:30%;
+	overflow:auto;
+	z-index:15;
+	border:3px double red;
+	background-color:antiquewhite;
+}
+#debug h1 {
+	background:darkred;
+	padding:10px;
+	color:white;
+}
+#debug div {
+	padding:20px;
+}

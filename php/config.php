@@ -137,6 +137,8 @@ class Config
 						'profile'=>'opensuse-x86-42','obtain'=>false),
 				array('name'=>'Linux Ubuntu 16.04','type'=>'linux',
 						'profile'=>'ubuntuserver-x86-16.04','obtain'=>true),
+				array('name'=>'Linux Ubuntu 17.04','type'=>'linux',
+						'profile'=>'ubuntuserver-x86-17.04','obtain'=>true),
 			),
 		),
 		array(

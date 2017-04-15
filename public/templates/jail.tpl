@@ -24,6 +24,7 @@ astart="#astart#";
 data="#workdir#/jails-data/#jname#-data";
 
 vnet="#vnet#";
+nic_hwaddr="0";
 applytpl="#applytpl#";
 mdsize="#mdsize#";
 rcconf="#workdir#/jails-rcconf/rc.conf_#jname#";

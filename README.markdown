@@ -25,7 +25,8 @@ We like existing Linux-only solutions such as OpenStack (https://www.openstack.o
 
 ## Usage
 
-Use downloads pages https://clonos.tekroutine.com/download.html to obtain latest .ISO image
+For installing from ISO: Use downloads pages https://clonos.tekroutine.com/download.html to obtain latest .ISO image
+For installing on FreeBSD: https://clonos.tekroutine.com/installation_on_freebsd.html
 
 ## Limitations
 
@@ -39,7 +40,7 @@ Tested with following OSes and distribution:
 ## Contributing
 
 * Fork me on GitHub: [https://github.com/clonos/cp.git](https://github.com/clonos/cp.git)
+* Switch to develop branch
 * Commit your changes (`git commit -am 'Added some feature'`)
 * Push to the branch (`git push`)
 * Create new Pull Request
-

@@ -4,5 +4,5 @@
 			<span class="dialog-close"></span>
 		</span>
 	</div>
-	<iframe src="about:blank" id="vnc-iframe" border="0" width="1024" height="800"></iframe>
+	<iframe src="about:blank" id="vnc-iframe" border="0" width="1026" height="802"></iframe>
 </dialog>

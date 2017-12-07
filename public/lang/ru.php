@@ -16,6 +16,8 @@ $lang=array(
 		'Virtual machine control panel'=>'Панель управления нодами',
 	'Nodes'=>'Сервера',
 		'Nodes control panel'=>'Панель управления нодами',
+	'VM Packages'=>'Шаблоны виртуальных машин',
+		'Manage for virtual machine packages'=>'Управление профилями виртуальных машин',
 	'Virtual Private Network'=>'Виртуальные сети',
 		'Manage for virtual private networks'=>'Панель управления подсетями',
 	'Authkeys'=>'Ключи авторизации',
@@ -138,6 +140,13 @@ $lang=array(
 	'@rename_warning@'=>'<strong>ВНИМАНИЕ!</strong> Контейнер запущен. Переименование работает только при выключенном окружении, поэтому данный контейнер предварительно будет остановлен!',
 
 	'No installed helpers'=>'Нет установленных хелперов',
+	
+	'edit_title'=>'Редактировать',
+	'delete_title'=>'Удалить',
+	
+	'Users'=>'Пользователи',
+	'CBSD Users'=>'Учётные записи пользователей CBSD',
+	
 	
 	//''=>'',
 );

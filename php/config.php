@@ -7,8 +7,19 @@ class Config
 		'ru'=>'Russian',
 	);
 	
+	public $os_types_names=array(
+		'netbsd'=>'NetBSD',
+		'dflybsd'=>'DragonflyBSD',
+		'linux'=>'Linux',
+		'other'=>'Other',
+		'freebsd'=>'FreeBSD',
+		'openbsd'=>'OpenBSD',
+		'windows'=>'Windows',
+	);
+	
 	public $other_titles=array(
 		'settings'=>'CBSD Settings',
+		'users'=>'CBSD Users',
 	);
 
 	/* Меню проекта */
@@ -43,6 +54,12 @@ class Config
 			'icon'=>'icon-buffer',
 		),
 */
+		'vm_packages'=>array(
+			'name'=>'VM Packages',
+			'title'=>'Manage VM Packages group',
+			'icon'=>'icon-cubes',
+		),
+		
 		'vpnet'=>array(
 			'name'=>'Virtual Private Network',
 			'title'=>'Manage for virtual private networks',
@@ -149,6 +166,31 @@ class Config
 			),
 		)
 	);
+	
+	function __construct()
+	{
+		$array=array();
+		$array1=array();
+		$res=ClonOS::cbsd_cmd('get_bhyve_profiles');
+		if($res['retval']==0)
+		{
+			$res=json_decode($res['message'],true);
+			if(!empty($res))foreach($res as $item)
+			{
+				$os_name=$this->os_types_names[$item['type']];
+				if(isset($array[$os_name]))
+				{
+					$array[$os_name]['items'][]=$item;
+				}else{
+					$array[$os_name]=array('os'=>$os_name,'items'=>array($item));
+				}
+			}
+			if(!empty($array))foreach($array as $item) $array1[]=$item;
+			unset($array);
+			$this->os_types=$array1;
+		}
+	}
+	
 	function os_types_create($obtain='new')
 	{
 		$obtain=($obtain=='obtain');
@@ -161,6 +203,7 @@ class Config
 			$items=$os['items'];
 			foreach($items as $num2=>$item)
 			{
+				if(!isset($item['obtain'])) $item['obtain']=false;
 				if(!$obtain || $item['obtain'])
 					$html_tmp.='						<option value="'.$num1.'.'.$num2.'">'.$item['name'].'</option>'.PHP_EOL;
 				if($item['obtain']) $obtain_count++;

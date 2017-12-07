@@ -21,7 +21,11 @@ class ClonOS
 	private $_client_ip='';
 	private $_dialogs=array();
 	private $_cmd_array=array('jcreate','jstart','jstop','jrestart','jedit','jremove','jexport','jimport','jclone','jrename','madd','sstart','sstop','projremove','bcreate','bstart','bstop','brestart','bremove','bclone','brename','vm_obtain','removesrc','srcup','removebase','world','repo','forms');
-	
+	private $_user_info=array(
+		'id'=>0,
+		'username'=>'guest',
+		'unregistered'=>true,
+	);
 /*
 	public $projectId=0;
 	public $jailId=0;
@@ -124,7 +128,8 @@ class ClonOS
 			//echo $this->realpath_page;
 		}else if($_SERVER['REQUEST_URI']){
 			//$this->realpath_page=$this->realpath_public.'pages/'.trim($_SERVER['REQUEST_URI'],'/').'/';
-			$this->realpath_page=$this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
+			if(isset($this->uri_chunks[0]))
+				$this->realpath_page=$this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
 		}
 		
 		if(isset($this->_vars['hash']))
@@ -148,11 +153,35 @@ class ClonOS
 		if(isset($this->_vars['mode'])) $this->mode=$this->_vars['mode'];
 		if(isset($this->_vars['form_data'])) $this->form=$this->_vars['form_data'];
 		
+		$ures=$this->userAutologin();
+		if($ures!==false)
+		{
+			if(isset($ures['id']) && is_numeric($ures['id']) && $ures['id']>0)
+			{
+				$this->_user_info=$ures;
+				$this->_user_info['unregistered']=false;
+			}else{
+				$this->_user_info['unregistered']=true;
+			}
+		}
+		
 		if($this->_post && isset($this->mode))
 		{
+			if(isset($this->_user_info['error']) && $this->_user_info['error'])
+			{
+				if($this->mode!='login')
+				{
+					echo json_encode(array('error'=>true,'unregistered_user'=>true));
+					exit;
+				}
+			}
+
 			unset($_POST);
 			switch($this->mode)
 			{
+				case 'login':
+					echo json_encode($this->login());
+					return;break;
 				case 'getTasksStatus':
 					echo json_encode($this->_getTasksStatus($this->form['jsonObj']));
 					return;break;
@@ -296,6 +325,21 @@ class ClonOS
 				case 'baseRemove':
 					echo json_encode($this->baseRemove());
 					return;break;
+				case 'usersAdd':
+					echo json_encode($this->usersAdd());
+					return;break;
+				case 'usersEdit':
+					echo json_encode($this->usersEdit());
+					return;break;
+				case 'userRemove':
+					echo json_encode($this->userRemove());
+					return;break;
+				case 'userGetInfo':
+					echo json_encode($this->userGetInfo());
+					return;break;
+				case 'userEditInfo':
+					echo json_encode($this->userEditInfo());
+					return;break;
 					
 /*				case 'saveHelperValues':
 					echo json_encode($this->saveHelperValues());
@@ -303,6 +347,14 @@ class ClonOS
 */
 			}
 		}
+	}
+	
+	function login()
+	{
+		$form=$this->_vars['form_data'];
+		
+		return $this->userRegisterCheck($form);
+		//array('message'=>'unregistered user','errorCode'=>1)
 	}
 	
 	function redis_publish($key,$message)
@@ -423,6 +475,8 @@ class ClonOS
 			$tid=join("','",$ids);
 			$query="select id,cmd,status,jname from taskd where status<2 and jname in ('{$tid}')";
 			//echo $query;
+			$cmd='';
+			$txt_status='';
 			$tasks=$this->_db_tasks->select($query);
 			if(!empty($tasks)) foreach($tasks as $task)
 			{
@@ -627,8 +681,9 @@ class ClonOS
 		$ip4_addr=$form['ip4_addr'];
 		$old_name=$form['oldJail'];
 		$new_name=$form['jname'];
+		$username=$this->_user_info['username'];
 		
-		$cmd="task owner=cbsdwebsys mode=new /usr/local/bin/cbsd jrename old=${old_name} new=${new_name} host_hostname=${host_hostname} ip4_addr=${ip4_addr} restart=1";
+		$cmd="task owner=${username} mode=new /usr/local/bin/cbsd jrename old=${old_name} new=${new_name} host_hostname=${host_hostname} ip4_addr=${ip4_addr} restart=1";
 		$res=$this->cbsd_cmd($cmd);
 		
 		$err='Jail is not renamed!';
@@ -646,8 +701,9 @@ class ClonOS
 	function jailClone()
 	{
 		$form=$this->_vars['form_data'];
+		$username=$this->_user_info['username'];
 		
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd jclone checkstate=0 old='.$form['oldJail'].' new='.$form['jname'].' host_hostname='.$form['host_hostname'].' ip4_addr='.$form['ip4_addr']);
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd jclone checkstate=0 old='.$form['oldJail'].' new='.$form['jname'].' host_hostname='.$form['host_hostname'].' ip4_addr='.$form['ip4_addr']);
 		
 		$err='Jail is not cloned!';
 		$taskId=-1;
@@ -739,6 +795,8 @@ class ClonOS
 	function saveJailHelperValues()
 	{
 		$form=$this->form;
+		$username=$this->_user_info['username'];
+		
 		if(!isset($this->uri_chunks[1]) || !isset($this->url_hash)) return array('error'=>true,'errorMessage'=>'Bad url!');
 		$jail_name=$this->uri_chunks[1];
 		
@@ -756,7 +814,7 @@ class ClonOS
 		}
 		
 		//cbsd forms module=<helper> jname=jail1 inter=0
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd forms module='.$this->url_hash.' jname='.$jail_name.' inter=0');
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd forms module='.$this->url_hash.' jname='.$jail_name.' inter=0');
 
 		$err='Helper values is saved!';
 		$taskId=-1;
@@ -897,8 +955,10 @@ class ClonOS
 		}
 		file_put_contents($file_name,$file);
 		
+		$username=$this->_user_info['username'];
+		
 		$cbsd_queue_name='/clonos/'.trim($this->_vars['path'],'/').'/';
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd jcreate inter=0 jconf='.$file_name);
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd jcreate inter=0 jconf='.$file_name);
 		//.' cbsd_queue_name='.$cbsd_queue_name);
 
 		$err='Jail is not created!';
@@ -1088,41 +1148,46 @@ class ClonOS
 	function jailStart()	//$name
 	{
 		$form=$this->_vars['form_data'];
+		$username=$this->_user_info['username'];
 		$name=$form['jname'];
 		$cbsd_queue_name=trim($this->_vars['path'],'/');
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd jstart inter=0 jname='.$name);
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd jstart inter=0 jname='.$name);
 		//.' cbsd_queue_name=/clonos/'.$cbsd_queue_name.'/');	// autoflush=2
 		return $res;
 	}
 	function jailStop()	//$name
 	{
 		$form=$this->_vars['form_data'];
+		$username=$this->_user_info['username'];
 		$name=$form['jname'];
 		$cbsd_queue_name=trim($this->_vars['path'],'/');
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd jstop inter=0 jname='.$name);
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd jstop inter=0 jname='.$name);
 		//.' cbsd_queue_name=/clonos/'.$cbsd_queue_name.'/');	// autoflush=2
 		return $res;
 	}
 	function jailRestart()	//$name
 	{
 		$form=$this->_vars['form_data'];
+		$username=$this->_user_info['username'];
 		$name=$form['jname'];
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd jrestart inter=0 jname='.$name);	// autoflush=2
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd jrestart inter=0 jname='.$name);	// autoflush=2
 		return $res;
 	}
 	function jailRemove()	//$name
 	{
 		$form=$this->_vars['form_data'];
+		$username=$this->_user_info['username'];
 		$name=$form['jname'];
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd jremove inter=0 jname='.$name);	// autoflush=2
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd jremove inter=0 jname='.$name);	// autoflush=2
 		return $res;
 	}
 
 	function bhyveClone()
 	{
 		$form=$this->_vars['form_data'];
+		$username=$this->_user_info['username'];
 		
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd bclone checkstate=0 old='.$form['oldBhyve'].' new='.$form['vm_name']);
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd bclone checkstate=0 old='.$form['oldBhyve'].' new='.$form['vm_name']);
 		
 		$err='Virtual Machine is not renamed!';
 		$taskId=-1;
@@ -1249,8 +1314,9 @@ class ClonOS
 		
 		$old_name=$form['oldJail'];
 		$new_name=$form['jname'];
+		$username=$this->_user_info['username'];
 		
-		$cmd="task owner=cbsdwebsys mode=new /usr/local/bin/cbsd brename old=${old_name} new=${new_name} restart=1";
+	$cmd="task owner=${username} mode=new /usr/local/bin/cbsd brename old=${old_name} new=${new_name} restart=1";
 		$res=$this->cbsd_cmd($cmd);
 		
 		$err='Virtual Machine is not renamed!';
@@ -1426,8 +1492,9 @@ class ClonOS
 		}
 		//echo $file;exit;
 		file_put_contents($file_name,$file);
+		$username=$this->_user_info['username'];
 		
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd bcreate inter=0 jconf='.$file_name);
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd bcreate inter=0 jconf='.$file_name);
 
 		$err='Virtual Machine is not created!';
 		$taskId=-1;
@@ -1474,6 +1541,7 @@ class ClonOS
 	function bhyveObtain()
 	{
 		$form=$this->_vars['form_data'];
+		$username=$this->_user_info['username'];
 		
 		$os_types=$this->config->os_types;
 		$sel_os=$form['vm_os_profile'];
@@ -1491,7 +1559,7 @@ class ClonOS
 		{
 			$key_name=$nres['name'];
 		}
-		$cmd="task owner=cbsdwebsys mode=new /usr/local/bin/cbsd vm_obtain jname={$form['vm_name']} vm_size={$form['vm_size']} vm_cpus={$form['vm_cpus']} vm_ram={$form['vm_ram']} vm_os_type={$os_type} mask={$form['mask']} ip4_addr={$form['ip4_addr']} gw={$form['gateway']} authkey={$key_name} pw={$form['vm_password']}";
+		$cmd="task owner=${username} mode=new /usr/local/bin/cbsd vm_obtain jname={$form['vm_name']} vm_size={$form['vm_size']} vm_cpus={$form['vm_cpus']} vm_ram={$form['vm_ram']} vm_os_type={$os_type} mask={$form['mask']} ip4_addr={$form['ip4_addr']} gw={$form['gateway']} authkey={$key_name} pw={$form['vm_password']}";
 		
 		$res=$this->cbsd_cmd($cmd);
 		$err='Virtual Machine is not created!';
@@ -1537,29 +1605,33 @@ class ClonOS
 	function bhyveStart()
 	{
 		$form=$this->form;
+		$username=$this->_user_info['username'];
 		$name=$form['jname'];
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd bstart inter=0 jname='.$name);	// autoflush=2
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd bstart inter=0 jname='.$name);	// autoflush=2
 		return $res;
 	}
 	function bhyveStop()
 	{
 		$form=$this->form;
+		$username=$this->_user_info['username'];
 		$name=$form['jname'];
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd bstop inter=0 jname='.$name);	// autoflush=2
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd bstop inter=0 jname='.$name);	// autoflush=2
 		return $res;
 	}
 	function bhyveRestart()
 	{
 		$form=$this->form;
+		$username=$this->_user_info['username'];
 		$name=$form['jname'];
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd brestart inter=0 jname='.$name);	// autoflush=2
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd brestart inter=0 jname='.$name);	// autoflush=2
 		return $res;
 	}
 	function bhyveRemove()	//$name
 	{
 		$form=$this->form;
+		$username=$this->_user_info['username'];
 		$name=$form['jname'];
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd bremove inter=0 jname='.$name);	// autoflush=2
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd bremove inter=0 jname='.$name);	// autoflush=2
 		return $res;
 	}
 
@@ -1688,21 +1760,23 @@ class ClonOS
 	function srcRemove()
 	{
 		$form=$this->form;
+		$username=$this->_user_info['username'];
 		$ver=$form['jname'];
 		$ver=str_replace('src','',$ver);
 		if(empty($ver)) return array('error'=>true,'errorMessage'=>'Version of sources is emtpy!');
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd removesrc inter=0 ver='.$ver.' jname=#src'.$ver);
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd removesrc inter=0 ver='.$ver.' jname=#src'.$ver);
 		return $res;
 	}
 	function srcUpdate()
 	{
 		$form=$this->form;
+		$username=$this->_user_info['username'];
 		$ver=$form['jname'];
 		//$ver=str_replace('src','',$ver);
 		$ver=str_replace('src','',$ver);
 		$stable=(preg_match('#\.\d#',$ver))?0:1;
 		if(empty($ver)) return array('error'=>true,'errorMessage'=>'Version of sources is emtpy!');
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd srcup stable='.$stable.' inter=0 ver='.$ver.' jname=#src'.$ver);
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd srcup stable='.$stable.' inter=0 ver='.$ver.' jname=#src'.$ver);
 		return $res;
 	}
 	function getSrcInfo($id)
@@ -1748,6 +1822,7 @@ class ClonOS
 		//$id=str_replace('base','',$id);
 		//base10.3-amd64-0
 		$form=$this->form;
+		$username=$this->_user_info['username'];
 		$id=$form['jname'];
 		$orig_id=$id;
 		preg_match('#base([0-9\.]+)-([^-]+)-(\d+)#',$id,$res);
@@ -1755,7 +1830,7 @@ class ClonOS
 		$arch=$res[2];
 		$stable=$res[3];
 
-		$cmd='task owner=cbsdwebsys mode=new /usr/local/bin/cbsd removebase inter=0 stable='.$stable.' ver='.$ver.' arch='.$arch.' jname=#'.$orig_id;
+		$cmd='task owner='.$username.' mode=new /usr/local/bin/cbsd removebase inter=0 stable='.$stable.' ver='.$ver.' arch='.$arch.' jname=#'.$orig_id;
 		$res=$this->cbsd_cmd($cmd);
 		return $res;
 	}
@@ -1763,6 +1838,7 @@ class ClonOS
 	function basesCompile()
 	{
 		$form=$this->form;
+		$username=$this->_user_info['username'];
 		if(!isset($form['sources']) || !is_numeric($form['sources'])) return array('error'=>true,'errorMessage'=>'Wrong OS type selected!');
 		$id=$form['sources'];
 		
@@ -1783,7 +1859,7 @@ class ClonOS
 		$html=$res['html'];
 		$res=$res['arr'];
 
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd world inter=0 stable='.$res['stable'].' ver='.$ver.' jname=#base'.$bid);
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd world inter=0 stable='.$res['stable'].' ver='.$ver.' jname=#base'.$bid);
 		//$res['retval']=0;$res['message']=3;
 		
 		$err='';
@@ -1858,6 +1934,7 @@ class ClonOS
 	function repoCompile()
 	{
 		$form=$this->form;
+		$username=$this->_user_info['username'];
 		if(!isset($form['version']) || !is_numeric($form['version'])) return array('error'=>true,'errorMessage'=>'Wrong OS type input!');
 		
 		$stable_arr=array('release','stable');
@@ -1894,7 +1971,7 @@ class ClonOS
 			$html=$html_tpl;
 		}
 		
-		$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd repo action=get sources=base inter=0 stable='.$stable_num.' ver='.$ver.' jname=#base'.$bid);
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd repo action=get sources=base inter=0 stable='.$stable_num.' ver='.$ver.' jname=#base'.$bid);
 		//$res['retval']=0;$res['message']=3;
 		
 		$err='';
@@ -1978,11 +2055,12 @@ class ClonOS
 		$form=$this->form;
 		if($this->uri_chunks[0]!='jailscontainers' || empty($this->uri_chunks[1])) return array('error'=>true,'errorMessage'=>'Bad url!');
 		$jail_id=$this->uri_chunks[1];
+		$username=$this->_user_info['username'];
 		
 		$helpers=array_keys($form);
 		if(!empty($helpers)) foreach($helpers as $helper)
 		{
-			$res=$this->cbsd_cmd('task owner=cbsdwebsys mode=new /usr/local/bin/cbsd forms inter=0 module='.$helper.' jname='.$jail_id);
+		$res=$this->cbsd_cmd('task owner=${username} mode=new /usr/local/bin/cbsd forms inter=0 module='.$helper.' jname='.$jail_id);
 		}
 		return array('error'=>false);
 	}
@@ -2066,9 +2144,6 @@ class ClonOS
 		return array('html'=>$res['html']);
 	}
 	
-	
-	
-	
 	function useDialogs($arr=array())
 	{
 		//print_r($arr);
@@ -2089,6 +2164,17 @@ class ClonOS
 		}
 	}
 	
+	function placeDialogByName($dialog_name=null)
+	{
+		if(is_null($dialog_name)) return;
+		echo PHP_EOL;
+		$file_name=$this->realpath_public.'dialogs/'.$dialog_name.'.php';
+		if(file_exists($file_name))
+		{
+			include($file_name);
+			echo PHP_EOL,PHP_EOL;
+		}
+	}
 	
 	
 	
@@ -2107,7 +2193,7 @@ class ClonOS
 		//if(strlen($nodeip)<7) $nodeip=$this->server_name;
 		$nodeip=$this->server_name;
 		
-		header('Location: http://'.$nodeip.':6080/vnc_auto.html?host='.$nodeip.'&port=6080');
+		header('Location: http://'.$nodeip.':6080/vnc_auto.html?host='.$nodeip.'&port=6080?password=cbsd');
 		exit;
 	}
 	
@@ -2244,5 +2330,251 @@ class ClonOS
 		}
 		
 		return $html;
+	}
+	
+	function usersAdd()
+	{
+		$form=$this->form;
+		
+		$res=$this->userRegister($form);
+		if($res!==false)
+		{
+			if(isset($res['user_exists']) && $res['user_exists'])
+			{
+				return array('error'=>true,'errorType'=>'user-exists','errorMessage'=>'User always exists!');
+			}
+			return $res;
+		}
+		return array('form'=>$form);
+	}
+	function usersEdit()
+	{
+		$form=$this->form;
+		
+		if(!isset($form['user_id']) || !is_numeric($form['user_id']) || $form['user_id']<1)
+			return array('error'=>true,'error_message'=>'incorrect data!');
+		
+		$db=new Db('clonos');
+		if($db!==false)
+		{
+			$user_id=$form['user_id'];
+			$username=$form['username'];
+			$first_name=$form['first_name'];
+			$last_name=$form['last_name'];
+			$is_active=0;
+			if(isset($form['actuser']) && $form['actuser']=='on') $is_active=1;
+			
+			$pwd_sql='';
+			if(isset($form['password']))
+			{
+				$password=$this->getPasswordHash($form['password']);
+				$pwd_sql=",password='${password}'";
+			}
+			
+			$query="update auth_user set username='${username}'".$pwd_sql.",first_name='${first_name}',last_name='${last_name}',is_active=${is_active} where id=${user_id}";
+			
+			//echo $query;
+			
+			$res=$db->update($query);
+			return array('error'=>false,'res'=>$res);
+		}else{
+			return array('error'=>true,'error_message'=>'db connection lost!');
+		}
+	}
+
+	
+	function getPasswordHash($password)
+	{
+		return hash('sha256',hash('sha256',$password).$this->getSalt());
+	}
+	private function getSalt()
+	{
+		$salt_file='/var/db/clonos/salt';
+		if(file_exists($salt_file)) return trim(file_get_contents($salt_file));
+		return 'noSalt!';
+	}
+	function userRegister($user_info=array())
+	{
+		if(empty($user_info)) return false;
+		if(isset($user_info['username']) && isset($user_info['password']))
+		{
+			$db=new Db('clonos');
+			if($db!==false)
+			{
+				$res=$db->select("select username from auth_user where username='${user_info['username']}'");
+				if(!empty($res))
+				{
+					$res['user_exsts']=true;
+					return $res;
+				}
+				
+				$username=$user_info['username'];
+				$password=$this->getPasswordHash($user_info['password']);
+				$first_name=$user_info['first_name'];
+				$last_name=$user_info['last_name'];
+				$is_active=0;
+				if(isset($user_info['actuser']) && $user_info['actuser']=='on') $is_active=1;
+				$query=$db->query_protect("insert into auth_user
+				(username,password,first_name,last_name,is_active,date_joined)
+				values
+				('${username}','${password}','${first_name}','${last_name}',${is_active},datetime('now','localtime'))");
+				$res=$db->insert($query);
+				return array('error'=>false,'res'=>$res);
+			}
+		}
+	}
+	function userRegisterCheck($user_info=array())
+	{
+		/*
+		[0] => Array
+		(
+			[id] => 1
+			[username] => admin
+			[password] => 01...87a
+			[first_name] => Admin
+			[last_name] => Admin
+			[last_login] => 
+			[is_active] => 1
+			[date_joined] => 2017-12-02 00:09:00
+			[sess_id] => 
+			[secure_sess_id] => 
+		)
+		*/
+		if(empty($user_info)) return false;
+		if(isset($user_info['login']) && isset($user_info['password']))
+		{
+			$db=new Db('clonos');
+			if($db!==false)
+			{
+				$pass=$this->getPasswordHash($user_info['password']);
+				$res=$db->selectAssoc(
+					"select id,username
+					from auth_user 
+					where 
+						username='${user_info['login']}' and
+						password='${pass}' and
+						is_active=1");
+				if(empty($res))
+				{
+					sleep(3);
+					return array('errorCode'=>1,'message'=>'user not found!');
+				}
+				$res['errorCode']=0;
+				
+				$id=$res['id'];
+				$ip=$this->_client_ip;
+				$memory_hash=md5($id.$res['username'].time());
+				$secure_memory_hash=md5($memory_hash.$ip);
+				
+				/*
+				$query="update auth_user set sess_id='${memory_hash}', secure_sess_id='${secure_memory_hash}', last_login=datetime('now','localtime') where id=${id}";
+				$db->update($query);
+				*/
+				
+				//$query="update auth_list set secure_sess_id='${secure_memory_hash}',auth_time=datetime('now','localtime') where sess_id='${memory_hash}'";	//sess_id='${memory_hash}',
+				$query="update auth_list set sess_id='${memory_hash}',secure_sess_id='${secure_memory_hash}',auth_time=datetime('now','localtime') where user_id=${id} and user_ip='${ip}'";
+				$qres=$db->update($query);
+				//print_r($qres);
+				if(isset($qres['rowCount']))
+				{
+					if($qres['rowCount']==0)
+					{
+						$query="insert into auth_list
+							(user_id,sess_id,secure_sess_id,user_ip,auth_time) values
+							(${id},'${memory_hash}','${secure_memory_hash}','${ip}',datetime('now','localtime'))";
+						$qres=$db->insert($query);
+					}
+				}
+				
+				setcookie('mhash',$memory_hash,time()+1209600);
+				
+				return $res;
+			}
+		}
+		return array('message'=>'unregistered user','errorCode'=>1);
+	}
+	function userAutologin()
+	{
+		if(isset($_COOKIE['mhash']))
+		{
+			$memory_hash=$_COOKIE['mhash'];
+			$secure_memory_hash=md5($memory_hash.$this->_client_ip);
+			$db=new Db('clonos');
+			if($db!==false)
+			{
+				$query="select au.id,au.username
+					from auth_user au, auth_list al
+					where 
+						al.secure_sess_id='${secure_memory_hash}' and
+						au.id=al.user_id and
+						au.is_active=1";
+				//echo $query;
+				$res=$db->selectAssoc($query);
+				//print_r($res);
+				if(!empty($res))
+				{
+					$res['error']=false;
+					return $res;
+				}
+			}
+		}
+		return array('error'=>true);
+	}
+	
+	function userRemove()
+	{
+		$form=$this->form;
+		
+		$id=$form['user_id'];
+		if(is_numeric($id) && $id>0)
+		{
+			$query="delete from auth_user where id=${id}";
+			$db=new Db('clonos');
+			if($db!==false)
+			{
+				$res=$db->select($query);
+				return $res;
+			}else{
+				return array('error'=>true,'error_message'=>'DB connection error!');
+			}
+		}
+	}
+	
+	function userEditInfo()
+	{
+		$form=$this->form;
+		
+		if(!isset($form['user_id']))
+		{
+			return array('error'=>true,'error_message'=>'incorrect data!');
+		}
+		
+		$user_id=$form['user_id'];
+		$db=new Db('clonos');
+		if($db!==false)
+		{
+			$res=$db->selectAssoc("select username,first_name,last_name,is_active as actuser from auth_user where id=${user_id}");
+			return array(
+				'dialog'=>$form['dialog'],
+				'vars'=>$res,
+				'error'=>false,
+				'tblid'=>$form['tbl_id'],
+				'user_id'=>$user_id,
+			);
+		}else{
+			return array('error'=>true,'error_message'=>'DB connection error!');
+		}
+	}
+	
+	function userGetInfo()
+	{
+		$db=new Db('clonos');
+		if($db!==false)
+		{
+			$res=$db->select("select * from auth_user limit 1");
+			return $res;
+		}else{
+			return array('DB connection error!');
+		}
 	}
 }

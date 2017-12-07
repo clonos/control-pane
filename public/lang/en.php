@@ -16,6 +16,8 @@ $lang=array(
 		'Virtual machine control panel'=>'Virtual machine control panel',
 	'Nodes'=>'Nodes',
 		'Nodes control panel'=>'Nodes control panel',
+	'VM Packages'=>'VM Packages',
+		'Manage for virtual machine packages'=>'Manage for virtual machine packages',
 	'Virtual Private Network'=>'Virtual Private Network',
 		'Manage for virtual private networks'=>'Manage for virtual private networks',
 	'Authkeys'=>'Authkeys',
@@ -125,5 +127,8 @@ $lang=array(
 	
 	'@clone_warning@'=>'<strong>ATTENTION!</strong> Cloning of the running container can lead to data inconsistency in clones (eg environment with active database). Stop the container for safe cloning or continue, if you are confident in the security operation!',
 	
+	'edit_title'=>'Edit',
+	'delete_title'=>'Delete',
+
 	//''=>'',
 );

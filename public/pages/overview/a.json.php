@@ -1,7 +1,7 @@
 <?php
 $res_array=array(
-	'num-nodes'=>0,
-	'online-nodes'=>0,
+	'num-nodes'=>1,
+	'online-nodes'=>1,
 	'offline-nodes'=>0,
 	'num-jails'=>0,
 	'num-cores'=>0,
@@ -23,7 +23,11 @@ if(!empty($nodes))foreach($nodes as $node)
 	$nodenames[]=$node['nodename'];
 }
 
-$res_array['num-nodes']=count($nodes);
+
+// extra+1: мы предполагаем, что сервер с WEB интерфейсом
+// также играет роль ноды - ее можно использовать полноценно со
+// всеми ресурсами
+$res_array['num-nodes']=count($nodes)+1;
 
 if(!empty($nodenames))foreach($nodenames as $name)
 {

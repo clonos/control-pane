@@ -84,3 +84,6 @@ cd_vnc_wait="1";
 bhyve_vnc_resolution="1024x768";
 bhyve_vnc_tcp_bind="#bhyve_vnc_tcp_bind#";
 
+vnc_password="";
+
+

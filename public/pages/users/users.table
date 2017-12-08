@@ -1,0 +1,14 @@
+	<tbody>
+		<tr class="#nth-num# helper" id="#id#">
+			<td class="txtleft vmiddle">#login#</td>
+			<td class="txtleft name vmiddle">#first_name#</td>
+			<td class="txtleft name vmiddle">#last_name#</td>
+			<td class="txtleft name vmiddle small date">#date_joined#</td>
+			<td class="txtleft name vmiddle small date">#last_login#</td>
+			<td class="txtcenter active vmiddle"><span class="#is_active#"></span></td>
+			<td class="ops vmiddle" width="5">
+				<span class="icon-edit" title="#edit_title#"></span>
+				<span class="icon-cancel" title="#delete_title#"></span>
+			</td>
+		</tr>
+	</tbody>

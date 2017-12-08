@@ -73,6 +73,7 @@ var clonos={
 		$(window).on('hashchange',$.proxy(this.onHashChange,this));
 		$('#lng-sel').on('change',$.proxy(this.setLang,this));	//function(){document.cookie="lang="+$(this).val()+";path=/;";location.reload();});
 		$('#content').on('click',$.proxy(this.bodyClick,this));
+		$('#login').on('click',$.proxy(this.loginAction,this));
 		$('.closer').on('click',$.proxy(this.closerClick,this));
 		$(window).on('keypress',$.proxy(this.dialogCloseByKey,this))
 			.on('resize',$.proxy(this.onResize,this));
@@ -276,6 +277,22 @@ var clonos={
 		
 		if(window.showModal=='function') return;
 		if(event.keyCode==27) this.dialogClose();
+		
+		if(event.keyCode==13) this.checkInputComplete(target);
+	},
+	checkInputComplete:function(target)
+	{
+		if(target.nodeName=='INPUT')
+		{
+			if(target.name=='password')
+			{
+				var par=$(target).closest('#loginData');
+				if(par.length==1)
+				{
+					this.loginGo();
+				}
+			}
+		}
 	},
 	dialogSubmit:function(id)
 	{
@@ -362,7 +379,8 @@ var clonos={
 				this.tmp_jail_info[jid]={};
 				this.tmp_jail_info[jid]['runasap']=$('#astart-id:checked').length>0?1:0;
 				var posts=$('form#jailSettings').serializeArray();
-				if(mode=='edit') posts.push({'name':'jname','value':jid});
+				if(mode=='edit')
+					posts.push({'name':'jname','value':jid});
 				var jmode=(mode=='edit'?'jailEdit':'jailAdd');
 				this.loadData(jmode,$.proxy(this.onJailAdd,this),posts);
 			}
@@ -470,6 +488,23 @@ var clonos={
 				var posts=$('form#helpersAddSettings').serializeArray();
 				this.loadData('helpersAdd',$.proxy(this.onHelpersAdd,this),posts);
 			}
+			if(id=='users-new')
+			{
+				var pass1=$('form#userSettings input[name="password"]').val();
+				var pass2=$('form#userSettings input[name="password1"]').val();
+				if(pass1!=pass2)
+				{
+					var inp=$('form#userSettings input[name="password"]').get(0);
+					inp.setCustomValidity(this.translate('Passwords must match!'));
+					inp.reportValidity();
+					return;
+				}
+
+				var fmode=(mode=='edit')?'usersEdit':'usersAdd';
+				var posts=$('form#userSettings').serializeArray();
+				if(mode=='edit') posts.push({'name':'user_id','value':this.lastEditedUser});
+				this.loadData(fmode,$.proxy(this.onUsersAdd,this),posts);
+			}
 
 		}
 	},
@@ -496,9 +531,11 @@ var clonos={
 	},
 	onJailAdd:function(data)
 	{
+		/*
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		*/
 		
 		if(typeof data!='undefined' && !data.error)
 		{
@@ -588,9 +625,11 @@ var clonos={
 	},
 	onHelpersAdd:function(data)
 	{
+		/*
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		*/
 		
 		this.dialogClose();
 		
@@ -598,9 +637,11 @@ var clonos={
 	},
 	onAuthkeyAdd:function(data)
 	{
+		/*
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		*/
 		
 		if(typeof data!='undefined' && !data.error)
 		{
@@ -631,9 +672,11 @@ var clonos={
 	},
 	onVpnetAdd:function(data)
 	{
+		/*
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		*/
 		
 		if(typeof data!='undefined' && !data.error)
 		{
@@ -738,9 +781,12 @@ var clonos={
 	},
 	onUpdateBhyveISO:function(data)
 	{
+		/*
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		*/
+		
 		if(typeof data.iso_list!='undefined')
 		{
 			$('dialog #bhyveSettings select[name="vm_iso_image"]').html(data.iso_list);
@@ -752,11 +798,51 @@ var clonos={
 	},
 	onGetFreeJname:function(data)
 	{
+		/*
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		*/
+		
 		$('dialog#jail-settings input[name="jname"]').val(data.freejname);
 		$('dialog#jail-settings input[name="host_hostname"]').val(data.freejname+'.my.domain');
+	},
+	
+	onUsersAdd:function(data)
+	{
+		/*
+		try{
+			var data=JSON.parse(data);
+		}catch(e){this.debug(e.message,data);return;}
+		*/
+		
+		if(typeof data.error!='undefined')
+		{
+			if(data.error)
+			{
+				if(data.errorType=='user-exists')
+				{
+					var inp=$('form#userSettings input[name="username"]').get(0);
+					inp.setCustomValidity(this.translate('This name is already exists!'));
+					inp.reportValidity();
+					return;
+				}
+			}else{
+				if(typeof data.res!='undefined')
+				{
+					var res=data.res;
+					if(res.error)
+					{
+						alert('SQL error: ' + res.info[2]);
+						return;
+					}
+				}
+				this.dialogClose();
+				
+				this.wssReload();
+				this.dataReload();
+			}
+		}
 	},
 	
 	loadData:function(mode,return_func,arr,spinner)
@@ -772,8 +858,31 @@ var clonos={
 				posts['form_data'][arr[n]['name']]=arr[n]['value'];
 		}
 		$.post(path,posts,
-			$.proxy(function(data){return_func(data);$('.spinner').hide();},this)
+			$.proxy(function(data){this.onLoadDataAuthorize(return_func,data);$('.spinner').hide();},this)	//return_func(data)
 		);
+	},
+	onLoadDataAuthorize:function(return_func,data)
+	{
+		try{
+			var data=JSON.parse(data);
+		}catch(e){this.debug(e.message,data);return;}
+		
+		if(typeof data['unregistered_user']!='undefined')
+		{
+			this.loginFadeIn();
+			return;
+		}
+		
+		if(typeof data.error!='undefined')
+		{
+			if(data.error && typeof(data.error_message)!='undefined')
+			{
+				this.notify(data.error_message,'error');
+				return;
+			}
+		}
+		
+		return_func(data);
 	},
 	
 /* 	loadData1:function()
@@ -799,9 +908,14 @@ var clonos={
 	}, */
 	onLoadData:function(data)
 	{
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
+/*
+		if(typeof data!='object')
+		{
+			try{
+				var data=JSON.parse(data);
+			}catch(e){this.debug(e.message,data);return;}
+		}
+*/
 		
 		if(data.error)
 		{
@@ -1120,9 +1234,11 @@ var clonos={
 		
 		update:function(data)
 		{
+			/*
 			try{
 				var data=JSON.parse(data);
 			}catch(e){this.debug(e.message,data);return;}
+			*/
 			
 /* 			if(typeof data['mod_ops']!='undefined')
 			{
@@ -1345,9 +1461,11 @@ var clonos={
 	},
 	onAuthkeyRemove:function(data)
 	{
+		/*
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		*/
 		
 		if(typeof data.error!='undefined')
 		{
@@ -1370,9 +1488,11 @@ var clonos={
 	},
 	onVpnetRemove:function(data)
 	{
+		/*
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		*/
 		
 		if(typeof data.error!='undefined')
 		{
@@ -1395,9 +1515,11 @@ var clonos={
 	},
 	onMediaRemove:function(data)
 	{
+		/*
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		*/
 		
 		if(typeof data.error!='undefined')
 		{
@@ -1451,6 +1573,34 @@ var clonos={
 			$('tr#'+id+' .jstatus').html(this.translate(this.commands[op]['stat'][1]));
 		}
 	},
+	
+	userRemove:function(id)
+	{
+		var c=confirm(this.translate('You want to delete selected CBSD user! Are you sure?'));
+		if(!c) return;
+		var posts=[{'name':'user_id','value':id}];
+		this.loadData('userRemove',$.proxy(this.onUserRemove,this),posts,false);
+	},
+	onUserRemove:function(data)
+	{
+		/*
+		try{
+			var data=JSON.parse(data);
+		}catch(e){this.debug(e.message,data);return;}
+		*/
+		
+		if(typeof data.error!='undefined')
+		{
+			if(data.error)
+			{
+				this.notify(data.error_message,'error');
+				return;
+			}
+		}
+		
+		this.wssReload();
+		this.dataReload();
+	},
 
 	
 	logOpen:function(id)
@@ -1462,9 +1612,11 @@ var clonos={
 	},
 	onLogLoad:function(data)
 	{
+		/*
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		*/
 		
 		if(typeof data.error!='undefined')
 		{
@@ -1484,9 +1636,11 @@ var clonos={
 	},
 	onLogFlush:function(data)
 	{
+		/*
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		*/
 		
 		if(typeof data.error!='undefined')
 		{
@@ -1539,6 +1693,16 @@ var clonos={
 					return;
 				}
 			}
+			
+			if(cl=='letsedit')
+			{
+				var chkd=$(target).prop('checked');
+				var efs=$(target).closest('fieldset');
+				var inps=$('input[type="password"]',efs);
+				for(var n=0;n<inps.length;n++)
+					$(inps[n]).prop('disabled',!chkd);
+			}
+			
 			return;
 		}
 		var elid=$(target).attr('id');
@@ -1607,6 +1771,11 @@ var clonos={
 					this.srcRemove(trid);
 					return;
 				}
+				if(tblid=='userslist')
+				{
+					this.userRemove(trid);
+					return;
+				}
 				this.jailRemove(trid,opt);
 				return;break;
 			case 'icon-arrows-cw':
@@ -1629,6 +1798,15 @@ var clonos={
 				return;break;
 			case 'btn-openlog':
 				this.logOpen(trid);
+				return;break;
+			case 'icon-edit':
+				switch(tblid)
+				{
+					case 'userslist':
+						this.userEdit(trid,tblid);
+						return;
+				}
+				
 				return;break;
 		}
 		
@@ -1791,6 +1969,79 @@ var clonos={
 		*/
 	},
 	
+	loginAction:function(event)
+	{
+		var target=event.target;
+		var cl=$(target).attr('class');
+		if(typeof cl=='undefined') return;
+		var res=cl.match(new RegExp(/ok-but/));
+		if(res==null) return;
+		
+		this.loginGo();
+	},
+	loginGo:function()
+	{
+		$('.login-wait').show();
+		this.loadData('login',$.proxy(this.onLogin,this),
+				[{'name':'login','value':$('#loginData input[name="login"]').val()},
+				 {'name':'password','value':$('#loginData input[name="password"]').val()}]
+			);
+		$('#loginData input[name="password"]').val('');
+	},
+	onLogin:function(data)
+	{
+		$('.login-wait').hide();
+		/*
+		try{
+			var data=JSON.parse(data);
+		}catch(e){this.debug(e.message,data);return;}
+		*/
+		
+		if(typeof data.errorCode!=='undefined')
+		{
+			if(data.errorCode==1)
+			{
+				$('.login-error-nouser').show();
+				setTimeout(function(){$('.login-error-nouser').hide();},3000);
+				return;
+			}
+			if(data.errorCode==0)
+			{
+				$('.login-area').fadeOut(200);
+				$('#user-login').html(data.username);
+				this.dataReload();
+			}
+		}
+		
+		//this.loginFadeOut();
+	},
+	loginFadeOut:function()
+	{
+		setTimeout(function(){$('.login-area').fadeOut(200);},2000);
+		
+		//$('.login-area').removeClass('fadeIn').addClass('fadeOut');
+		//setTimeout(function() { $('.login-area').hide(); }, 400);
+	},
+	loginFadeIn:function()
+	{
+		$('#login').show();
+		$('.login-wait').hide();
+		$('.login-area').fadeIn(200);
+		$('#login').find('input[type=text]').filter(':visible:first').focus();
+		
+		//$('#loginData').find('input[name="login"]').filter(':visible:first').focus();
+		
+		//$('.login-area').show();
+		//$('.login-area').removeClass('fadeOut').addClass('fadeIn');
+	},
+	logout:function()
+	{
+		document.cookie='mhash=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+		
+		$('#user-login').html('guest');
+		this.loginFadeIn();
+	},
+	
 	ddmenu_interval:null,
 	cnt_mode:'new',
 	DDMenuShow:function(id,td,tr,event)
@@ -1938,9 +2189,11 @@ var clonos={
 	},
 	onDDMenuLoad:function(data)
 	{
+		/*
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		*/
 		
 		if(typeof data.error!='undefined')
 		{
@@ -1972,9 +2225,34 @@ var clonos={
 
 	},
 	
+	userEdit:function(user_id,tblid)
+	{
+		var mode='userEditInfo';
+		var posts=[{'name':'tbl_id','value':tblid},{'name':'dialog','value':'users-new'},{'name':'user_id','value':user_id}];
+		this.loadData(mode,$.proxy(this.onUserEdit,this),posts);
+	},
+	onUserEdit:function(data)
+	{
+		/*
+		try{
+			var data=JSON.parse(data);
+		}catch(e){this.debug(e.message,data);return;}
+		*/
+		
+		var dialog=data.dialog;
+		$('dialog#'+dialog+' fieldset.edit input[type="password"]').prop('disabled',true);
+		this.fillDialogVars(dialog,data.vars);
+		this.lastEditedUser=data.user_id;
+		this.dialogShow1(dialog,'edit');
+	},
+	
 	dataReload:function()
 	{
 		this.loadData('getJsonPage',$.proxy(this.onLoadData,this));
+	},
+	wssReload:function()
+	{
+		this.wssend({'cmd':'reload','path':location.pathname},'system');
 	},
 	
 	fillFormVars:function(form,data)
@@ -2023,6 +2301,7 @@ var clonos={
 					$(inp).prop('checked',$(inp).val()==v);
 					break;
 				case 'checkbox':
+					if(typeof v=='undefined') break;
 					$(inp).prop('checked',v==1);
 					break;
 				case 'range':
@@ -2072,9 +2351,11 @@ var clonos={
 	},
 	onSaveHelperValues:function(data)
 	{
+		/*
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		*/
 		
 		if(typeof data.error!='undefined' && data.error)
 		{
@@ -2111,9 +2392,11 @@ var clonos={
 	},
 	onDeleteHelperGroup:function(data)
 	{
+		/*
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		*/
 		
 		if(!data) return;
 		if(typeof data.error!='undefined')
@@ -2175,9 +2458,11 @@ var clonos={
 	},
 	onAddHelperGroup:function(data)
 	{
+		/*
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		*/
 		
 		if(!data) return;
 		if(typeof data.error!='undefined')
@@ -2320,7 +2605,6 @@ var clonos={
 		{
 			txt.client_id=this.client_id;
 			txt=JSON.stringify(txt);
-return;
 		}
 		var msg=JSON.stringify({'author':author,'body':txt});
 		this.socket.send(msg);
@@ -2657,6 +2941,7 @@ return;
 				//window.setTimeout($.proxy(this.deleteItemsOk,this,id),2000);
 				setTimeout($.proxy(clonos.delete_file,this,id),3000);
 				clonos.dataReload();
+				clonos.wssReload();
 			},
 			onUploadError: function(id, message){
 				clonos.add_log('Failed to Upload file #p-' + id + ': ' + message);

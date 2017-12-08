@@ -9,7 +9,7 @@ $_REALPATH=realpath('../');
 $uri=trim($_SERVER['REQUEST_URI'],'/');
 include($_REALPATH.'/php/clonos.php');
 $clonos=new ClonOS($_REALPATH,$uri);
-
+//echo json_encode($clonos->config->os_types);exit;
 if(isset($_GET['upload']))
 {
 	include('upload.php');
@@ -38,6 +38,14 @@ if(empty($uri))
 }
 
 error_reporting(E_ALL);
+
+$user_info=$clonos->userAutologin();
+if(!$user_info['error'])
+{
+	$user_info_txt="user_id='${user_info['id']}';user_login='${user_info['username']}';";
+}else{
+	$user_info['username']='guest';
+}
 ?>
 <!DOCTYPE html>
 <head>
@@ -59,9 +67,10 @@ error_reporting(E_ALL);
 	<script type="text/javascript">
 		_server_name='<?php echo $clonos->server_name; ?>';_first_start=true;
 		err_messages={add:function(arr){for(n in arr){err_messages[n]=arr[n];}}};
+		<?php if(isset($user_info_txt)) echo $user_info_txt; ?>
 	</script>
 </head>
-<body class="gadget1">
+<body class="gadget1 login">
 
 <main><div class="main"><div id="content">
 <?php
@@ -85,6 +94,7 @@ echo $clonos->menu->html;
 	<ul>
 		<li class="mhome"><a href="/">Home</a></li>
 		<li><a href="/settings/"><?php echo $clonos->translate('Settings'); ?></a></li>
+		<li><a href="/users/"><?php echo $clonos->translate('Users'); ?></a></li>
 <!--
 		<li><a href="/profile/"><?php echo $clonos->translate('Profile'); ?></a></li>
 		<li><a href="/support/"><?php echo $clonos->translate('Support'); ?></a></li>
@@ -101,10 +111,18 @@ if(isset($_languages))foreach($_languages as $lng=>$lngname)
 ?>
 			</select>
 		</a></li>
+		<li><a onclick="clonos.logout();" class="link" id="user-login"><?php echo $user_info['username']; ?></a></li>
 	</ul>
 </div></header>
+
+<div class="login-area<?php if(!$user_info['error']) echo ' hide'; ?>"><?php echo $clonos->placeDialogByName('system-login'); ?>
+<div class="ccopy">ClonOS — is a powerfull system for&hellip;</div>
+<div class="ccopy">Jails, Virtualization, WebDeveloping, etc&hellip;</div>
+</div>
 
 <div class="spinner"></div>
 <div class="online icon-online" id="net-stat" onclick="ws_debug();"></div>
 </body>
 </html>
+<?php //print_r($clonos->userGetInfo()); ?>
+<?php //print_r($_SERVER); ?>

@@ -179,4 +179,10 @@ class Db
 		}
 		return false;
 	}
+	
+	function query_protect($query)
+	{
+		// Добавить сюда защиту запроса от инъекций и других ошибок.
+		return $query;
+	}
 }

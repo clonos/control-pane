@@ -19,7 +19,7 @@ if(!empty($nodes))foreach($nodes as $node)
 	$db1=new Db('base',$node);
 	if($db1!==false)
 	{
-		$bhyves=$db1->select("SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden,protected FROM bhyve where hidden!=1 order by jname asc;");
+		$bhyves=$db1->select("SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden,protected,bhyve_vnc_tcp_bind FROM bhyve where hidden!=1 order by jname asc;");
 		//$allnodes[$node]=$bhyves;
 		
 		$num=$nth & 1;
@@ -30,6 +30,22 @@ if(!empty($nodes))foreach($nodes as $node)
 			{
 				$html_tpl=$hres[1];
 				$status=$this->check_vmonline($bhyve['jname']);
+
+				$jname=$bhyve['jname'];
+				$vnc_port_status='grey';
+				$vnc_ip=$bhyve['bhyve_vnc_tcp_bind'];
+				if($status==1)
+				{
+					$vnc_port_file=$this->workdir.'/jails-system/'.$jname.'/vnc_port';
+					if(file_exists($vnc_port_file))
+					{
+						$vnc_port=trim(file_get_contents($vnc_port_file));
+					}
+				}else{
+					$vnc_port='';
+				}
+				if($vnc_ip!='127.0.0.1') $vnc_port_status='black';
+				
 				$vars=array(
 					'jname'=>$bhyve['jname'],
 					'nth-num'=>'nth'.$num,
@@ -50,6 +66,8 @@ if(!empty($nodes))foreach($nodes as $node)
 //					'protitle'=>($jail['protected']==1)?' title="'.$this->translate('Protected jail').'"':' title="'.$this->translate('Delete').'"',
 					'vnc_title'=>$this->translate('Open VNC'),
 					'reboot_title'=>$this->translate('Restart bhyve'),
+					'vnc_port'=>$vnc_port,
+					'vnc_port_status'=>$vnc_port_status,
 				);
 				
 				foreach($vars as $var=>$val)

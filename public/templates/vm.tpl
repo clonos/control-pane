@@ -83,7 +83,6 @@ vm_vnc_port="#vm_vnc_port#";
 cd_vnc_wait="1";
 bhyve_vnc_resolution="1024x768";
 bhyve_vnc_tcp_bind="#bhyve_vnc_tcp_bind#";
+bhyve_vnc_vgaconf="io";
 
-vnc_password="";
-
-
+vnc_password="#vm_vnc_password#";

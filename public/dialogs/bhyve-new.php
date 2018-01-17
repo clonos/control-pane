@@ -24,20 +24,27 @@ err_messages.add({
 				<input type="text" name="vm_name" value="" pattern="[^0-9]{1}[a-zA-Z0-9]{1,}" required="required" class="edit-disable" />
 			</p>
 			<p class="new">
-				<span class="field-name"><?php echo $this->translate('VM Image size');?>:</span>
-				<input type="text" name="vm_size" value="" pattern="^[0-9]+g$" placeholder="10g" required="required" class="edit-disable" />
+				<span class="field-name"><?php echo $this->translate('VM template (cpu, ram, hdd)');?>:</span>
+				<select name="vm_packages" onchange="clonos.onChangePkgTemplate(this,event);">
+<?php $vm_res=$this->config->vm_packages_list(); echo $vm_res['html']; ?>
+				</select>
+				<script type="text/javascript">clonos.vm_packages_new_min_id=<?php echo $vm_res['min_id']; ?>;</script>
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('VM CPUs');?>:</span>
 				<span class="range">
 					<input type="range" name="vm_cpus" class="vHorizon" min="1" max="16" value="1" style="margin:6px 0;" id="rngCpus" oninput="rngCpusShow.value=rngCpus.value" />
-					<input type="text" disabled="disabled" id="rngCpusShow" value="1" />
+					<input type="text" disabled="disabled" id="rngCpusShow" value="1" name="vm_cpus_show" />
 					<!-- input type="text" name="vm_cpus" value="" pattern="[0-9]+" placeholder="1" required="required" / -->
 				</span>
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('VM RAM');?>:</span>
-				<input type="text" name="vm_ram" value="" pattern="^[0-9]+\s*(g|G|gb|GB|mb|MB|m|M)$" placeholder="1g" required="required" />
+				<input type="text" name="vm_ram" value="" pattern="^[0-9]+\s*(g|gb|mb|m|t|tb)$" placeholder="1g" required="required" />
+			</p>
+			<p class="new">
+				<span class="field-name"><?php echo $this->translate('VM Image size');?>:</span>
+				<input type="text" name="vm_size" value="" pattern="^[0-9]+(g|gb|t|tb)$" placeholder="10g" required="required" class="edit-disable" />
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('Attached boot ISO image');?>:</span>
@@ -55,6 +62,10 @@ err_messages.add({
 			<p>
 				<span class="field-name"><?php echo $this->translate('VNC PORT');?>:</span>
 				<input type="text" name="vm_vnc_port" value="" placeholder="0" maxlength="5" />
+			</p>
+			<p>
+				<span class="field-name"><?php echo $this->translate('VNC Password');?>:</span>
+				<input type="password" name="vm_vnc_password" value="" placeholder="3-20 symbols" pattern=".{3,20}" maxlength="20"></input> <small>— <?php echo $this->translate('use to log in VNC console');?></small>
 			</p>
 <!--			<p>
 				<span class="field-name"><?php echo $this->translate('CD-ROM ISO');?>:</span>

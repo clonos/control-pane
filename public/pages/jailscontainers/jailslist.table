@@ -9,5 +9,6 @@
 			<td width="5" class="op-reboot" title="#reboot_title#"><span class="icon-arrows-cw"></span></td>
 			<td width="5" class="op-del"#protitle#><span class="#protected#"></span></td>
 			<td width="5" class="op-vnc"><span class="icon-desktop" title="#vnc_title#"></span></td>
+			<td class="small vnc-#vnc_port_status#">#vnc_port#</td>
 		</tr>
 	</tbody>

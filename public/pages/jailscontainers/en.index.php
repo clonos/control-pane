@@ -19,6 +19,7 @@ $clonos->useDialogs(array(
 			<th class="wdt-120">Status</th>
 			<th colspan="4" class="wdt-100">Action</th>
 			<th class="wdt-30">VNC</th>
+			<th class="txtcenter wdt-50">VNC port</th>
 		</tr>
 	</thead>
 	<tbody></tbody>

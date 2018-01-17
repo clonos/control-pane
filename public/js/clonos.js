@@ -188,6 +188,13 @@ var clonos={
 				this.trids=this.getTrIdsForCheck('bhyveslist');
 				this.updateBhyveISO();
 				this.updateBhyveOSProfile();
+				if(typeof this.vm_packages_new_min_id!='undefined')
+					$('#bhyveSettings select[name="vm_packages"]').val(this.vm_packages_new_min_id).change();
+			}
+			if(id=='bhyve-obtain')
+			{
+				if(typeof this.vm_packages_obtain_min_id!='undefined')
+					$('#bhyveObtSettings select[name="vm_packages"]').val(this.vm_packages_obtain_min_id).change();
 			}
 			this.dialogShow1(id);
 		}
@@ -505,6 +512,13 @@ var clonos={
 				if(mode=='edit') posts.push({'name':'user_id','value':this.lastEditedUser});
 				this.loadData(fmode,$.proxy(this.onUsersAdd,this),posts);
 			}
+			if(id=='vm_packages-new')
+			{
+				var fmode=(mode=='edit')?'vmTemplateEdit':'vmTemplateAdd';
+				var posts=$('form#templateSettings').serializeArray();
+				if(mode=='edit') posts.push({'name':'template_id','value':this.lastEditedVmTemplate});
+				this.loadData(fmode,$.proxy(this.onVmTemplateAdd,this),posts);
+			}
 
 		}
 	},
@@ -531,12 +545,6 @@ var clonos={
 	},
 	onJailAdd:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
 		if(typeof data!='undefined' && !data.error)
 		{
 			if(typeof data.mode!='undefined')
@@ -625,24 +633,12 @@ var clonos={
 	},
 	onHelpersAdd:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
 		this.dialogClose();
 		
 		this.loadData('getJsonPage',$.proxy(this.onLoadData,this));
 	},
 	onAuthkeyAdd:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
 		if(typeof data!='undefined' && !data.error)
 		{
 			var injected=false;
@@ -672,12 +668,6 @@ var clonos={
 	},
 	onVpnetAdd:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
 		if(typeof data!='undefined' && !data.error)
 		{
 			var injected=false;
@@ -781,12 +771,6 @@ var clonos={
 	},
 	onUpdateBhyveISO:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
 		if(typeof data.iso_list!='undefined')
 		{
 			$('dialog #bhyveSettings select[name="vm_iso_image"]').html(data.iso_list);
@@ -798,24 +782,12 @@ var clonos={
 	},
 	onGetFreeJname:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
 		$('dialog#jail-settings input[name="jname"]').val(data.freejname);
 		$('dialog#jail-settings input[name="host_hostname"]').val(data.freejname+'.my.domain');
 	},
 	
 	onUsersAdd:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
 		if(typeof data.error!='undefined')
 		{
 			if(data.error)
@@ -843,6 +815,12 @@ var clonos={
 				this.dataReload();
 			}
 		}
+	},
+	onVmTemplateAdd:function(data)
+	{
+		this.dialogClose();
+		this.wssReload();
+		this.dataReload();
 	},
 	
 	loadData:function(mode,return_func,arr,spinner)
@@ -872,7 +850,7 @@ var clonos={
 			this.loginFadeIn();
 			return;
 		}
-		
+
 		if(typeof data.error!='undefined')
 		{
 			if(data.error && typeof(data.error_message)!='undefined')
@@ -908,15 +886,6 @@ var clonos={
 	}, */
 	onLoadData:function(data)
 	{
-/*
-		if(typeof data!='object')
-		{
-			try{
-				var data=JSON.parse(data);
-			}catch(e){this.debug(e.message,data);return;}
-		}
-*/
-		
 		if(data.error)
 		{
 			var t=$('tbody.error td.error_message');
@@ -1093,8 +1062,10 @@ var clonos={
 		var op='jremove';
 		var txt='jail';
 		if(opt=='bhyve'){op='bremove';txt='virtual machine';}
-		var c=confirm(this.translate('You want to delete selected '+txt+'! Are you sure?'));
-		if(!c) return;
+		var name=$('#'+id+' td.jname').html();
+		if(this.removeConfirm(id,'You want to delete selected '+txt+': «'+name+'»! Are you sure?')===false) return;
+		//var c=confirm(this.translate('You want to delete selected '+txt+'! Are you sure?'));
+		//if(!c) return;
 		this.enableWait(id);
 		// ---
 		var posts=[{'name':'operation','value':op},{'name':'jname','value':id}];
@@ -1234,12 +1205,6 @@ var clonos={
 		
 		update:function(data)
 		{
-			/*
-			try{
-				var data=JSON.parse(data);
-			}catch(e){this.debug(e.message,data);return;}
-			*/
-			
 /* 			if(typeof data['mod_ops']!='undefined')
 			{
 				var key='mod_ops';
@@ -1452,91 +1417,67 @@ var clonos={
 		}
 	},
 	
+	sleepFor:function(sleepDuration)
+	{
+		var now=new Date().getTime();
+		while(new Date().getTime() < now + sleepDuration){ /* do nothing */ } 
+	},
+	removeConfirm:function(id,answer)
+	{
+		if(typeof id!='undefined')
+		{
+			var obj=$('#'+id);
+			if(typeof obj!='undefined')
+			{
+				$(obj).addClass('del');
+				var c=confirm(this.translate(answer));
+				if(!c)
+				{
+					$(obj).removeClass('del');
+					return false;
+				}
+				return true;
+			}
+		}
+		return false;
+	},
+	
 	authkeyRemove:function(id)
 	{
-		var c=confirm(this.translate('You want to delete selected authkey! Are you sure?'));
-		if(!c) return;
+		if(this.removeConfirm(id,'You want to delete selected authkey! Are you sure?')===false) return;
 		var posts=[{'name':'auth_id','value':id}];
 		this.loadData('authkeyRemove',$.proxy(this.onAuthkeyRemove,this),posts);
 	},
 	onAuthkeyRemove:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
-		if(typeof data.error!='undefined')
-		{
-			if(data.error)
-			{
-				this.notify(data.error_message,'error');
-				return;
-			}
-			
-			$('#authkeyslist tr#'+data.auth_id).remove();
-		}
+		$('#authkeyslist tr#'+data.auth_id).remove();
 	},
 	
 	vpnetRemove:function(id)
 	{
-		var c=confirm(this.translate('You want to delete selected network! Are you sure?'));
-		if(!c) return;
+		if(this.removeConfirm(id,'You want to delete selected network! Are you sure?')===false) return;
 		var posts=[{'name':'vpnet_id','value':id}];
 		this.loadData('vpnetRemove',$.proxy(this.onVpnetRemove,this),posts);
 	},
 	onVpnetRemove:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
-		if(typeof data.error!='undefined')
-		{
-			if(data.error)
-			{
-				this.notify(data.error_message,'error');
-				return;
-			}
-			
-			$('#vpnetslist tr#'+data.vpnet_id).remove();
-		}
+		$('#vpnetslist tr#'+data.vpnet_id).remove();
 	},
 	
 	mediaRemove:function(id)
 	{
-		var c=confirm(this.translate('You want to delete selected storage media! Are you sure?'));
-		if(!c) return;
+		if(this.removeConfirm(id,'You want to delete selected storage media! Are you sure?')===false) return;
 		var posts=[{'name':'media_id','value':id}];
 		this.loadData('mediaRemove',$.proxy(this.onMediaRemove,this),posts);
 	},
 	onMediaRemove:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
-		if(typeof data.error!='undefined')
-		{
-			if(data.error)
-			{
-				this.notify(data.error_message,'error');
-				return;
-			}
-			
-			$('#mediaslist tr#'+data.media_id).remove();
-		}
+		$('#mediaslist tr#'+data.media_id).remove();
 	},
 	
 	srcRemove:function(id)
 	{
-		var c=confirm(this.translate('You want to delete selected FreeBSD sources! Are you sure?'));
-		if(!c) return;
+		if(this.removeConfirm(id,'You want to delete selected FreeBSD sources! Are you sure?')===false) return;
 		var ver=$('#srcslist tr#'+this.dotEscape(id)+' .version').html();
 		var op='removesrc';
 		//this.enableWait(id);
@@ -1559,8 +1500,7 @@ var clonos={
 	},
 	baseRemove:function(id)
 	{
-		var c=confirm(this.translate('You want to delete selected FreeBSD bases! Are you sure?'));
-		if(!c) return;
+		if(this.removeConfirm(id,'You want to delete selected FreeBSD bases! Are you sure?')===false) return;
 		var ver=$('#baseslist tr#'+this.dotEscape(id)+' .version').html();
 		var op='removebase';
 		//this.enableWait(id);
@@ -1576,28 +1516,24 @@ var clonos={
 	
 	userRemove:function(id)
 	{
-		var c=confirm(this.translate('You want to delete selected CBSD user! Are you sure?'));
-		if(!c) return;
+		if(this.removeConfirm(id,'You want to delete selected CBSD user! Are you sure?')===false) return;
 		var posts=[{'name':'user_id','value':id}];
 		this.loadData('userRemove',$.proxy(this.onUserRemove,this),posts,false);
 	},
 	onUserRemove:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
-		if(typeof data.error!='undefined')
-		{
-			if(data.error)
-			{
-				this.notify(data.error_message,'error');
-				return;
-			}
-		}
-		
+		this.wssReload();
+		this.dataReload();
+	},
+	
+	vmTemplateRemove:function(id)
+	{
+		if(this.removeConfirm(id,'You want to delete selected template! Are you sure?')===false) return;
+		var posts=[{'name':'template_id','value':id}];
+		this.loadData('vmTemplateRemove',$.proxy(this.onVmTemplateRemove,this),posts,false);
+	},
+	onVmTemplateRemove:function(data)
+	{
 		this.wssReload();
 		this.dataReload();
 	},
@@ -1612,21 +1548,6 @@ var clonos={
 	},
 	onLogLoad:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
-		if(typeof data.error!='undefined')
-		{
-			if(data.error)
-			{
-				this.notify(data.error_message,'error');
-				return;
-			}
-		}
-		
 		$('dialog#tasklog .window-content').html(data.html);
 		this.dialogShow1('tasklog');
 	},
@@ -1636,21 +1557,6 @@ var clonos={
 	},
 	onLogFlush:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
-		if(typeof data.error!='undefined')
-		{
-			if(data.error)
-			{
-				this.notify(data.error_message,'error');
-				return;
-			}
-		}
-		
 		$('#taskloglist tbody').html('');
 		this.wssend({'cmd':'reload','path':location.pathname},'system');
 	},
@@ -1776,7 +1682,17 @@ var clonos={
 					this.userRemove(trid);
 					return;
 				}
-				this.jailRemove(trid,opt);
+				if(tblid=='jailslist' || tblid=='bhyveslist')
+				{
+					this.jailRemove(trid,opt);
+					return;
+				}
+				if(tblid=='packageslist')
+				{
+					this.vmTemplateRemove(trid);
+					return;
+				}
+				alert(tblid);
 				return;break;
 			case 'icon-arrows-cw':
 				if(tblid=='srcslist')
@@ -1804,6 +1720,9 @@ var clonos={
 				{
 					case 'userslist':
 						this.userEdit(trid,tblid);
+						return;
+					case 'packageslist':
+						this.vmTemplateEdit(trid,tblid);
 						return;
 				}
 				
@@ -1969,6 +1888,22 @@ var clonos={
 		*/
 	},
 	
+	onChangePkgTemplate:function(obj,event)
+	{
+		var id=$(obj).val();
+		var index=$(obj).prop('selectedIndex');
+		var txt=$('option:selected',obj).text();
+		var res=txt.match(new RegExp(/cpu:[ ]*(\d+).*ram:[ ]*([\dmg]+).*hdd:[ ]*([\dmg]+)/));
+		if(res!=null)
+		{
+			var par=$(obj).closest('form');
+			$('input[name="vm_cpus"]',par).val(res[1]);
+			$('input[name="vm_cpus_show"]',par).val(res[1]);
+			$('input[name="vm_ram"]',par).val(res[2]);
+			$('input[name="vm_size"]',par).val(res[3]);
+		}
+	},
+	
 	loginAction:function(event)
 	{
 		var target=event.target;
@@ -1991,12 +1926,6 @@ var clonos={
 	onLogin:function(data)
 	{
 		$('.login-wait').hide();
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
 		if(typeof data.errorCode!=='undefined')
 		{
 			if(data.errorCode==1)
@@ -2189,17 +2118,10 @@ var clonos={
 	},
 	onDDMenuLoad:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
 		if(typeof data.error!='undefined')
 		{
 			if(data.error)
 			{
-				this.notify(data.error_message,'error');
 				if(typeof data.reload!='undefined')
 				{
 					if(data.reload) this.dataReload();
@@ -2233,16 +2155,25 @@ var clonos={
 	},
 	onUserEdit:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
 		var dialog=data.dialog;
 		$('dialog#'+dialog+' fieldset.edit input[type="password"]').prop('disabled',true);
 		this.fillDialogVars(dialog,data.vars);
 		this.lastEditedUser=data.user_id;
+		this.dialogShow1(dialog,'edit');
+	},
+	
+	vmTemplateEdit:function(template_id,tblid)
+	{
+		var mode='vmTemplateEditInfo';
+		var posts=[{'name':'template_id','value':template_id}];
+		this.loadData(mode,$.proxy(this.onVmTemplateEdit,this),posts);
+		
+	},
+	onVmTemplateEdit:function(data)
+	{
+		var dialog='vm_packages-new';
+		this.lastEditedVmTemplate=data.template_id;
+		this.fillDialogVars(dialog,data.vars);
 		this.dialogShow1(dialog,'edit');
 	},
 	
@@ -2294,6 +2225,8 @@ var clonos={
 			switch(type)
 			{
 				case 'text':
+				case 'password':
+				case 'textarea':
 				case 'select':
 					if(typeof v!='undefined') $(inp).val(v);
 					break;
@@ -2351,16 +2284,6 @@ var clonos={
 	},
 	onSaveHelperValues:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
-		if(typeof data.error!='undefined' && data.error)
-		{
-			this.notify(data.errorMessage,'error');
-		}
 		if(typeof data.redirect!='undefined')
 		{
 			if(data.redirect!='')
@@ -2392,21 +2315,7 @@ var clonos={
 	},
 	onDeleteHelperGroup:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
 		if(!data) return;
-		if(typeof data.error!='undefined')
-		{
-			if(data.error)
-			{
-				this.notify(data.error_message,'error');
-				return;
-			}
-		}
 		if(typeof data.db_path!='undefined')
 		{
 			this.saveDbPath(data.db_path);
@@ -2458,21 +2367,7 @@ var clonos={
 	},
 	onAddHelperGroup:function(data)
 	{
-		/*
-		try{
-			var data=JSON.parse(data);
-		}catch(e){this.debug(e.message,data);return;}
-		*/
-		
 		if(!data) return;
-		if(typeof data.error!='undefined')
-		{
-			if(data.error)
-			{
-				this.notify(data.error_message,'error');
-				return;
-			}
-		}
 		if(typeof data.db_path!='undefined')
 		{
 			this.saveDbPath(data.db_path);

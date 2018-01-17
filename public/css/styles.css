@@ -393,11 +393,15 @@ thead td, thead th {
 }
 .tfill thead td, td {
 	border-style: solid;
-	border-width: 0 1px 1px 0;
+	border-width: 0;	/* 0 1px 1px 0; */
 	border-color: white;
+}
+.tfill thead td {
+	border-bottom: 1px solid #f0f0f0;
 }
 .tfill td {
 	background: #D8E6F3;
+	border-bottom: 1px solid #f0f0f0;
 }
 thead td:first-child, td:first-child {
 	text-align: left;
@@ -422,6 +426,18 @@ thead td:first-child, td:first-child {
 }
 .tsimple tbody tr:nth-child(2n){
 	background-color: #fafafa;
+}
+.tsimple tbody tr:nth-child(2n):hover {
+	background-color:#fbfbe3;	/*#fdfded;*/
+}
+.tsimple tbody tr:hover {
+	background-color:#fcfccc	/*#ffffef;*/
+}
+.tsimple tbody tr.del {
+	background-color: #ffe6e6;	/* #ffcccc; */
+}
+.tsimple tbody tr.del:nth-child(2n) {
+	background-color:#fde3e3;
 }
 .tsimple .txtleft {
 	text-align:left;
@@ -544,6 +560,9 @@ td.jstatus,
 td.small {
 	font-size:small;
 }
+td.x-small {
+	font-size:x-small;
+}
 tr.busy .jstatus,
 tr.busy.s-on .jstatus,
 tr.busy.s-off .jstatus {
@@ -587,6 +606,10 @@ tr.busy.maintenance .ops span {
 
 .nowrap {
 	white-space:nowrap;
+}
+
+.vnc-grey {
+	color:gray;
 }
 
 /* td.ops span.icon-play:before {

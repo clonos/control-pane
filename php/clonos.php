@@ -340,6 +340,18 @@ class ClonOS
 				case 'userEditInfo':
 					echo json_encode($this->userEditInfo());
 					return;break;
+				case 'vmTemplateAdd':
+					echo json_encode($this->vmTemplateAdd());
+					return;break;
+				case 'vmTemplateEditInfo':
+					echo json_encode($this->vmTemplateEditInfo());
+					return;break;
+				case 'vmTemplateEdit':
+					echo json_encode($this->vmTemplateEdit());
+					return;break;
+				case 'vmTemplateRemove':
+					echo json_encode($this->vmTemplateRemove());
+					return;break;
 					
 /*				case 'saveHelperValues':
 					echo json_encode($this->saveHelperValues());
@@ -1302,6 +1314,7 @@ class ClonOS
 			return $res;
 		}
 		
+		$res['vars']['vm_vnc_password']='-nochange-';
 		$res['error']=false;
 		$res['dialog']=$form['dialog'];
 		$res['jail_id']=$form['jail_id'];
@@ -1379,6 +1392,7 @@ class ClonOS
 		$form['vm_ram']=$ram;
 		
 		$arr=array('vm_cpus','vm_ram','bhyve_vnc_tcp_bind','vm_vnc_port','interface');
+		if($form['vm_vnc_password']!='-nochange-') $arr[]='vm_vnc_password';
 		foreach($arr as $a)
 		{
 			if(isset($form[$a]))
@@ -1450,6 +1464,7 @@ class ClonOS
 			'vm_guestfs'=>'',
 			'bhyve_vnc_tcp_bind'=>$form['bhyve_vnc_tcp_bind'],
 			'vm_vnc_port'=>$form['vm_vnc_port'],
+			'vm_vnc_password'=>$form['vm_vnc_password'],
 		);
 		
 		$iso=true;
@@ -1559,7 +1574,7 @@ class ClonOS
 		{
 			$key_name=$nres['name'];
 		}
-		$cmd="task owner=${username} mode=new /usr/local/bin/cbsd vm_obtain jname={$form['vm_name']} vm_size={$form['vm_size']} vm_cpus={$form['vm_cpus']} vm_ram={$form['vm_ram']} vm_os_type={$os_type} mask={$form['mask']} ip4_addr={$form['ip4_addr']} gw={$form['gateway']} authkey={$key_name} pw={$form['vm_password']}";
+		$cmd="task owner=${username} mode=new /usr/local/bin/cbsd vm_obtain jname={$form['vm_name']} vm_size={$form['vm_size']} vm_cpus={$form['vm_cpus']} vm_ram={$form['vm_ram']} vm_os_type={$os_type} mask={$form['mask']} ip4_addr={$form['ip4_addr']} gw={$form['gateway']} authkey={$key_name} pw={$form['vm_password']} vnc_password={$form['vnc_password']}";
 		
 		$res=$this->cbsd_cmd($cmd);
 		$err='Virtual Machine is not created!';
@@ -2185,6 +2200,14 @@ class ClonOS
 	
 	function runVNC($jname)
 	{
+		$query="SELECT vnc_password FROM bhyve WHERE jname='${jname}'";
+		$res=$this->_db_local->selectAssoc($query);
+		$pass='cbsd';
+		if($res!==false)
+		{
+			$pass=$res['vnc_password'];
+		}
+		
 		$res=$this->cbsd_cmd("vm_vncwss jname={$jname} permit={$this->_client_ip}");
 		//$res=$this->_db_local->selectAssoc('select nodeip from local');
 		//$nodeip=$res['nodeip'];
@@ -2193,7 +2216,7 @@ class ClonOS
 		//if(strlen($nodeip)<7) $nodeip=$this->server_name;
 		$nodeip=$this->server_name;
 		
-		header('Location: http://'.$nodeip.':6080/vnc_auto.html?host='.$nodeip.'&port=6080?password=cbsd');
+		header('Location: http://'.$nodeip.':6080/vnc_auto.html?host='.$nodeip.'&port=6080?password='.$pass);
 		exit;
 	}
 	
@@ -2228,28 +2251,28 @@ class ClonOS
 		$bytes = floatval($bytes);
 		$arBytes = array(
 			0 => array(
-				"UNIT" => "TB",
+				"UNIT" => "tb",
 				"VALUE" => pow($bytes_in_mb, 4)
 			),
 			1 => array(
-				"UNIT" => "GB",
+				"UNIT" => "gb",
 				"VALUE" => pow($bytes_in_mb, 3)
 			),
 			2 => array(
-				"UNIT" => "MB",
+				"UNIT" => "mb",
 				"VALUE" => pow($bytes_in_mb, 2)
 			),
 			3 => array(
-				"UNIT" => "KB",
+				"UNIT" => "kb",
 				"VALUE" => $bytes_in_mb
 			),
 			4 => array(
-				"UNIT" => "B",
+				"UNIT" => "b",
 				"VALUE" => 1
 			),
 		);
 
-		$result='0 MB';
+		$result='0 mb';
 		foreach($arBytes as $arItem)
 		{
 			if($bytes >= $arItem["VALUE"])
@@ -2308,7 +2331,7 @@ class ClonOS
 	{
 		$db=new Db('base','storage_media');
 		$res=$db->select('select * from media where type="iso"');
-		if($res===false || empty($res)) return;
+		if($res===false || empty($res)) return array(); //array('error'=>true,'error_message'=>'Profile ISO is not find!');
 		
 		$sel='';
 		//if(empty($iso)) $sel='#sel#';
@@ -2576,5 +2599,124 @@ class ClonOS
 		}else{
 			return array('DB connection error!');
 		}
+	}
+	
+	function vmTemplateAdd()
+	{
+		$form=$this->form;
+		
+		$name=$form['name'];
+		$description=$form['description'];
+		$pkg_vm_ram=$form['pkg_vm_ram'];
+		$pkg_vm_disk=$form['pkg_vm_disk'];
+		$pkg_vm_cpus=$form['pkg_vm_cpus'];
+		$owner=$this->_user_info['username'];
+		$query="insert into vmpackages (name,description,pkg_vm_ram,pkg_vm_disk,pkg_vm_cpus,owner,timestamp)
+			values
+			('${name}','${description}','${pkg_vm_ram}','${pkg_vm_disk}','${pkg_vm_cpus}','${owner}',datetime('now','localtime'))";
+		
+		$db=new Db('base','local');
+		if($db!==false)
+		{
+			$res=$db->insert($query);
+			if($res!==false)
+			{
+				if(!$res['error'])
+					return $this->messageSuccess($res);
+				else
+					return $this->messageError('sql error!',$res);
+			}
+			else
+				return $this->messageError('sql error!');
+		}else{
+			return $this->messageError('data incorrect!'); //array('error'=>true,'error_message'=>'data incorrect!');
+		}
+	}
+	function vmTemplateEditInfo()
+	{
+		$form=$this->form;
+		
+		if(!isset($form['template_id']))
+		{
+			return $this->messageError('incorrect data!');
+		}
+		
+		$tpl_id=$form['template_id'];
+		$db=new Db('base','local');
+		if($db!==false)
+		{
+			$res=$db->selectAssoc("select name,description,pkg_vm_ram,pkg_vm_disk,pkg_vm_cpus from vmpackages where id=${tpl_id}");
+			return $this->messageSuccess(array('vars'=>$res,'template_id'=>$tpl_id));
+		}else{
+			return $this->messageError('DB connection error!');
+		}
+	}
+	function vmTemplateEdit()
+	{
+		$form=$this->form;
+		
+		$id=$form['template_id'];
+		if(!isset($id) || $id<1) $this->messageError('wrong data!');
+		$name=$form['name'];
+		$description=$form['description'];
+		$pkg_vm_ram=$form['pkg_vm_ram'];
+		$pkg_vm_disk=$form['pkg_vm_disk'];
+		$pkg_vm_cpus=$form['pkg_vm_cpus'];
+		$owner=$this->_user_info['username'];
+		$query="update vmpackages set
+			name='${name}',description='${description}',
+			pkg_vm_ram='${pkg_vm_ram}',pkg_vm_disk='${pkg_vm_disk}',
+			pkg_vm_cpus='${pkg_vm_cpus}',owner='${owner}',timestamp=datetime('now','localtime') where id=${id}";
+		
+		$db=new Db('base','local');
+		if($db!==false)
+		{
+			$res=$db->update($query);
+			if($res!==false)
+			{
+				return $this->messageSuccess($res);
+			}
+			else
+				return $this->messageError('sql error!');
+		}else{
+			return $this->messageError('db connection error!');
+		}
+	}
+	function vmTemplateRemove()
+	{
+		$form=$this->form;
+		
+		$id=$form['template_id'];
+		if(is_numeric($id) && $id>0)
+		{
+			$query="delete from vmpackages where id=${id}";
+			$db=new Db('base','local');
+			if($db!==false)
+			{
+				$res=$db->select($query);
+				return $this->messageSuccess($res);
+			}else{
+				return $this->messageError('DB connection error!');
+			}
+		}else{
+			return $this->messageError('wrong data!');
+		}
+	}
+	
+	
+	function messageError($message,$vars=array())
+	{
+		$rarr=array(
+			'error'=>true,
+			'error_message'=>$message,
+		);
+		return array_merge($rarr,$vars);
+	}
+	function messageSuccess($vars=array())
+	{
+		$rarr=array(
+			'error'=>false,
+		);
+		return array_merge($rarr,$vars);
 	}
 }

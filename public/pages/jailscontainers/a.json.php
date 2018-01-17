@@ -36,13 +36,24 @@ if(!empty($nodes))foreach($nodes as $node)
 		{
 			if($hres!==false)
 			{
+				$jname=$jail['jname'];
+				$vnc_port_status='grey';
+				$vnc_port='';
+				$vnc_port_file=$this->workdir.'/jails-system/'.$jname.'/vnc_port';
+				if(file_exists($vnc_port_file))
+				{
+					$vnc_port=trim(file_get_contents($vnc_port_file));
+				}
+				
 				$html_tpl=$hres[1];
 				$status=$jail['status'];
 				$vars=array(
 					'nth-num'=>'nth'.$num,
 					'node'=>$node,
 					'ip4_addr'=>str_replace(',',',<wbr />',$jail['ip4_addr']),
-					'jname'=>$jail['jname'],
+					'jname'=>$jname,
+					'vnc_port'=>$vnc_port,
+					'vnc_port_status'=>$vnc_port_status,
 					'status'=>$status,
 					'jstatus'=>$this->translate($statuses[$status]),
 					'icon'=>($status==0)?'play':'stop',

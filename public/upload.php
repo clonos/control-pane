@@ -1,9 +1,21 @@
 <?php
 header('Content-Type: application/json');
 
+$cmd='';
+
 if($_SERVER['REQUEST_METHOD'] === 'POST')
 {
-	$path=realpath('').'/media/';
+	$ppath='/media/';
+	if(isset($_POST['uplace']))
+	{
+		$res=strpos($_POST['uplace'],'jailscontainers');
+		if($res!==false)
+		{
+			$ppath='/media_import/';
+			$cmd='import';
+		}
+	}
+	$path=realpath('').$ppath;
 	if(is_uploaded_file($_FILES['file']['tmp_name']))
 	{
 		$ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
@@ -19,10 +31,17 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 		if (move_uploaded_file($_FILES['file']['tmp_name'], $filename))
 		{
 			$status = 'ok';	//'Successfully uploaded!';
+			if($cmd=='import')
+			{
+				$username=$clonos->getUserName();
+				$command='task owner='.$username.' mode=new /usr/local/bin/cbsd jimport jname='.$filename.' inter=0';
+				$res=$clonos->cbsd_cmd($command);
+			}
 		}else{
 			$status = 'Upload Fail: Unknown error occurred!';
 		}
 	}
+	//echo '<pre>';print_r($_POST);
 }
 if($status!='ok') {echo json_encode(array('status' => $status));exit;}
 return;

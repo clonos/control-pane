@@ -1,20 +1,22 @@
-// some useful assertions for noVNC
+// Assertions that make it easier to use sinon
+import sinonChai from '../node_modules/sinon-chai/lib/sinon-chai.js';
+chai.use(sinonChai);
+
+// noVNC specific assertions
 chai.use(function (_chai, utils) {
     _chai.Assertion.addMethod('displayed', function (target_data) {
         var obj = this._obj;
-        var data_cl = obj._drawCtx.getImageData(0, 0, obj._viewportLoc.w, obj._viewportLoc.h).data;
+        var ctx = obj._target.getContext('2d');
+        var data_cl = ctx.getImageData(0, 0, obj._target.width, obj._target.height).data;
         // NB(directxman12): PhantomJS 1.x doesn't implement Uint8ClampedArray, so work around that
         var data = new Uint8Array(data_cl);
-        var same = true;
         var len = data_cl.length;
-        if (len != target_data.length) {
-            same = false;
-        } else {
-            for (var i = 0; i < len; i++) {
-                if (data[i] != target_data[i]) {
-                    same = false;
-                    break;
-                }
+        new chai.Assertion(len).to.be.equal(target_data.length, "unexpected display size");
+        var same = true;
+        for (var i = 0; i < len; i++) {
+            if (data[i] != target_data[i]) {
+                same = false;
+                break;
             }
         }
         if (!same) {

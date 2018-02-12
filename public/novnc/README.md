@@ -1,115 +1,127 @@
-## noVNC: HTML5 VNC Client
+## noVNC: HTML VNC Client Library and Application
 
-[![Build Status](https://travis-ci.org/kanaka/noVNC.svg?branch=master)](https://travis-ci.org/kanaka/noVNC)
+[![Build Status](https://travis-ci.org/novnc/noVNC.svg?branch=master)](https://travis-ci.org/novnc/noVNC)
 
 ### Description
 
-noVNC is a HTML5 VNC client that runs well in any modern browser
-including mobile browsers (iPhone/iPad and Android).
+noVNC is both a HTML VNC client JavaScript library and an application built on
+top of that library. noVNC runs well in any modern browser including mobile
+browsers (iOS and Android).
 
-Many companies/projects have integrated noVNC including [Ganeti Web
-Manager](http://code.osuosl.org/projects/ganeti-webmgr),
+Many companies, projects and products have integrated noVNC including
 [OpenStack](http://www.openstack.org),
-[OpenNebula](http://opennebula.org/), and
-[LibVNCServer](http://libvncserver.sourceforge.net). See [the Projects
-and Companies wiki
-page](https://github.com/kanaka/noVNC/wiki/ProjectsCompanies-using-noVNC)
+[OpenNebula](http://opennebula.org/),
+[LibVNCServer](http://libvncserver.sourceforge.net), and
+[ThinLinc](https://cendio.com/thinlinc). See
+[the Projects and Companies wiki page](https://github.com/novnc/noVNC/wiki/Projects-and-companies-using-noVNC)
 for a more complete list with additional info and links.
+
+### Table of Contents
+
+- [News/help/contact](#newshelpcontact)
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Browser Requirements](#browser-requirements)
+- [Server Requirements](#server-requirements)
+- [Quick Start](#quick-start)
+- [Integration and Deployment](#integration-and-deployment)
+- [Authors/Contributors](#authorscontributors)
 
 ### News/help/contact
 
+The project website is found at [novnc.com](http://novnc.com).
 Notable commits, announcements and news are posted to
-<a href="http://www.twitter.com/noVNC">@noVNC</a>
+[@noVNC](http://www.twitter.com/noVNC).
 
-If you are a noVNC developer/integrator/user (or want to be) please
-join the <a
-href="https://groups.google.com/forum/?fromgroups#!forum/novnc">noVNC
-discussion group</a>
+If you are a noVNC developer/integrator/user (or want to be) please join the
+[noVNC discussion group](https://groups.google.com/forum/?fromgroups#!forum/novnc).
 
-Bugs and feature requests can be submitted via [github
-issues](https://github.com/kanaka/noVNC/issues). If you are looking
-for a place to start contributing to noVNC, a good place to start
-would be the issues that are marked as
-["patchwelcome"](https://github.com/kanaka/noVNC/issues?labels=patchwelcome).
+Bugs and feature requests can be submitted via
+[github issues](https://github.com/novnc/noVNC/issues). If you have questions
+about using noVNC then please first use the
+[discussion group](https://groups.google.com/forum/?fromgroups#!forum/novnc).
+We also have a [wiki](https://github.com/novnc/noVNC/wiki/) with lots of
+helpful information.
 
-If you want to show appreciation for noVNC you could donate to a great
-non-profits such as: [Compassion
-International](http://www.compassion.com/), [SIL](http://www.sil.org),
-[Habitat for Humanity](http://www.habitat.org), [Electronic Frontier
-Foundation](https://www.eff.org/), [Against Malaria
-Foundation](http://www.againstmalaria.com/), [Nothing But
-Nets](http://www.nothingbutnets.net/), etc. Please tweet <a
-href="http://www.twitter.com/noVNC">@noVNC</a> if you do.
+If you are looking for a place to start contributing to noVNC, a good place to
+start would be the issues that are marked as
+["patchwelcome"](https://github.com/novnc/noVNC/issues?labels=patchwelcome).
+Please check our
+[contribution guide](https://github.com/novnc/noVNC/wiki/Contributing) though.
+
+If you want to show appreciation for noVNC you could donate to a great non-
+profits such as:
+[Compassion International](http://www.compassion.com/),
+[SIL](http://www.sil.org),
+[Habitat for Humanity](http://www.habitat.org),
+[Electronic Frontier Foundation](https://www.eff.org/),
+[Against Malaria Foundation](http://www.againstmalaria.com/),
+[Nothing But Nets](http://www.nothingbutnets.net/), etc.
+Please tweet [@noVNC](http://www.twitter.com/noVNC) if you do.
 
 
 ### Features
 
 * Supports all modern browsers including mobile (iOS, Android)
 * Supported VNC encodings: raw, copyrect, rre, hextile, tight, tightPNG
-* WebSocket SSL/TLS encryption (i.e. "wss://") support
-* 24-bit true color and 8 bit colour mapped
-* Supports desktop resize notification/pseudo-encoding
-* Local or remote cursor
+* Supports scaling, clipping and resizing the desktop
+* Local cursor rendering
 * Clipboard copy/paste
-* Clipping or scolling modes for large remote screens
-* Easy site integration and theming (3 example themes included)
-* Licensed under the [MPL 2.0](http://www.mozilla.org/MPL/2.0/)
+* Licensed mainly under the [MPL 2.0](http://www.mozilla.org/MPL/2.0/), see
+  [the license document](LICENSE.txt) for details
 
 ### Screenshots
 
-Running in Chrome before and after connecting:
+Running in Firefox before and after connecting:
 
-<img src="http://kanaka.github.com/noVNC/img/noVNC-5.png" width=400>&nbsp;<img src="http://kanaka.github.com/noVNC/img/noVNC-7.jpg" width=400>
+<img src="http://novnc.com/img/noVNC-1-login.png" width=400>&nbsp;
+<img src="http://novnc.com/img/noVNC-3-connected.png" width=400>
 
-See more screenshots <a href="http://kanaka.github.com/noVNC/screenshots.html">here</a>.
+See more screenshots
+[here](http://novnc.com/screenshots.html).
 
 
 ### Browser Requirements
 
-* HTML5 Canvas (with createImageData): Chrome, Firefox 3.6+, iOS
-  Safari, Opera 11+, Internet Explorer 9+, etc.
+noVNC uses many modern web technologies so a formal requirement list is
+not available. However these are the minimum versions we are currently
+aware of:
 
-* HTML5 WebSockets and Typed Arrays
-
-* Fast Javascript Engine: this is not strictly a requirement, but
-  without a fast Javascript engine, noVNC might be painfully slow.
-
-* See the more detailed [browser compatibility wiki page](https://github.com/kanaka/noVNC/wiki/Browser-support).
+* Chrome 49, Firefox 44, Safari 10, Opera 36, IE 11, Edge 12
 
 
 ### Server Requirements
 
-Unless you are using a VNC server with support for WebSockets
-connections (such as
+noVNC follows the standard VNC protocol, but unlike other VNC clients it does
+require WebSockets support. Many servers include support (e.g.
 [x11vnc/libvncserver](http://libvncserver.sourceforge.net/),
-[QEMU](http://www.qemu.org/), or
-[PocketVNC](http://www.pocketvnc.com/blog/?page_id=866)), you need to
-use a WebSockets to TCP socket proxy. There is a python proxy included
-('websockify').
+[QEMU](http://www.qemu.org/), and
+[MobileVNC](http://www.smartlab.at/mobilevnc/)), but for the others you need to
+use a WebSockets to TCP socket proxy. noVNC has a sister project
+[websockify](https://github.com/novnc/websockify) that provides a simple such
+proxy.
 
 
 ### Quick Start
 
-* Use the launch script to start a mini-webserver and the WebSockets
-  proxy (websockify). The `--vnc` option is used to specify the location of
-  a running VNC server:
+* Use the launch script to automatically download and start websockify, which
+  includes a mini-webserver and the WebSockets proxy. The `--vnc` option is
+  used to specify the location of a running VNC server:
 
     `./utils/launch.sh --vnc localhost:5901`
 
-* Point your browser to the cut-and-paste URL that is output by the
-  launch script. Enter a password if the VNC server has one
-  configured. Hit the Connect button and enjoy!
+* Point your browser to the cut-and-paste URL that is output by the launch
+  script. Hit the Connect button, enter a password if the VNC server has one
+  configured, and enjoy!
 
 
-### Other Pages
+### Integration and Deployment
 
-* [Encrypted Connections](https://github.com/kanaka/websockify/wiki/Encrypted-Connections). How to setup websockify so that you can use encrypted connections from noVNC.
+Please see our other documents for how to integrate noVNC in your own software,
+or deploying the noVNC application in production environments:
 
-* [Advanced Usage](https://github.com/kanaka/noVNC/wiki/Advanced-usage). Starting a VNC server, advanced websockify usage, etc.
-
-* [Integrating noVNC](https://github.com/kanaka/noVNC/wiki/Integration) into existing projects.
-
-* [Troubleshooting noVNC](https://github.com/kanaka/noVNC/wiki/Troubleshooting) problems.
+* [Embedding](docs/EMBEDDING.md) - For the noVNC application
+* [Library](docs/LIBRARY.md) - For the noVNC JavaScript library
 
 
 ### Authors/Contributors
@@ -119,14 +131,18 @@ use a WebSockets to TCP socket proxy. There is a python proxy included
     * [Samuel Mannehed](https://github.com/samhed) (Cendio)
     * [Peter Åstrand](https://github.com/astrand) (Cendio)
     * [Solly Ross](https://github.com/DirectXMan12) (Red Hat / OpenStack)
+    * [Pierre Ossman](https://github.com/CendioOssman) (Cendio)
 
 * Notable contributions:
-    * UI and Icons : Chris Gordon
+    * UI and Icons : Pierre Ossman, Chris Gordon
     * Original Logo : Michael Sersen
     * tight encoding : Michael Tinglof (Mercuri.ca)
 
 * Included libraries:
-    * as3crypto : Henri Torgemane (code.google.com/p/as3crypto)
     * base64 : Martijn Pieters (Digital Creations 2), Samuel Sieb (sieb.net)
     * DES : Dave Zimmerman (Widget Workshop), Jef Poskanzer (ACME Labs)
     * Pako : Vitaly Puzrin (https://github.com/nodeca/pako)
+
+Do you want to be on this list? Check out our
+[contribution guide](https://github.com/novnc/noVNC/wiki/Contributing) and
+start hacking!

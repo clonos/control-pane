@@ -10,6 +10,7 @@ $clonos->useDialogs(array(
 	'vnc',
 	'jail-settings',
 	'jail-settings-config-menu',
+	'jail-import',
 	'jail-clone',
 	'jail-rename',
 ));
@@ -17,7 +18,8 @@ $clonos->useDialogs(array(
 ?>
 <h1>Контейнеры:</h1>
 
-<p><span class="top-button icon-plus id:jail-settings">Создать контейнер</span></p>
+<p><span class="top-button icon-plus id:jail-settings">Создать контейнер</span>
+<span class="top-button icon-upload id:jail-import">Импортировать</span></p>
 
 <table class="tsimple" id="jailslist" width="100%">
 	<thead>

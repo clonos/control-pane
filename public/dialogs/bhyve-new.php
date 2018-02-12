@@ -75,8 +75,11 @@ err_messages.add({
 			</p>
 -->			<p>
 				<span class="field-name"><?php echo $this->translate('Net Interface');?>:</span>
-				<input type="radio" name="interface" value="auto" id="rint0" checked="checked" class="inline"><label for="rint0">auto</label></radio>
-				<input type="radio" name="interface" value="lo0" id="rint2" class="inline"><label for="rint2">lo0</label></radio>
+				<!-- <input type="radio" name="interface" value="auto" id="rint0" checked="checked" class="inline"><label for="rint0">auto</label></radio> -->
+				<select name="interface">
+					<option value="auto">auto</option>
+<?php echo $this->get_interfaces_html(); ?>
+				</select>
 			</p>
 		</div>
 	</form>

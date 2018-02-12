@@ -2801,10 +2801,11 @@ var clonos={
 	{
 		$('#drag-and-drop-zone').dmUploader(
 		{
+			extraData:{"uplace":location.pathname},
 			url: '/?upload',
 			dataType: 'json',
 			//allowedTypes: 'iso/*',
-			extFilter: 'iso',	//iso;jpg;jpeg;
+			extFilter: 'iso;img',	//iso;jpg;jpeg;
 			onInit: function(){
 				clonos.add_log('Penguin initialized :)');
 			},
@@ -2835,8 +2836,8 @@ var clonos={
 				//clonos.update_file_progress(id, '0');
 				//window.setTimeout($.proxy(this.deleteItemsOk,this,id),2000);
 				setTimeout($.proxy(clonos.delete_file,this,id),3000);
-				clonos.dataReload();
-				clonos.wssReload();
+				//clonos.dataReload();
+				//clonos.wssReload();
 			},
 			onUploadError: function(id, message){
 				clonos.add_log('Failed to Upload file #p-' + id + ': ' + message);

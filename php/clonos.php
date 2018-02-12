@@ -1536,6 +1536,8 @@ class ClonOS
 				'vm_cpus'=>$form['vm_cpus'],
 				'vm_ram'=>$vm_ram,
 				'vm_os_type'=>$os_items['type'],	//$os_name,
+				'vnc_port'=>'',
+				'vnc_port_status'=>'',
 				'icon'=>'spin6 animate-spin',
 				'desktop'=>' s-off',
 				'maintenance'=>' maintenance',
@@ -2355,6 +2357,20 @@ class ClonOS
 		return $html;
 	}
 	
+	function get_interfaces_html()
+	{
+		$if=$this->config->os_interfaces;
+		$html='';
+		$m=1;
+		if(!empty($if)) foreach($if as $i)
+		{
+			//$html.='<input type="radio" name="interface" value="'.$i['name'].'" id="rint'.$m.'" class="inline"><label for="rint'.$m.'">'.$i['name'].'</label></radio>';
+			$html.='<option value="'.$i['name'].'">'.$i['name'].'</option>';
+			$m++;
+		}
+		return $html;
+	}
+	
 	function usersAdd()
 	{
 		$form=$this->form;
@@ -2599,6 +2615,11 @@ class ClonOS
 		}else{
 			return array('DB connection error!');
 		}
+	}
+	
+	function getUserName()
+	{
+		return $this->_user_info['username'];
 	}
 	
 	function vmTemplateAdd()

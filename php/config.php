@@ -168,6 +168,7 @@ class Config
 	);
 	
 	public $os_types_obtain=array();
+	public $os_interfaces=array();
 	
 	function __construct()
 	{
@@ -184,6 +185,12 @@ class Config
 		if($res1['retval']==0)
 		{
 			$this->os_types_obtain=$this->create_bhyve_profiles($res1);
+		}
+		
+		$res2=ClonOS::cbsd_cmd('cbsd get_interfaces');
+		if($res2['retval']==0)
+		{
+			$this->os_interfaces=$this->create_interfaces($res2);
 		}
 	}
 	function create_bhyve_profiles($info)
@@ -203,6 +210,11 @@ class Config
 		unset($array);
 		return $array1;
 		//$this->os_types=$array1;
+	}
+	function create_interfaces($info)
+	{
+		$res=json_decode($info['message'],true);
+		return $res;
 	}
 	
 	function os_types_create($obtain='new')

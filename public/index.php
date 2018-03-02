@@ -16,6 +16,12 @@ if(isset($_GET['upload']))
 	$clonos->register_media($path,$file,$ext);
 	exit;
 }
+if(isset($_GET['download']))
+{
+	include('download.php');
+	$clonos->register_media($path,$file,$ext);
+	exit;
+}
 
 $lang=$clonos->getLang();
 $root=trim($_SERVER['DOCUMENT_ROOT'],DIRECTORY_SEPARATOR);

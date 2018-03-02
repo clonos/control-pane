@@ -5,17 +5,25 @@ $cmd='';
 
 if($_SERVER['REQUEST_METHOD'] === 'POST')
 {
-	$ppath='/media/';
+	//$ppath=realpath('').'/media/';
+	$path=realpath('').'/media/';
 	if(isset($_POST['uplace']))
 	{
 		$res=strpos($_POST['uplace'],'jailscontainers');
 		if($res!==false)
 		{
-			$ppath='/media_import/';
+			//$ppath='/media_import/';
+			$path=$clonos->media_import;
+			$cmd='import';
+		}
+		$res=strpos($_POST['uplace'],'imported');
+		if($res!==false)
+		{
+			$path=$clonos->media_import;
 			$cmd='import';
 		}
 	}
-	$path=realpath('').$ppath;
+	//$path=realpath('').$ppath;
 	if(is_uploaded_file($_FILES['file']['tmp_name']))
 	{
 		$ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));

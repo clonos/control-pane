@@ -24,6 +24,7 @@ $lang=array(
 		'Manage for SSH auth key'=>'Панель управления авторизационными ключами',
 	'Storage Media'=>'Виртуальные носители',
 		'Virtual Media Manager'=>'Менеджер виртуальных носителей',
+	'Imported images'=>'Импортированные образы',
 	'Repository'=>'Репозиторий',
 		'Remote repository'=>'Публичный репозиторий',
 	'FreeBSD Bases'=>'Базы FreeBSD',
@@ -148,5 +149,7 @@ $lang=array(
 	'CBSD Users'=>'Учётные записи пользователей CBSD',
 	
 	
+	'jail'=>'клетка',
+	'bhyve'=>'виртуальная машина',
 	//''=>'',
 );

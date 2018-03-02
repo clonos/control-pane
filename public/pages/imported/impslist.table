@@ -1,0 +1,12 @@
+	<tbody>
+		<tr id="#impid#">
+			<td class="txtleft">#impname#</td>
+			<!-- <td class="txtleft wordwreck"><span class="max-100">#imppath#</span></td> -->
+			<td class="txtleft">#imptype#</td>
+			<td class="ops">
+				<span#imptitle# class="icon-export"></span>
+				<span#dnldtitle# class="icon-download"></span>
+				<span#deltitle# class="icon-cancel"></span>
+			</td>
+		</tr>
+	</tbody>

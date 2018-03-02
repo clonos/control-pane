@@ -15,6 +15,7 @@ class ClonOS
 	public $translate_arr=array();
 	public $table_templates=array();
 	public $url_hash='';
+	public $media_import='';
 	
 	private $_post=false;
 	private $_db=null;
@@ -93,6 +94,8 @@ class ClonOS
 			
 		$this->realpath_public=$_REALPATH.'/public/';
 			# /usr/home/web/cp/clonos/public/
+		
+		$this->media_import=$_REALPATH.'/media_import/';
 		
 		if(isset($_SERVER['SERVER_NAME']) && !empty(trim($_SERVER['SERVER_NAME'])))
 			$this->server_name=$_SERVER['SERVER_NAME'];
@@ -351,6 +354,13 @@ class ClonOS
 					return;break;
 				case 'vmTemplateRemove':
 					echo json_encode($this->vmTemplateRemove());
+					return;break;
+					
+				case 'getImportedImageInfo':
+					echo json_encode($this->getImportedImageInfo());
+					return;break;
+				case 'imageImport':
+					echo json_encode($this->imageImport());
 					return;break;
 					
 /*				case 'saveHelperValues':
@@ -2222,11 +2232,12 @@ class ClonOS
 		exit;
 	}
 	
-	function getFreeJname($in_helper=false)
+	function getFreeJname($in_helper=false,$type='jail')
 	{
 		$arr=array();
 		$add_cmd=($in_helper)?' default_jailname='.$this->url_hash:'';
-		$res=$this->cbsd_cmd("freejname".$add_cmd);
+		$add_cmd1=' default_jailname='.$type;
+		$res=$this->cbsd_cmd("freejname".$add_cmd.$add_cmd1);
 		if($res['error'])
 		{
 			$arr['error']=true;
@@ -2740,4 +2751,171 @@ class ClonOS
 		);
 		return array_merge($rarr,$vars);
 	}
+	
+	
+	function getImportedImages()
+	{
+		$images=array();
+		$path=$this->media_import;
+		$files=$this->getImagesList($path);
+		foreach($files as $key=>$file)
+		{
+			if(file_exists($file['fullname']))
+			{
+				$fp=fopen($file['fullname'],'r');
+				$buf=fread($fp,300);
+				fclose($fp);
+				$pat='#emulator="([^\"]*)"#';
+				preg_match($pat,$buf,$res);
+				if(!empty($res))
+				{
+					/*
+					$type=$res[1];
+					$images[$res[1]][]=$file;
+					*/
+					$files[$key]['type']=$res[1];
+				}
+			}
+		}
+		/*
+		unset($files);
+		return $images;
+		*/
+		return $files;
+	}
+	function getImportedImageInfo()
+	{
+		$form=$this->form;
+		$name=$form['id'];
+		$info=$this->getImageInfo($name);
+		return $info;
+	}
+	
+	function getImagesList($path)
+	{
+		$files=array();
+		foreach (glob($path."*.img") as $filename)
+		{
+			$info=pathinfo($filename);
+			$arr=array(
+				'name'=>$info['basename'],
+				'fullname'=>$filename,
+			);
+			$files[]=$arr;
+		}
+		return $files;
+	}
+	
+	function getImageInfo($imgname)
+	{
+		if(empty($imgname)) return false;
+		
+		$file=$this->media_import.$imgname;
+		if(!file_exists($file)) return false;
+		
+		$fp=fopen($file,'r');
+		$buf=fread($fp,300);
+		fclose($fp);
+		
+		$type=$this->getImageVar('emulator',$buf);
+		$jname=$this->getImageVar('jname',$buf);
+		$orig_jname=$jname;
+		$ip=$this->getImageVar('ip4_addr',$buf);
+		$hostname=$this->getImageVar('host_hostname',$buf);
+		
+		$name_comment='';
+		$db=new Db('base','local');
+		if($db!==false)
+		{
+			$jail=$db->selectAssoc("SELECT jname FROM jails WHERE jname='{$jname}'");
+			
+			if($jname==$jail['jname'])
+			{
+				$jres=$this->getFreeJname(false,$type);
+				if($jres['error']) return $this->messageError('Something wrong...');
+				$jname=$jres['freejname'];
+				$name_comment='* '.$this->translate('Since imported name already exist, we are change it');
+			}
+		}
+		
+		return array('orig_jname'=>$orig_jname,'jname'=>$jname,'host_hostname'=>$hostname,'ip4_addr'=>$ip,'file_id'=>$imgname,'type'=>$type,'name_comment'=>$name_comment);
+	}
+	function getImageVar($name,$buf)
+	{
+		$val=false;
+		$pat='#'.$name.'="([^\"]*)"#';
+		preg_match($pat,$buf,$res);
+		if(!empty($res))
+		{
+			$val=$res[1];
+		}
+		return $val;
+	}
+	
+	function imageImport()
+	{
+		$form=$this->form;
+		
+		$file_id=$form['file_id'];
+		$res=$this->getImageInfo($file_id);
+		if($res===false) return $this->messageError('File not found!');
+		
+		$jname=$form['jname'];
+		
+		$attrs=array();
+		if($jname!=$res['orig_jname'])
+			$attrs[]='new_jname='.$jname;
+		
+		if($form['ip4_addr']!=$res['ip4_addr'])
+			$attrs[]='new_ip4_addr='.$form['ip4_addr'];
+		
+		if($form['host_hostname']!=$res['host_hostname'])
+			$attrs[]='new_host_hostname='.$form['host_hostname'];
+		
+		$file='jname='.$this->media_import.$file_id;
+		$attrs[]=$file;
+		$cmd='cbsd jimport '.join($attrs,' ');
+		
+		$res=$this->cbsd_cmd('task owner='.$this->_user_info['username'].' mode=new /usr/local/bin/'.$cmd);
+		
+		return $res;
+	}
+/*
+По опциям вот так дела обстоят:
+
+Образ - это архив окружения. По-умолчанию, если ты делаешь import на файл образа, он восстановит его с теми же параметрами что было при export.
+
+В CBSD можно рулить тремя параметрами, которые можно переназначить при import, это:
+
+- имя окружения ( $jname ). Если у тебя образ nginx.img и он создан для окружения nginx, то вторично ты из него не сможешь развернуть, если не переназначишь новое имя, тк jname уникально
+
+- IP адрес. Тут тоже можно переназначить IP, чтобы небыло конфликтов с оригиналом или уже развернутым из этого окружения образа
+
+- Имя хоста (FQDN).  Это nginx.my.domain например.
+
+В командной строчке это аргументы
+cbsd jimport [new_jname=XXX|new_ip4_addr=x.y.a.b|new_host_hostname=XXX.YYY.NNN]  <path-to-img>
+
+Я форму вижу вот таким образом, учитывая, что ты хидер можешь читать, это возможно:
+
+пользователь мышкой кликает на образ в списке, тем самым маркируя его (или снимая маркер на импорт). Если маркет ставится, появляются три поля:
+
+Новое имя контейнера: [$jname]  ($jname)
+Новый IP адрес : [$ip4_addr]  ($ip4_addr)
+Новый FQDN: [$host_hostname]
+
+Где $jname и $host_name и $ip4_addr ты вычитываешь из старого заголовка и подставляешь сюда.
+
+Можно попробовать еще круче сделать, но это возможно запарно:
+
+при маркере, перед заполнением $jname проверить, если ли уже такой контейнер в системе. Если есть, то поле должно быть пустое
+
+Если пользователь не меняет данные, можно делать
+cbsd jimport <path.img>
+
+если меняет любой из них (или все), то аргументы можно дописывать
+
+cbsd jmport new_jname=newjail1 <path.img>
+cbsd jmport new_jname=newjail1 new_ip4_addr=10.10.10.10 <path.img>
+*/
 }

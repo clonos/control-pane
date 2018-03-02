@@ -519,6 +519,12 @@ var clonos={
 				if(mode=='edit') posts.push({'name':'template_id','value':this.lastEditedVmTemplate});
 				this.loadData(fmode,$.proxy(this.onVmTemplateAdd,this),posts);
 			}
+			if(id=='image-import')
+			{
+				var fmode='imageImport';
+				var posts=$('form#imageImportSettings').serializeArray();
+				this.loadData(fmode,$.proxy(this.onImageImportStart,this),posts);
+			}
 
 		}
 	},
@@ -844,6 +850,8 @@ var clonos={
 		try{
 			var data=JSON.parse(data);
 		}catch(e){this.debug(e.message,data);return;}
+		
+		if(data==null) return;
 		
 		if(typeof data['unregistered_user']!='undefined')
 		{
@@ -1727,6 +1735,18 @@ var clonos={
 				}
 				
 				return;break;
+			case 'icon-download':
+				if(tblid=='impslist')
+				{
+					this.imageDownload(trid,tblid);
+				}
+				return;break;
+			case 'icon-export':
+				if(tblid=='impslist')
+				{
+					this.imageImport(trid,tblid);
+				}
+				return;break;
 		}
 		
 		if(cl.indexOf('cancel-but')>-1)
@@ -2177,6 +2197,32 @@ var clonos={
 		this.dialogShow1(dialog,'edit');
 	},
 	
+	imageImport:function(id,tblid)
+	{
+		var mode='getImportedImageInfo';
+		var posts=[{'name':'tbl_id','value':tblid},{'name':'dialog','value':'image-import'},{'name':'id','value':id}];
+		this.loadData(mode,$.proxy(this.onImageImport,this),posts);
+	},
+	onImageImport:function(data)
+	{
+		var dialog='image-import';
+		this.fillDialogVars(dialog,data);
+		if(typeof data['name_comment']!='undefined')
+		{
+			$('#name_comment').html(data['name_comment']);
+			
+		}
+		this.dialogShow1(dialog);
+	},
+	imageDownload:function(id,tblid)
+	{
+		window.location='/?download&file='+id;
+	},
+	onImageImportStart:function(data)
+	{
+		this.dialogClose();
+	},
+	
 	dataReload:function()
 	{
 		this.loadData('getJsonPage',$.proxy(this.onLoadData,this));
@@ -2225,6 +2271,7 @@ var clonos={
 			switch(type)
 			{
 				case 'text':
+				case 'hidden':
 				case 'password':
 				case 'textarea':
 				case 'select':
@@ -2382,16 +2429,18 @@ var clonos={
 		}
 	},
 	
-	notify:function(message,type)
+	notify:function(message,type,timeout)
 	{
 	//	alert, success, warning, error, information
 		if(typeof type=='undefined') type='warning';
+		if(typeof timeout=='undefined') timeout=5000;
 		noty({
 			text        : message,
 			type        : type,
 			dismissQueue: true,
 			layout      : 'bottomRight',
 			theme       : 'defaultTheme',
+			timeout     : timeout,
 		});
 	},
 	
@@ -2649,7 +2698,17 @@ var clonos={
 					}
 				}
 				break;
+			case 'tooltip':
+				var txt='<storng>'+data.author+':</storng> '+data.msg;
+				var timeout=5000;
+				var type='information';
+				if(typeof data.timeout!='undefined') timeout=data.timeout;
+				if(typeof data.type!='undefined' && data.type!='') type=data.type;
+				this.notify(txt,type,timeout);
+				return;
+				break;
 		}
+		if(typeof data.data['protected'])
 		if(isset(this.tpl_protected,data.data['protected']))
 		{
 			var table=$('table.tsimple').attr('id');

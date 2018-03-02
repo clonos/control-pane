@@ -518,7 +518,8 @@ td.ops span.icon-cnt,
 .icon-cancel,
 .icon-cog,
 .icon-arrows-cw,
-.icon-download {
+.icon-download,
+.icon-export {
 	color:gray;
 	position:relative;
 	text-align:center;
@@ -532,7 +533,8 @@ span.icon-cnt:hover .icon-stop,
 .icon-cancel:hover,
 .icon-cog:hover,
 .icon-arrows-cw:hover,
-.icon-download:hover {
+.icon-download:hover,
+.icon-export:hover {
 	color:black;
 	cursor:pointer;
 }
@@ -853,6 +855,10 @@ form.win fieldset.full {
 	margin:0;
 }
 
+.inp_comment {
+	font-size:90%;
+	color:red;
+}
 
 .cbsd-str {
 	color:gray;

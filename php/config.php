@@ -77,6 +77,12 @@ class Config
 			'title'=>'Virtual Media Manager',
 			'icon'=>'icon-inbox',
 		),
+		
+		'imported'=>array(
+			'name'=>'Imported images',
+			'title'=>'Imported images',
+			'icon'=>'icon-upload',
+		),
 /*		
 		'repo'=>array(
 			'name'=>'Repository',

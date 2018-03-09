@@ -20,7 +20,18 @@ if(isset($res['id']) && $res['id']>0)
 	header('Content-Length: '.filesize($file));
 	header("Pragma: no-cache");
 	header("Expires: 0");
-	readfile($file);
+	
+	$chunkSize = 1024 * 1024;
+    $handle = fopen($file, 'rb');
+    while (!feof($handle))
+    {
+		$buffer = fread($handle, $chunkSize);
+		echo $buffer;
+		ob_flush();
+		flush();
+    }
+    fclose($handle);
+	
 	exit;	
 }
 

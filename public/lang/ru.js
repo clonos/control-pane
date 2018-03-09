@@ -30,6 +30,7 @@ clonos.lang={
 	"Created":"Создано",
 	"Starting":"Запускается",
 	"Exporting":"Экспортируется",
+	"Exported":"Экспортировано",
 	"Cloning":"Клонируется",
 	"Cloned":"Клонировано",
 	"Restarting":"Перезапускаем",
@@ -53,6 +54,9 @@ clonos.lang={
 	//"Edit jail":"Редактирование параметров контейнера",
 	
 	"end":"конец",
+	
+	"jail":"клетка",
+	"bhyve":"виртуальная машина",
 	
 	"This name is already exists!":"Такое имя уже существует!",
 	"Passwords must match!":"Пароли должны совпадать!",

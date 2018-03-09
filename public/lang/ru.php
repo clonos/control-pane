@@ -79,6 +79,7 @@ $lang=array(
 	'Create'=>'Создать',
 	'Cancel'=>'Отменить',
 	'Save'=>'Сохранить',
+	'Download'=>'Скачать',
 	
 	'Delete'=>'Удалить',
 	'Protected jail'=>'Запрет на удаление',
@@ -151,5 +152,7 @@ $lang=array(
 	
 	'jail'=>'клетка',
 	'bhyve'=>'виртуальная машина',
+	
+	'Since imported name already exist, we are change it'=>'Поскольку оригинальное имя уже существует, мы поменяли его <br />на свободное',
 	//''=>'',
 );

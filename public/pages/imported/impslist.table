@@ -1,8 +1,10 @@
 	<tbody>
-		<tr id="#impid#">
-			<td class="txtleft">#impname#</td>
+		<tr id="#id#">
+			<td class="txtleft">#jname#</td>
 			<!-- <td class="txtleft wordwreck"><span class="max-100">#imppath#</span></td> -->
+			<td class="txtcenter">#impsize#</td>
 			<td class="txtleft">#imptype#</td>
+			<td class="jstatus">#jstatus#</td>
 			<td class="ops">
 				<span#imptitle# class="icon-export"></span>
 				<span#dnldtitle# class="icon-download"></span>

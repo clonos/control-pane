@@ -362,6 +362,12 @@ class ClonOS
 				case 'imageImport':
 					echo json_encode($this->imageImport());
 					return;break;
+				case 'imageExport':
+					echo json_encode($this->imageExport());
+					return;break;
+				case 'imageRemove':
+					echo json_encode($this->imageRemove());
+					return;break;
 					
 /*				case 'saveHelperValues':
 					echo json_encode($this->saveHelperValues());
@@ -489,6 +495,7 @@ class ClonOS
 			'removebase'=>'Removing',
 			'world'=>'Compiling',
 			'repo'=>'Fetching',
+			'imgremove'=>'Removing',
 		);
 		
 		$res=array();
@@ -580,6 +587,7 @@ class ClonOS
 		$stat_array['bclone']=&$stat_array['jclone'];
 		$stat_array['removesrc']=&$stat_array['jremove'];
 		$stat_array['removebase']=&$stat_array['jremove'];
+		$stat_array['imgremove']=&$stat_array['jremove'];
 		
 		
 		if(!empty($obj)) foreach($obj as $key=>$task)
@@ -2852,6 +2860,17 @@ class ClonOS
 		return $val;
 	}
 	
+	function imageExport()
+	{
+		// cbsd jexport jname=XXX dstdir=<path_to_imported_dir>
+		$form=$this->form;
+		$jname=$form['id'];
+		if(empty($jname)) $this->messageError('Jname is incorrect in export command! Is «'.$jname.'».');
+		$cmd='cbsd jexport gensize=1 jname='.$jname.' dstdir='.$this->media_import;
+		$res=$this->cbsd_cmd('task owner='.$this->_user_info['username'].' mode=new /usr/local/bin/'.$cmd);
+		return $res;
+	}
+	
 	function imageImport()
 	{
 		$form=$this->form;
@@ -2880,42 +2899,15 @@ class ClonOS
 		
 		return $res;
 	}
-/*
-По опциям вот так дела обстоят:
+	
+	function imageRemove()
+	{
+		$form=$this->form;
+		
+		$cmd='cbsd imgremove path='.$this->media_import.' img='.$form['jname'];
+		
+		$res=$this->cbsd_cmd('task owner='.$this->_user_info['username'].' mode=new /usr/local/bin/'.$cmd);
+		return $res;
+	}
 
-Образ - это архив окружения. По-умолчанию, если ты делаешь import на файл образа, он восстановит его с теми же параметрами что было при export.
-
-В CBSD можно рулить тремя параметрами, которые можно переназначить при import, это:
-
-- имя окружения ( $jname ). Если у тебя образ nginx.img и он создан для окружения nginx, то вторично ты из него не сможешь развернуть, если не переназначишь новое имя, тк jname уникально
-
-- IP адрес. Тут тоже можно переназначить IP, чтобы небыло конфликтов с оригиналом или уже развернутым из этого окружения образа
-
-- Имя хоста (FQDN).  Это nginx.my.domain например.
-
-В командной строчке это аргументы
-cbsd jimport [new_jname=XXX|new_ip4_addr=x.y.a.b|new_host_hostname=XXX.YYY.NNN]  <path-to-img>
-
-Я форму вижу вот таким образом, учитывая, что ты хидер можешь читать, это возможно:
-
-пользователь мышкой кликает на образ в списке, тем самым маркируя его (или снимая маркер на импорт). Если маркет ставится, появляются три поля:
-
-Новое имя контейнера: [$jname]  ($jname)
-Новый IP адрес : [$ip4_addr]  ($ip4_addr)
-Новый FQDN: [$host_hostname]
-
-Где $jname и $host_name и $ip4_addr ты вычитываешь из старого заголовка и подставляешь сюда.
-
-Можно попробовать еще круче сделать, но это возможно запарно:
-
-при маркере, перед заполнением $jname проверить, если ли уже такой контейнер в системе. Если есть, то поле должно быть пустое
-
-Если пользователь не меняет данные, можно делать
-cbsd jimport <path.img>
-
-если меняет любой из них (или все), то аргументы можно дописывать
-
-cbsd jmport new_jname=newjail1 <path.img>
-cbsd jmport new_jname=newjail1 new_ip4_addr=10.10.10.10 <path.img>
-*/
 }

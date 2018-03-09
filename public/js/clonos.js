@@ -27,6 +27,7 @@ var clonos={
 		'repo':{stat:['Fetch','Fetching','Fetched'],cmd:'repoCompile'},
 		'removesrc':{stat:['Remove','Removing','Removed'],cmd:'srcRemove'},
 		'removebase':{stat:['Remove','Removing','Removed'],cmd:'baseRemove'},
+		'imgremove':{stat:['Remove','Removing','Removed'],cmd:'imageRemove'},
 	},
 	
 	start:function()
@@ -1630,10 +1631,8 @@ var clonos={
 				case 'jddm-clone':
 				case 'jddm-rename':
 				case 'jddm-helpers':
-					this.DDMenuSelect(elid);
-					return;break;
 				case 'jddm-export':
-					alert('Экспортируем! :)');
+					this.DDMenuSelect(elid);
 					return;break;
 			}
 		}
@@ -1698,6 +1697,11 @@ var clonos={
 				if(tblid=='packageslist')
 				{
 					this.vmTemplateRemove(trid);
+					return;
+				}
+				if(tblid=='impslist')
+				{
+					this.imageRemove(trid);
 					return;
 				}
 				alert(tblid);
@@ -2087,6 +2091,10 @@ var clonos={
 						location.href='/jailscontainers/'+id+'/';
 						return;
 						break;
+					case 'jddm-export':
+						this.imageExport(id,table_id);
+						return;
+						break;
 				}
 				break;
 			case 'bhyveslist':
@@ -2197,6 +2205,16 @@ var clonos={
 		this.dialogShow1(dialog,'edit');
 	},
 	
+	imageExport:function(id,tblid)
+	{
+		var mode='imageExport';
+		var posts=[{'name':'tbl_id','value':tblid},{'name':'id','value':id}];	//,{'name':'dialog','value':'image-import'}
+		this.loadData(mode,$.proxy(this.onImageExport,this),posts);
+	},
+	onImageExport:function(data)
+	{
+		
+	},
 	imageImport:function(id,tblid)
 	{
 		var mode='getImportedImageInfo';
@@ -2221,6 +2239,18 @@ var clonos={
 	onImageImportStart:function(data)
 	{
 		this.dialogClose();
+	},
+	imageRemove:function(id)
+	{
+		var c=confirm(this.translate('You want to delete image «'+id+'»! Are you sure?'));
+		if(!c) return;
+		
+		var posts=[{'name':'jname','value':id}];
+		this.loadData('imageRemove',$.proxy(this.onJailStart,this),posts,false);
+	},
+	onImageRemove:function(data)
+	{
+		debugger;
 	},
 	
 	dataReload:function()
@@ -2660,11 +2690,17 @@ var clonos={
 			case 'repo':
 				if(status==1)
 				{
+					/*
+					if(cmd=='jexport')
+					{
+						this.enableWait(id);
+					}
+					*/
 					if(isset(data.data))
 					{
 						this.addNewJail(data,cmd);
 					}
-					if(['srcup','world','repo'].indexOf(cmd)!=-1)
+					if(['srcup','world','repo','jexport'].indexOf(cmd)!=-1)
 					{
 						this.enableWait(id);
 					}
@@ -2678,6 +2714,7 @@ var clonos={
 			case 'bremove':
 			case 'removesrc':
 			case 'removebase':
+			case 'imgremove':
 				if(status==1)
 				{
 					$('#'+this.dotEscape(id)).removeClass('s-on').addClass('s-off').addClass('busy');
@@ -2724,7 +2761,7 @@ var clonos={
 		{
 			var cmd=data.cmd;
 			
-			if(['srcup','repo','world'].indexOf(cmd)!=-1)
+			if(['srcup','repo','world','jexport'].indexOf(cmd)!=-1)
 			{
 				$('#'+this.dotEscape(id))
 					.removeClass('s-off').removeClass('busy').removeClass('maintenance')
@@ -2763,6 +2800,7 @@ var clonos={
 		if(['bcreate','bclone'].indexOf(cmd)!=-1) table='bhyveslist';
 		if(['srcup'].indexOf(cmd)!=-1) table='srcslist';
 		if(['repo','world'].indexOf(cmd)!=-1) table='baseslist';
+		if(['jexport'].indexOf(cmd)!=-1) table='impslist';
 
 		if(isset(data.data))
 		{
@@ -2770,7 +2808,7 @@ var clonos={
 				data.data['jstatus']=this.translate(this.commands[cmd]['stat'][1]);
 			if(!isset(data.data['id'])) data.data['id']=data['id'];
 			for(n in data.data)
-				html=html.replace(new RegExp('#'+n+'#','g'),data.data[n]);
+				html=html.replace(new RegExp('#'+n+'#','g'),this.translate(data.data[n]));
 		}
 		
 		var el=$('#'+this.dotEscape(id));

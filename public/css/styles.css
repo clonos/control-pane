@@ -555,7 +555,10 @@ tr.busy .op-settings span,	/*.icon-cog*/
 tr.busy .op-reboot span,	/*.icon-cancel,*/
 tr.busy .op-del span,	/*.icon-desktop,*/
 tr.busy .op-update span,	/*.icon-desktop,*/
-tr.busy .op-vnc span {	/*.icon-arrows-cw {*/
+tr.busy .op-vnc span,
+tr.busy .icon-export,
+tr.busy .icon-download,
+#impslist tr.busy .icon-cancel {	/*.icon-arrows-cw {*/
 	display:none;
 }
 td.jstatus,
@@ -580,6 +583,19 @@ tr.s-on td.jstatus {
 tr.s-off td.jstatus {
 	background-color:Seashell;
 }
+
+/* мегахак — это чтобы крутился прогресс. В других таблицах он реализован по-другому */
+#impslist tr.busy .ops span:first-child {
+    display:block;
+    text-align:left;
+    margin-left:7px;
+}
+#impslist tr.busy .ops span:first-child::before {
+    content:'\e839';
+    animation:spin 2s infinite linear;
+}
+/* мегахак конец */
+
 
 tr.maintenance .ops span,
 tr.maintenance .op-settings span,

@@ -2,7 +2,7 @@
 		<tr id="#id#">
 			<td class="txtleft">#jname#</td>
 			<!-- <td class="txtleft wordwreck"><span class="max-100">#imppath#</span></td> -->
-			<td class="txtcenter">#impsize#</td>
+			<td class="txtcenter impsize">#impsize#</td>
 			<td class="txtleft">#imptype#</td>
 			<td class="jstatus">#jstatus#</td>
 			<td class="ops">

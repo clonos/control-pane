@@ -2690,12 +2690,6 @@ var clonos={
 			case 'repo':
 				if(status==1)
 				{
-					/*
-					if(cmd=='jexport')
-					{
-						this.enableWait(id);
-					}
-					*/
 					if(isset(data.data))
 					{
 						this.addNewJail(data,cmd);
@@ -2731,6 +2725,7 @@ var clonos={
 				{
 					for(n in data.data)
 					{
+						if(n=='impsize') data.data[n]=this.formatBytes(data.data[n],0);
 						$('#'+this.dotEscape(id)+' .'+n).html(data.data[n]);
 					}
 				}
@@ -2761,7 +2756,7 @@ var clonos={
 		{
 			var cmd=data.cmd;
 			
-			if(['srcup','repo','world','jexport'].indexOf(cmd)!=-1)
+			if(['srcup','repo','world'].indexOf(cmd)!=-1)
 			{
 				$('#'+this.dotEscape(id))
 					.removeClass('s-off').removeClass('busy').removeClass('maintenance')

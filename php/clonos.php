@@ -2773,22 +2773,13 @@ class ClonOS
 				$fp=fopen($file['fullname'],'r');
 				$buf=fread($fp,300);
 				fclose($fp);
-				$pat='#emulator="([^\"]*)"#';
-				preg_match($pat,$buf,$res);
-				if(!empty($res))
-				{
-					/*
-					$type=$res[1];
-					$images[$res[1]][]=$file;
-					*/
-					$files[$key]['type']=$res[1];
-				}
+				
+				$res=$this->getImageVar('emulator',$buf);
+				$res1=$this->getImageVar('jname',$buf);
+				if(isset($res)) $files[$key]['type']=$res;
+				if(isset($res1)) $files[$key]['jname']=$res1;
 			}
 		}
-		/*
-		unset($files);
-		return $images;
-		*/
 		return $files;
 	}
 	function getImportedImageInfo()

@@ -1,5 +1,5 @@
 	<tbody>
-		<tr id="#id#">
+		<tr id="#id#" class="#busy#">
 			<td class="txtleft">#jname#</td>
 			<!-- <td class="txtleft wordwreck"><span class="max-100">#imppath#</span></td> -->
 			<td class="txtcenter impsize">#impsize#</td>

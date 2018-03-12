@@ -13,7 +13,6 @@ $res=array(
 
 $images=$this->getImportedImages();
 
-
 $html='';
 $nth=0;
 $num=$nth & 1;
@@ -57,12 +56,23 @@ if(!empty($images)) foreach($images as $item)
 		}
 		$filesize=$this->fileSizeConvert($size,1024,true);
 		
+		$query="select count(*) as busy from taskd where status<2 and jname='${item['jname']}'";
+		$busy=$this->_db_tasks->selectAssoc($query);
+		$jstatus='';
+		$jbusy='';
+		if($busy['busy']==1)
+		{
+			$jstatus=$this->translate('Exporting');
+			$jbusy='busy';
+		}
+		
 		$vars=array(
 			'nth-num'=>'nth'.$num,
 			'id'=>$item['name'],
 			'jname'=>$item['name'],
 			'impsize'=>$filesize,
-			'jstatus'=>'',
+			'jstatus'=>$jstatus,
+			'busy'=>$jbusy,
 			'imptype'=>$this->translate($item['type']),
 		);
 		

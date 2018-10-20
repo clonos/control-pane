@@ -42,7 +42,7 @@ class ClonOS
 
 	const CBSD_CMD='env NOCOLOR=1 /usr/local/bin/sudo /usr/local/bin/cbsd ';
 	
-	function cbsd_cmd($cmd)
+	static function cbsd_cmd($cmd)
 	{
 		$descriptorspec = array(
 			0 => array('pipe','r'),

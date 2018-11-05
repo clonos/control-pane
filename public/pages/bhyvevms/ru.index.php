@@ -19,6 +19,7 @@ $clonos->useDialogs(array(
 	<thead>
 		<th class="wdt-120">Имя сервера</th>
 		<th class="txtleft">Виртуальная машина</th>
+		<th class="wdt-120">Нагрузка</th>
 		<th class="txtcenter wdt-70">RAM</th>
 		<th class="wdt-30">CPU</th>
 		<th class="txtcenter wdt-100">Тип ОС</th>

@@ -61,6 +61,7 @@ if(!$user_info['error'])
 	<script src="/js/jquery.js" type="text/javascript"></script>
 	<script src="/js/clonos.js" type="text/javascript"></script>
 	<script src="/js/dmuploader.js" type="text/javascript"></script>
+	<script src="/js/smoothie.js" type="text/javascript"></script>
 	<script src="/js/noty/packaged/jquery.noty.packaged.min.js" type="text/javascript"></script>
 	<link type="text/css" href="/css/reset.css" rel="stylesheet" />
 	<link type="text/css" href="/css/styles.css" rel="stylesheet" />

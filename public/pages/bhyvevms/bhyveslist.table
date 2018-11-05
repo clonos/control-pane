@@ -2,6 +2,7 @@
 		<tr class="#nth-num##desktop##maintenance#" id="#jname#">
 			<td class="node">#node#</td>
 			<td class="txtleft jname">#jname#</td>
+			<td class="graph g-#jname#"></td>
 			<td class="txtcenter vm_ram">#vm_ram#</td>
 			<td class="vm_cpus">#vm_cpus#</td>
 			<td class="vm_os_type">#vm_os_type#</td>

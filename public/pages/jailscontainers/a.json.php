@@ -116,7 +116,7 @@ if(!empty($jail_ids))
 {
 	$tasks=$this->getRunningTasks($jail_ids);
 }
-
+//echo '<pre>';print_r($tasks);exit;
 $html_tpl_1=str_replace(array("\n","\r","\t"),'',$hres[1]);
 if($hres!==false)
 {

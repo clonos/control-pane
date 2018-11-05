@@ -226,12 +226,12 @@ var clonos={
 		
 		if($('span.close-but',dlg).length==0)
 			$('h1',dlg).before('<span class="close-but">×</span>');
-		
+		/*
 		var wd=$(dlg).width();
 		var hg=$(dlg).height();
 		var mt=hg/2;
 		var ml=wd/2;
-		
+		*/
 		var res=$(dlg).get(0).showModal;
 		if(typeof res=='function')
 		{
@@ -243,6 +243,7 @@ var clonos={
 			{
 				$('dialog#'+id).before('<div id="backdrop"></div>');
 			}
+			/*
 			$('dialog#'+id).css({
 				'display':'block',
 				'top':'50%',
@@ -252,9 +253,36 @@ var clonos={
 				'position':'fixed',
 				'z-index':'100000',
 			});
+			*/
+			this.dialogSetPosition(dlg);
 			$('div#backdrop').css('display','block');
 		}
 		$(dlg).find('input[type=text],textarea').filter(':visible:first').focus();
+	},
+	dialogSetPosition:function(dialog)
+	{
+		var wd=$(dialog).width();
+		var hg=$(dialog).height();
+		var mt=hg/2;
+		var ml=wd/2;
+
+		$(dialog).css({
+			'display':'block',
+			'top':'50%',
+			'margin-top':'-'+mt+'px',
+			'left':'50%',
+			'margin-left':'-'+ml+'px',
+			'position':'fixed',
+			'z-index':'100000',
+		});
+	},
+	dialogFullscreen:function(btn)
+	{
+		
+		var dialog=$(btn).parents('dialog');
+		$(dialog).toggleClass('fullscreen');
+		if(!$(dialog).hasClass('fullscreen'))
+			this.dialogSetPosition(dialog);
 	},
 	dialogClose:function()
 	{
@@ -957,6 +985,11 @@ var clonos={
 		//debugger;
 		// ---
 
+		// Если мы в нужной таблице, то рисуем графики
+		if(data.id=='bhyveslist' || data.id=='jailslist')
+		{
+			clonos.createGraphs();
+		}
 	},
 	
 	fillTab:function(data)
@@ -2701,6 +2734,8 @@ var clonos={
 				}
 				if(status==2)
 				{
+					var o=$('#'+this.dotEscape(id));
+					if(!o.length) his.addNewJail(data,cmd);
 					this.evtStatus2(id,status,data);
 				}
 				break;
@@ -2718,6 +2753,8 @@ var clonos={
 				{
 					this.enableRip(id);
 					window.setTimeout($.proxy(this.deleteItemsOk,this,id),2000);
+					if(cmd=='jremove' || cmd=='bremove')
+						this.deleteGraphById(id);
 				}
 				break;
 			case 'update':
@@ -2740,7 +2777,7 @@ var clonos={
 				return;
 				break;
 		}
-		if(typeof data.data['protected'])
+		if(typeof data.data['protected']!='undefined')
 		if(isset(this.tpl_protected,data.data['protected']))
 		{
 			var table=$('table.tsimple').attr('id');
@@ -2832,6 +2869,8 @@ var clonos={
 			}
 			status=true;
 		}
+		
+		this.createGraphById(id);
 	},
 	
 	formatBytes:function(bytes,decimals)
@@ -3002,7 +3041,171 @@ var clonos={
 		document.cookie="lang="+lang+";path=/;";
 		location.reload();
 	},
+	
+	createGraphs:function()
+	{
+		var grs=$('td.graph');
+		for(n=0,nl=grs.length;n<nl;n++)
+		{
+			var gr=grs[n];
+			this.createGraphByGr(gr);
+		}
+		graphs.getMetrics();
+	},
+	createGraphByGr(gr)
+	{
+		$(gr).css({'padding':'1px 0','margin':0,'vertical-align':'middle','font-size':0});
+		var cl=$(gr).attr('class');
+		var width=$(gr).width();
+		var height=$(gr).height();
+		var res=cl.match(/g-([^ ]+)/);
+		if(res!=null)
+		{
+			var name=res[1];
+			var g=new graph(name,width,height,gr);
+			g.create();
+		}
+
+	},
+	
+	createGraphById:function(id)
+	{
+		var gr=$('td.graph.g-'+id)
+		this.createGraphByGr(gr);
+	},
+	
+	deleteGraphById:function(id)
+	{
+		delete graphs.list[id];
+	},
 }
+
+/* --- GRAPH START --- */
+graphs={
+	list:{},
+	
+	listAdd:function(name)
+	{
+		this.list.push(name);
+	},
+	
+	getMetrics:function()
+	{
+		this.wsconnect();
+	},
+	
+	wsconnect:function()
+	{
+		this.client_id=this.name;
+		this.socket = new WebSocket("ws://"+_server_name+":8024/graph/client-"+Math.random());
+		$(this.socket).on('open',$.proxy(this.wsopen,this))
+			.on('close',$.proxy(this.wsclose,this))
+			.on('error',$.proxy(this.wserror,this))
+			.on('message',$.proxy(this.wsmessage,this));
+	},
+	wsclose:function(event)
+	{
+		if(event.wasClean)
+		{
+			var msg_type='warning';
+			var msg='Сервер закрыл соединение!';
+		}else{
+			var msg_type='error';
+			var msg='Соединение с сервером разорвано аварийно! Перезагрузите страницу!';
+		}
+		this.connected=false;
+		setTimeout($.proxy(this.wsconnect,this),5000);
+	},
+	wsopen:function(event)
+	{
+		this.connected=true;
+	},
+	wserror:function(event)
+	{
+		this.connected=false;
+	},
+	wsmessage:function(event)
+	{
+		try{
+			var msg=JSON.parse(event.originalEvent.data);
+		}catch(e){ }
+		
+		if(msg && typeof msg.cmd!='undefined')
+		{
+			return;
+		}
+		
+		var larr=[];
+		for(l in this.list)
+			larr.push(this.list[l].name)
+		
+		if(typeof msg=='object')
+		{
+			for(n in msg)
+			{
+				var inf=msg[n];
+				var name=inf['name'];
+				var gr=this.list[name];
+				if(gr)
+				{
+					gr.line1.append(new Date().getTime(), inf.pcpu);
+					gr.line2.append(new Date().getTime(), inf.pmem);
+					var res=larr.indexOf(name);
+					if(res>-1) larr.splice(res,1);
+				}
+			}
+		}
+		
+		for(n=0,nl=larr.length;n<nl;n++)
+		{
+			this.list[larr[n]].line1.append(new Date().getTime(), 0);
+			this.list[larr[n]].line2.append(new Date().getTime(), 0);
+		}
+	}
+}
+function graph(name,width,height,el_parent)
+{
+	this.name=name;
+	this.height=height;
+	this.width=width;
+	this.el_parent=el_parent;
+	this.is_init=false;
+	this.el_id=null;
+	this.line1=null;
+	this.line2=null;
+	this.connected=false;
+}
+graph.prototype.create=function()
+{
+	
+	var el_parent=$(this.el_parent);
+	if(typeof el_parent=='undefined')
+	{
+		el_parent=$('body');
+	}else{
+		this.el_id=el_parent;
+		this.is_init=true;
+	}
+	$(el_parent).append('<canvas id="g-'+this.name+'" width="'+this.width+'" height="'+this.height+' vertical-align="middle"></canvas>');
+	
+	this.line1 = new TimeSeries({resetBounds:false,resetBoundsInterval:5000});
+	this.line2 = new TimeSeries({resetBounds:false,resetBoundsInterval:5000});
+	
+	var back_color='rgba(0,0,0,0.02)';
+	var line1_color='rgb(17,125,187)'; //'blue';	//'rgb(0,0,255)';
+	var line1_fillStyle='rgba(17,125,187,0.05)'; //'rgba(241, 240, 255, 0.4)';
+	var line2_color='rgb(149,40,180)'; //'green'; //'rgb(0,255,0)';
+	var line2_fillStyle='rgba(149,40,180,0.05)'; //'rgba(222,245,222,0.4)';
+	
+	this.smoothie = new SmoothieChart({interpolation:'bezier',grid:{fillStyle:back_color,sharpLines:true,strokeStyle:'transparent'},labels:{fontSize:8,disabled:true,fillStyle:'#000000',precision:0},millisPerPixel:1000,tooltip:true,maxValue:100,minValue:0});
+
+	this.smoothie.addTimeSeries(this.line1, { strokeStyle: line1_color, lineWidth:1, fillStyle:line1_fillStyle }); //, fillStyle: 'rgba(0, 255, 0, 0.4)'
+	this.smoothie.addTimeSeries(this.line2, { strokeStyle: line2_color, lineWidth: 1, fillStyle:line2_fillStyle }); //, fillStyle: 'rgba(255, 0, 255, 0.3)'
+
+	this.smoothie.streamTo(document.getElementById('g-'+this.name), 5000);
+	graphs.list[this.name]=this;
+}
+/* === GRAPH END === */
 
 function isset(varr){for(a in arguments){if(typeof arguments[a]=='undefined')return false;}return true;}
 

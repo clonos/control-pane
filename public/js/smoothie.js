@@ -948,10 +948,19 @@
               // Importantly, A and P are at the same y coordinate, as are B and Q. This is
               // so adjacent curves appear to flow as one.
               //
-              context.bezierCurveTo( // startPoint (A) is implicit from last iteration of loop
-                Math.round((lastX + x) / 2), lastY, // controlPoint1 (P)
-                Math.round((lastX + x)) / 2, y, // controlPoint2 (Q)
-                x, y); // endPoint (B)
+			  
+			  if(lastY==y)
+			  {
+				  var minus=0.5;
+				  if(y<1) minus=0;
+				  context.lineTo(x,y-minus);
+			  }else{
+			  
+				  context.bezierCurveTo( // startPoint (A) is implicit from last iteration of loop
+					Math.round((lastX + x) / 2), lastY, // controlPoint1 (P)
+					Math.round((lastX + x)) / 2, y, // controlPoint2 (Q)
+					x, y); // endPoint (B)
+			  }
               break;
             }
             case "step": {

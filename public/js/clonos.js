@@ -2735,7 +2735,7 @@ var clonos={
 				if(status==2)
 				{
 					var o=$('#'+this.dotEscape(id));
-					if(!o.length) his.addNewJail(data,cmd);
+					if(!o.length) this.addNewJail(data,cmd);
 					this.evtStatus2(id,status,data);
 				}
 				break;
@@ -3148,10 +3148,17 @@ graphs={
 				var gr=this.list[name];
 				if(gr)
 				{
-					gr.line1.append(new Date().getTime(), inf.pcpu);
-					gr.line2.append(new Date().getTime(), inf.pmem);
+					var cpu=inf.pcpu, mem=inf.pmem;
+					//cpu=cpu+(cpu%2);
+					//mem=mem+(mem%2);
+					//cpu=Math.floor((Math.random() * 100) + 1);
+					//mem=Math.floor((Math.random() * 100) + 1);
+					gr.line1.append(new Date().getTime(), cpu);
+					gr.line2.append(new Date().getTime(), mem);
 					var res=larr.indexOf(name);
 					if(res>-1) larr.splice(res,1);
+					
+					//console.log(name,cpu,mem);
 				}
 			}
 		}
@@ -3186,23 +3193,23 @@ graph.prototype.create=function()
 		this.el_id=el_parent;
 		this.is_init=true;
 	}
-	$(el_parent).append('<canvas id="g-'+this.name+'" width="'+this.width+'" height="'+this.height+' vertical-align="middle"></canvas>');
+	$(el_parent).append('<canvas id="g-'+this.name+'" width="'+this.width+'" height="'+this.height+'" vertical-align="middle"></canvas>');
 	
-	this.line1 = new TimeSeries({resetBounds:false,resetBoundsInterval:5000});
-	this.line2 = new TimeSeries({resetBounds:false,resetBoundsInterval:5000});
+	this.line1 = new TimeSeries({resetBounds:false,resetBoundsInterval:3000});
+	this.line2 = new TimeSeries({resetBounds:false,resetBoundsInterval:3000});
 	
 	var back_color='rgba(0,0,0,0.02)';
 	var line1_color='rgb(17,125,187)'; //'blue';	//'rgb(0,0,255)';
-	var line1_fillStyle='rgba(17,125,187,0.05)'; //'rgba(241, 240, 255, 0.4)';
+	var line1_fillStyle='rgba(17,125,187,0.03)'; //'rgba(241, 240, 255, 0.4)';
 	var line2_color='rgb(149,40,180)'; //'green'; //'rgb(0,255,0)';
-	var line2_fillStyle='rgba(149,40,180,0.05)'; //'rgba(222,245,222,0.4)';
+	var line2_fillStyle='rgba(149,40,180,0.03)'; //'rgba(222,245,222,0.4)';
 	
-	this.smoothie = new SmoothieChart({interpolation:'bezier',grid:{fillStyle:back_color,sharpLines:true,strokeStyle:'transparent'},labels:{fontSize:8,disabled:true,fillStyle:'#000000',precision:0},millisPerPixel:1000,tooltip:true,maxValue:100,minValue:0});
+	this.smoothie = new SmoothieChart({interpolation:'bezier',grid:{fillStyle:back_color,sharpLines:true,strokeStyle:'transparent',borderVisible:true},labels:{fontSize:8,disabled:true,fillStyle:'#000000',precision:0},millisPerPixel:1000,enableDpiScaling:true,tooltip:true,maxValue:100,minValue:0});
 
-	this.smoothie.addTimeSeries(this.line1, { strokeStyle: line1_color, lineWidth:1, fillStyle:line1_fillStyle }); //, fillStyle: 'rgba(0, 255, 0, 0.4)'
-	this.smoothie.addTimeSeries(this.line2, { strokeStyle: line2_color, lineWidth: 1, fillStyle:line2_fillStyle }); //, fillStyle: 'rgba(255, 0, 255, 0.3)'
+	this.smoothie.addTimeSeries(this.line1, { strokeStyle: line1_color, lineWidth:0.5, fillStyle:line1_fillStyle }); //, fillStyle: 'rgba(0, 255, 0, 0.4)'
+	this.smoothie.addTimeSeries(this.line2, { strokeStyle: line2_color, lineWidth:0.5, fillStyle:line2_fillStyle }); //, fillStyle: 'rgba(255, 0, 255, 0.3)'
 
-	this.smoothie.streamTo(document.getElementById('g-'+this.name), 5000);
+	this.smoothie.streamTo(document.getElementById('g-'+this.name), 1000);
 	graphs.list[this.name]=this;
 }
 /* === GRAPH END === */

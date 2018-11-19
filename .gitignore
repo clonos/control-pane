@@ -1,1 +1,4 @@
-media_import/*
+media_import/*.img
+media_import/*.size
+
+

@@ -18,6 +18,7 @@ $clonos->useDialogs(array(
 	<thead>
 		<th class="wdt-120">Node name</th>
 		<th class="txtleft">VM</th>
+		<th class="wdt-120">Usage</th>
 		<th class="txtleft wdt-70">RAM</th>
 		<th class="wdt-30">CPU</th>
 		<th class="wdt-100">OS type</th>

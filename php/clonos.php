@@ -2293,14 +2293,14 @@ class ClonOS
 			),
 		);
 
-		$result='0 mb';
+		$result='0 MB';
 		foreach($arBytes as $arItem)
 		{
 			if($bytes >= $arItem["VALUE"])
 			{
 				$result = $bytes / $arItem["VALUE"];
 				if($round) $result=round($result);
-				$result = str_replace(".", "," , strval(round($result, 2)))." ".$arItem["UNIT"];
+				$result = str_replace(".", "," , strval(round($result, 2)))." ".strtoupper($arItem["UNIT"]);
 				break;
 			}
 		}

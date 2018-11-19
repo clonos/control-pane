@@ -15,6 +15,7 @@ $clonos->useDialogs(array(
 		<tr>
 			<th class="wdt-200 elastic">Node name</th>
 			<th class="txtleft">Jail</th>
+			<th class="wdt-120">Usage</th>
 			<th class="txtleft wdt-200">IP-address</th>
 			<th class="wdt-120">Status</th>
 			<th colspan="4" class="wdt-100">Action</th>

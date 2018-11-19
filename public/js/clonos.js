@@ -90,6 +90,7 @@ var clonos={
 		if(this.manual_close_menu) return;
 		var wdt=$(window).width();
 		if(wdt<800) $('body').addClass('gadget'); else $('body').removeClass('gadget');
+		setTimeout(graphs.onResize,500);
 	},
 	closerClick:function(event)
 	{
@@ -937,6 +938,13 @@ var clonos={
 				return;
 			}
 			for(id in data) $('#'+id).html(data[id]);
+			
+			var razd=location.pathname;
+			if(['/overview/'].indexOf(razd)!=-1)
+			{
+				clonos.createGraphs();
+				console.log(data.id);
+			}
 		}
 	},
 	
@@ -986,7 +994,7 @@ var clonos={
 		// ---
 
 		// Если мы в нужной таблице, то рисуем графики
-		if(data.id=='bhyveslist' || data.id=='jailslist')
+		if(['bhyveslist','jailslist'].indexOf(data.id)!=-1)
 		{
 			clonos.createGraphs();
 		}
@@ -2643,7 +2651,7 @@ var clonos={
 				{
 					data.data['vm_ram']=ram.replace(/^\d+([gmt])$/gi,function(orig,lett)
 					{
-						var a={'m':' MB','g':' GB','t':' TB'}[lett.toLowerCase()];
+						var a={'m':' MB','g':' GB','t':' TB'}[lett.toUpperCase()];	//!!!
 						return orig.replace(lett,a);
 					});
 				}else{
@@ -3044,7 +3052,7 @@ var clonos={
 	
 	createGraphs:function()
 	{
-		var grs=$('td.graph');
+		var grs=$('.graph');
 		for(n=0,nl=grs.length;n<nl;n++)
 		{
 			var gr=grs[n];
@@ -3058,14 +3066,23 @@ var clonos={
 		var cl=$(gr).attr('class');
 		var width=$(gr).width();
 		var height=$(gr).height();
-		var res=cl.match(/g-([^ ]+)/);
+		var tooltip1='';
+		var tooltip2='';
+		res=cl.match(/\bl-([^ ]+)\b/);
+		if(res!=null)
+		{
+			res=res[1].split(',');
+			tooltip1=res[0];
+			tooltip2=res[1];
+		}
+
+		var res=cl.match(/\bg-([^ ]+)\b/);
 		if(res!=null)
 		{
 			var name=res[1];
-			var g=new graph(name,width,height,gr);
+			var g=new graph(name,width,height,gr,tooltip1,tooltip2);
 			g.create();
 		}
-
 	},
 	
 	createGraphById:function(id)
@@ -3097,7 +3114,7 @@ graphs={
 	wsconnect:function()
 	{
 		this.client_id=this.name;
-		this.socket = new WebSocket("ws://"+_server_name+":8024/graph/client-"+Math.random());
+		this.socket = new WebSocket("ws://"+_server_name+":8024/graph"+location.pathname+"client-"+Math.random());
 		$(this.socket).on('open',$.proxy(this.wsopen,this))
 			.on('close',$.proxy(this.wsclose,this))
 			.on('error',$.proxy(this.wserror,this))
@@ -3135,42 +3152,104 @@ graphs={
 			return;
 		}
 		
-		var larr=[];
-		for(l in this.list)
-			larr.push(this.list[l].name)
-		
-		if(typeof msg=='object')
+		if(typeof msg.__all!='undefined')
 		{
-			for(n in msg)
+			for(a in msg.__all)
 			{
-				var inf=msg[n];
-				var name=inf['name'];
-				var gr=this.list[name];
-				if(gr)
+				var items=msg.__all[a];
+				for(i in items)
 				{
-					var cpu=inf.pcpu, mem=inf.pmem;
-					//cpu=cpu+(cpu%2);
-					//mem=mem+(mem%2);
-					//cpu=Math.floor((Math.random() * 100) + 1);
-					//mem=Math.floor((Math.random() * 100) + 1);
-					gr.line1.append(new Date().getTime(), cpu);
-					gr.line2.append(new Date().getTime(), mem);
-					var res=larr.indexOf(name);
-					if(res>-1) larr.splice(res,1);
-					
-					//console.log(name,cpu,mem);
+					var item=items[i];
+					var gr=this.list[item.name];
+					var date = new Date();
+					date.setTime(item.time*1000);
+					if(gr)
+					{
+						var cpu,mem;
+						if(typeof item.pcpu!='undefined')
+						{
+							gr.line1.append(date.getTime(), item.pcpu);
+						}
+						if(typeof item.pmem!='undefined')
+						{
+							gr.line2.append(date.getTime(), item.pmem);
+						}
+					}else{
+						var gr=this.list[item.name+'-pcpu'];
+						{
+							if(gr) gr.line1.append(date.getTime(), item.pcpu);
+						}
+						var gr=this.list[item.name+'-pmem'];
+						{
+							if(gr) gr.line1.append(date.getTime(), item.pmem);
+						}
+					}
 				}
 			}
+		}else{
+			
+			var larr=[];
+			for(l in this.list)
+				larr.push(this.list[l].name)
+			
+			if(typeof msg=='object')
+			{
+				for(n in msg)
+				{
+					var inf=msg[n];
+					var name=inf['name'];
+					var gr=this.list[name];
+					var date = new Date();
+					date.setTime(inf.time*1000);
+					if(gr)
+					{
+						var cpu=inf.pcpu, mem=inf.pmem;
+						gr.line1.append(date.getTime(), cpu);
+						gr.line2.append(date.getTime(), mem);
+						var res=larr.indexOf(name);
+						if(res>-1) larr.splice(res,1);
+					}else{
+						var nname=name+'-pcpu';
+						var gr=this.list[nname];
+						{
+							if(gr) gr.line1.append(date.getTime(), inf.pcpu);
+							var res=larr.indexOf(nname);
+							if(res>-1) larr.splice(res,1);
+						}
+						var nname=name+'-pmem';
+						var gr=this.list[nname];
+						{
+							if(gr) gr.line1.append(date.getTime(), inf.pmem);
+							var res=larr.indexOf(nname);
+							if(res>-1) larr.splice(res,1);
+						}
+					}
+				}
+			}
+			
+			for(n=0,nl=larr.length;n<nl;n++)
+			{
+				this.list[larr[n]].line1.append(new Date().getTime(), 0);
+				this.list[larr[n]].line2.append(new Date().getTime(), 0);
+			}
+			
 		}
-		
-		for(n=0,nl=larr.length;n<nl;n++)
+	},
+	onResize:function()
+	{
+		// ресайз не работает. Нужно найти нормальный способ
+		/*
+		var graphs=$('.graph');
+		for(n=0,nl=graphs.length;n<nl;n++)
 		{
-			this.list[larr[n]].line1.append(new Date().getTime(), 0);
-			this.list[larr[n]].line2.append(new Date().getTime(), 0);
+			var gpar=$(graphs[n]).parent();
+			var width=$(gpar).width();
+			$('canvas',graphs[n]).width(width);
 		}
+		*/
 	}
 }
-function graph(name,width,height,el_parent)
+function graph(name,width,height,el_parent,tooltip1,tooltip2)
 {
 	this.name=name;
 	this.height=height;
@@ -3181,10 +3260,74 @@ function graph(name,width,height,el_parent)
 	this.line1=null;
 	this.line2=null;
 	this.connected=false;
+	this.tooltip1=tooltip1;
+	this.tooltip2=tooltip2;
+	
+	this.graphView={
+		white:{
+			view:{
+				interpolation:'linear',
+				grid:{
+					fillStyle:'rgba(0,0,0,0.02)',
+					sharpLines:true,
+					strokeStyle:'transparent',
+					borderVisible:true
+				},
+				labels:{
+					fontSize:8,
+					disabled:true,
+					fillStyle:'#000000',
+					precision:0
+				},
+				millisPerPixel:1000,
+				enableDpiScaling:false,
+				tooltip:true,
+				maxValue:100,
+				minValue:0
+			},
+			colors:{
+				line1_color:'rgb(17,125,187)',
+				line1_fillStyle:'rgba(17,125,187,0.03)',
+				line2_color:'rgb(149,40,180)',
+				line2_fillStyle:'rgba(149,40,180,0.03)'
+			},
+			lineWidth:0.5,
+		},
+		black:{
+			view:{
+				interpolation:'linear',
+				grid:{
+					//fillStyle:'rgba(100,100,100,0.02)',
+					sharpLines:true,
+					//strokeStyle:'transparent',
+					borderVisible:true,
+					verticalSections:4,
+				},
+				labels:{
+					//fontSize:8,
+					//disabled:true,
+					//fillStyle:'#000000',
+					precision:0,
+				},
+				millisPerPixel:100,
+				enableDpiScaling:false,
+				tooltip:true,
+				maxValue:100,
+				minValue:0,
+				tooltipLabel:'test',
+			},
+			colors:{
+				line1_color:'rgb(0,255,0)',
+				line1_fillStyle:'rgba(0,255,0,0.4)',
+				line2_color:'rgb(255,0,255)',
+				line2_fillStyle:'rgba(255,0,255,0.3)'
+			},
+			lineWidth:1,
+		}
+	};
 }
 graph.prototype.create=function()
 {
-	
 	var el_parent=$(this.el_parent);
 	if(typeof el_parent=='undefined')
 	{
@@ -3195,19 +3338,30 @@ graph.prototype.create=function()
 	}
 	$(el_parent).append('<canvas id="g-'+this.name+'" width="'+this.width+'" height="'+this.height+'" vertical-align="middle"></canvas>');
 	
+	var view;
+	var cl=$(el_parent).attr('class');
+	var res=cl.match(/v-([a-z]+)/);
+	if(res!=null)
+	{
+		view=res[1];
+	}else{
+		view='white';
+	}
+	var varr=this.graphView[view];
+	
 	this.line1 = new TimeSeries({resetBounds:false,resetBoundsInterval:3000});
 	this.line2 = new TimeSeries({resetBounds:false,resetBoundsInterval:3000});
 	
 	var back_color='rgba(0,0,0,0.02)';
-	var line1_color='rgb(17,125,187)'; //'blue';	//'rgb(0,0,255)';
-	var line1_fillStyle='rgba(17,125,187,0.03)'; //'rgba(241, 240, 255, 0.4)';
-	var line2_color='rgb(149,40,180)'; //'green'; //'rgb(0,255,0)';
-	var line2_fillStyle='rgba(149,40,180,0.03)'; //'rgba(222,245,222,0.4)';
+	var line1_color=varr.colors.line1_color;
+	var line1_fillStyle=varr.colors.line1_fillStyle;
+	var line2_color=varr.colors.line2_color;
+	var line2_fillStyle=varr.colors.line2_fillStyle;
 	
-	this.smoothie = new SmoothieChart({interpolation:'bezier',grid:{fillStyle:back_color,sharpLines:true,strokeStyle:'transparent',borderVisible:true},labels:{fontSize:8,disabled:true,fillStyle:'#000000',precision:0},millisPerPixel:1000,enableDpiScaling:true,tooltip:true,maxValue:100,minValue:0});
+	this.smoothie = new SmoothieChart(varr.view);
 
-	this.smoothie.addTimeSeries(this.line1, { strokeStyle: line1_color, lineWidth:0.5, fillStyle:line1_fillStyle }); //, fillStyle: 'rgba(0, 255, 0, 0.4)'
-	this.smoothie.addTimeSeries(this.line2, { strokeStyle: line2_color, lineWidth:0.5, fillStyle:line2_fillStyle }); //, fillStyle: 'rgba(255, 0, 255, 0.3)'
+	this.smoothie.addTimeSeries(this.line1, { strokeStyle: line1_color, lineWidth:varr.lineWidth, fillStyle:line1_fillStyle, tooltipLabel:this.tooltip1+':' });
+	this.smoothie.addTimeSeries(this.line2, { strokeStyle: line2_color, lineWidth:varr.lineWidth, fillStyle:line2_fillStyle, tooltipLabel:this.tooltip2+':' });
 
 	this.smoothie.streamTo(document.getElementById('g-'+this.name), 1000);
 	graphs.list[this.name]=this;

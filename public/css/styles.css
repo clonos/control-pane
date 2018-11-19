@@ -359,6 +359,16 @@ p.log-p:before {
 }
 
 
+.row2col:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+.row2col .column {
+	float: left;
+	width: 50%;
+}
+
 
 /* Таблицы: http://html5book.ru/examples/demo-tables.html */
 
@@ -628,6 +638,29 @@ tr.busy.maintenance .ops span {
 
 .vnc-grey {
 	color:gray;
+}
+.vnc-wait {
+	position:absolute;
+	width:100%;
+	background-color:white;
+	opacity:0.7;
+	top:25px;
+	bottom:0;
+	font-weight:bold;
+	font-size:150%;
+}
+.vnc-wait .outer {
+	height:100%;
+	text-align:center;
+}
+.vnc-wait .inner {
+    margin: auto;
+    height: 30px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
 }
 
 /* td.ops span.icon-play:before {
@@ -1483,16 +1516,14 @@ div.smoothie-chart-tooltip {
     box-shadow:3px 3px 3px 0px rgba(0,0,0,0.1);
 	line-height: 120%;
 }
-.smoothie-chart-tooltip :nth-child(2):before {
-	content:'cpu: '
-}
-.smoothie-chart-tooltip :nth-child(4):before {
-	content:'mem: '
-}
 .smoothie-chart-tooltip :nth-child(2):after,
 .smoothie-chart-tooltip :nth-child(4):after {
 	content:'%'
 }  
 td.graph {
 	/*background-color:black;*/
+}
+
+.row2col div.smoothie-chart-tooltip {
+	background:gray;
 }

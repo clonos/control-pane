@@ -943,7 +943,6 @@ var clonos={
 			if(['/overview/'].indexOf(razd)!=-1)
 			{
 				clonos.createGraphs();
-				console.log(data.id);
 			}
 		}
 	},
@@ -1677,6 +1676,13 @@ var clonos={
 					return;break;
 			}
 		}
+		
+		var outer=$(target).parents('.vnc-wait');
+		if(outer.length)
+		{
+			$(outer).hide();
+			return;
+		}
 		/* --- */
 		
 /*  		if(target.id=='main_chkbox')
@@ -1756,6 +1762,10 @@ var clonos={
 				this.jailRestart(trid,opt);
 				return;break;
 			case 'icon-desktop':
+				$('.vnc-wait').show();
+				clearTimeout(this.coundown);
+				this.countdown_seconds=10;
+				this.vnc_countdown();
 				this.dialogShow(trid,'small');
 				return;break;
 			case 'icon-cog':
@@ -1951,6 +1961,18 @@ var clonos={
 				break;
 		}
 		*/
+	},
+	
+	vnc_countdown:function()
+	{
+		$('#vnc-countdown').html(this.countdown_seconds--);
+		this.coundown=setTimeout($.proxy(this.vnc_countdown,this),1000);
+		if(this.countdown_seconds<0)
+		{
+			$('.vnc-wait').hide();
+			clearTimeout(this.coundown);
+			this.countdown_seconds=10;
+		}
 	},
 	
 	onChangePkgTemplate:function(obj,event)
@@ -2785,13 +2807,16 @@ var clonos={
 				return;
 				break;
 		}
-		if(typeof data.data['protected']!='undefined')
-		if(isset(this.tpl_protected,data.data['protected']))
+		if(typeof data.data!='undefined')
 		{
-			var table=$('table.tsimple').attr('id');
-			var p=this.tpl_protected[data.data['protected']];
-			$('table#'+table+' tr#'+id+' td.op-del').attr('title',p['title']);
-			$('table#'+table+' tr#'+id+' td.op-del span').attr('class',p['icon']);
+			if(typeof data.data['protected']!='undefined')
+			if(isset(this.tpl_protected,data.data['protected']))
+			{
+				var table=$('table.tsimple').attr('id');
+				var p=this.tpl_protected[data.data['protected']];
+				$('table#'+table+' tr#'+id+' td.op-del').attr('title',p['title']);
+				$('table#'+table+' tr#'+id+' td.op-del span').attr('class',p['icon']);
+			}
 		}
 	},
 	
@@ -3131,6 +3156,8 @@ graphs={
 			var msg='Соединение с сервером разорвано аварийно! Перезагрузите страницу!';
 		}
 		this.connected=false;
+		console.log('Соединение закрыто по неизвестной причине...');
+		this.socket=null;
 		setTimeout($.proxy(this.wsconnect,this),5000);
 	},
 	wsopen:function(event)
@@ -3140,6 +3167,7 @@ graphs={
 	wserror:function(event)
 	{
 		this.connected=false;
+		console.log('Какая-то ошибка в соединении сокета');
 	},
 	wsmessage:function(event)
 	{
@@ -3266,7 +3294,7 @@ function graph(name,width,height,el_parent,tooltip1,tooltip2)
 	this.graphView={
 		white:{
 			view:{
-				interpolation:'linear',
+				interpolation:'bezier',
 				grid:{
 					fillStyle:'rgba(0,0,0,0.02)',
 					sharpLines:true,
@@ -3291,11 +3319,11 @@ function graph(name,width,height,el_parent,tooltip1,tooltip2)
 				line2_color:'rgb(149,40,180)',
 				line2_fillStyle:'rgba(149,40,180,0.03)'
 			},
-			lineWidth:0.5,
+			lineWidth:0,
 		},
 		black:{
 			view:{
-				interpolation:'linear',
+				interpolation:'bezier',
 				grid:{
 					//fillStyle:'rgba(100,100,100,0.02)',
 					sharpLines:true,

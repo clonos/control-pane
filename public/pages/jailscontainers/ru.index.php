@@ -24,12 +24,12 @@ $clonos->useDialogs(array(
 <table class="tsimple" id="jailslist" width="100%">
 	<thead>
 		<tr>
-			<th class="wdt-200 elastic">Имя сервера</th>
+			<th class="elastic">Имя сервера</th>
 			<th class="txtleft">Контейнер</th>
 			<th class="wdt-120">Нагрузка</th>
-			<th class="txtleft wdt-200">IP-адрес</th>
+			<th class="txtleft">IP-адрес</th>
 			<th class="txtcenter wdt-120">Статус</th>
-			<th colspan="4" class="wdt-100">Действия</th>
+			<th colspan="4" class="txtcenter wdt-100">Действия</th>
 			<th class="wdt-30">VNC</th>
 			<th class="txtcenter wdt-50">VNC порт</th>
 		</tr>

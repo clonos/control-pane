@@ -154,5 +154,9 @@ $lang=array(
 	'bhyve'=>'виртуальная машина',
 	
 	'Since imported name already exist, we are change it'=>'Поскольку оригинальное имя уже существует, мы поменяли его <br />на свободное',
+	
+	'Please, wait for initialize Virtual Machine'=>'Пожалуйста, подождите пока инициализируется виртуальная машина',
+	'You can click here, or wait'=>'Вы можете кликнуть сюда или подождать',
+	'some time'=>'некоторое время',
 	//''=>'',
 );

@@ -1,7 +1,6 @@
-<h1>Общая статистика облака:</h1>
-
 <div class="row2col">
 	<div class="column">
+		<h1>Общая статистика облака:</h1>
 		<table class="tfill" style="width:98%;">
 			<thead>
 				<tr>

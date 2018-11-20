@@ -129,6 +129,10 @@ $lang=array(
 	
 	'edit_title'=>'Edit',
 	'delete_title'=>'Delete',
+	
+	'Please, wait for initialize Virtual Machine'=>'Please, wait for initialize Virtual Machine',
+	'You can click here, or wait'=>'You can click here, or wait',
+	'some time'=>'some time',
 
 	//''=>'',
 );

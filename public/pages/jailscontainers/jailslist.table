@@ -2,14 +2,14 @@
 		<tr class="#nth-num##desktop##maintenance#" id="#jname#">
 			<td class="wordwreck node">#node#</td>
 			<td class="txtleft jname">#jname#</td>
-			<td class="graph g-#jname# l-cpu,mem"></td>
+			<td class="graph g-#jname# l-cpu,mem wdt-120"></td>
 			<td class="txtleft wordwreck ip4_addr">#ip4_addr#</td>
-			<td class="jstatus">#jstatus#</td>
-			<td class="ops" width="5"><span class="icon-cnt"><span class="icon-#icon#"></span></span></td>
-			<td width="5" class="op-settings"><span class="icon-cog"></span></td>
-			<td width="5" class="op-reboot" title="#reboot_title#"><span class="icon-arrows-cw"></span></td>
-			<td width="5" class="op-del"#protitle#><span class="#protected#"></span></td>
-			<td width="5" class="op-vnc"><span class="icon-desktop" title="#vnc_title#"></span></td>
-			<td class="small vnc-#vnc_port_status#">#vnc_port#</td>
+			<td class="jstatus wdt-120">#jstatus#</td>
+			<td class="ops"><span class="icon-cnt"><span class="icon-#icon#"></span></span></td>
+			<td class="op-settings"><span class="icon-cog"></span></td>
+			<td class="op-reboot" title="#reboot_title#"><span class="icon-arrows-cw"></span></td>
+			<td class="op-del"#protitle#><span class="#protected#"></span></td>
+			<td class="op-vnc"><span class="icon-desktop" title="#vnc_title#"></span></td>
+			<td class="wdt-50 small vnc-#vnc_port_status#">#vnc_port#</td>
 		</tr>
 	</tbody>

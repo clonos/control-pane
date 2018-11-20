@@ -1,4 +1,5 @@
 media_import/*.img
 media_import/*.size
-
-
+logs/*.log
+logs/*.err
+clonos/node/node_modules/*

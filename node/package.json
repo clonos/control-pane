@@ -1,0 +1,19 @@
+{
+  "name": "clonos",
+  "version": "0.0.1",
+  "description": "ClonOS WebUI",
+  "license": "BSD",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:clonos/cp.git"
+  },
+  "dependencies": {
+    "ws": "6.1.0",
+    "nodestalker": "0.1.21"
+  },
+  "devDependencies": {},
+  "scripts": {},
+  "engines": {
+    "node": ">= 6"
+  }
+}

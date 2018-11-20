@@ -172,7 +172,15 @@ header {
 	overflow:auto;
 }
 #content {
-	padding:20px;
+	/*padding:20px;*/
+	height:100%;
+	position:relative;
+}
+#ctop {
+	position:absolute;
+	top:20px;
+	left:20px;
+	right:20px;
 }
 
 .gadget .menu {
@@ -374,7 +382,7 @@ p.log-p:before {
 
 table {
 	font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
-	font-size: 14px;
+	font-size: .8em;
 	border-collapse: collapse;
 	text-align: center;
 	margin:4px 0;
@@ -419,8 +427,8 @@ thead td:first-child, td:first-child {
 
 .tsimple {
 	table-layout:fixed;
-  border-collapse:collapse;
-  width:100%;
+	border-collapse:collapse;
+	width:100%;
 }
 .tsimple thead th,
 .tsimple thead td {
@@ -429,7 +437,7 @@ thead td:first-child, td:first-child {
 	text-align:left;
 }
 .tsimple tbody td {
-	padding:8px 2px;
+	padding:8px 8px 8px 0; /*2px;*/
 	border-bottom:1px solid #f0f0f0;
 	overflow:hidden;
 	text-overflow:ellipsis;
@@ -1526,4 +1534,48 @@ td.graph {
 
 .row2col div.smoothie-chart-tooltip {
 	background:gray;
+}
+
+
+
+
+.asplit .tsimple tbody {
+    display:block;
+    height:50px;
+    overflow:auto;
+}
+.asplit .tsimple thead, .asplit .tsimple tbody tr {
+    display:table;
+    width:100%;
+    table-layout:fixed;
+}
+.asplit .tsimple thead {
+    width: calc( 100% - 16px )
+}
+.asplit .tsimple td[class^="op-"],
+.asplit .tsimple td.ops {
+	width:20px;
+}
+.asplit .tsimple td.op-vnc {
+	width:30px;
+}
+
+.asplit #cdown {
+	background-color: #f0f0f0;
+	position: absolute;
+	top: 210px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	border-top:1px solid silver;
+	box-shadow:inset 0 2px 4px 0px rgba(0,0,0,0.1);
+}
+.asplit #cinfo {
+	position:absolute;
+	top:20px;
+	left:20px;
+	right:20px;
+	bottom:20px;
+/*	border:1px inset white;
+	background-color:#fefefe;*/
 }

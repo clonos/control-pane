@@ -79,7 +79,7 @@ if(!$user_info['error'])
 </head>
 <body class="gadget1 login">
 
-<main><div class="main"><div id="content">
+<main><div class="main"><div id="content"><div id="ctop">
 <?php
 if(file_exists($file_name)) include($file_name); else
 {
@@ -87,7 +87,7 @@ if(file_exists($file_name)) include($file_name); else
 }
 $clonos->placeDialogs();
 ?>
-</div></div></main>
+</div><div id="cdown"><div id="cinfo"></div></div></div></div></main>
 
 <div class="menu"><div id="menu">
 	<div class="closer"></div>

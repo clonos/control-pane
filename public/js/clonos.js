@@ -1699,6 +1699,8 @@ var clonos={
 		var tbl=$(tr).closest('table');
 		var tblid=$(tbl).attr('id');
 		
+if(tblid=='jailslist'){var e=$(tr).parents('div.main');if(e){$(e).toggleClass('asplit');}}
+		
 		var opt='jail';
 		if(tblid=='bhyveslist') opt='bhyve';
 

@@ -13,7 +13,7 @@ var bsWatcher=function(ip,port,tube,callback)
 }
 bsWatcher.prototype.connect=function()
 {
-    this.client=bs.Client('clonos.bsdstore.ru:11300');
+    this.client=bs.Client('localhost:11300');
     this.client.addListener('connect', function() {
         this.connectionError=false;
     }.bind(this));

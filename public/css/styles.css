@@ -1521,7 +1521,7 @@ div.smoothie-chart-tooltip {
 	font-size: 8pt;
 	pointer-events: none;
 	border: 1px solid gray;
-    box-shadow:3px 3px 3px 0px rgba(0,0,0,0.1);
+    box-shadow:3px 3px 3px 0px rgba(0,0,0,0.2);
 	line-height: 120%;
 }
 .smoothie-chart-tooltip :nth-child(2):after,
@@ -1532,13 +1532,20 @@ td.graph {
 	/*background-color:black;*/
 }
 
-.row2col div.smoothie-chart-tooltip {
-	background:gray;
+body.overview div.smoothie-chart-tooltip {
+	background:#3a3a3a;
+	color:white;
+	
 }
 
 
 
-
+.main #cdown {
+	display:none;
+}
+.main.asplit #cdown {
+	display:block;
+}
 .asplit .tsimple tbody {
     display:block;
     height:190px;
@@ -1578,4 +1585,32 @@ td.graph {
 	bottom:20px;
 /*	border:1px inset white;
 	background-color:#fefefe;*/
+}
+
+#cinfo {
+	display:flex;
+}
+#cinfo .left {
+	width:calc(100% - 320px);
+	overflow-y:auto;
+	padding:10px;
+}
+#cinfo .right {
+	width:300px;
+	/*background-color:white;
+	border:1px inset white;*/
+	margin-left:20px;
+	overflow-y:auto;
+	/*padding:10px;*/
+}
+
+#cinfo h2 {
+	font-weight:bold;
+	color:#337ab7;
+	margin-bottom:4px;
+}
+#cinfo .graph {
+	height:70px;
+	width:260px;
+	padding-left:10px !important;
 }

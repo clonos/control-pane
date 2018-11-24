@@ -1699,7 +1699,10 @@ var clonos={
 		var tbl=$(tr).closest('table');
 		var tblid=$(tbl).attr('id');
 		
-if(tblid=='jailslist'){var e=$(tr).parents('div.main');if(e){$(e).toggleClass('asplit');}}
+if(tblid=='jailslist'){
+	var e=$(tr).parents('div.main');if(e){$(e).toggleClass('asplit');}
+	this.openedJailSummary=trid;
+}
 		
 		var opt='jail';
 		if(tblid=='bhyveslist') opt='bhyve';
@@ -3238,6 +3241,20 @@ graphs={
 						gr.line2.append(date.getTime(), mem);
 						var res=larr.indexOf(name);
 						if(res>-1) larr.splice(res,1);
+						//if($('#cdown').css('display')!='block')
+						if(clonos.openedJailSummary==name)
+						{
+							var gr1=this.list['!summary-cpu'];
+							gr1.line1.append(date.getTime(),inf.pcpu);
+							gr1=this.list['!summary-mem'];
+							gr1.line1.append(date.getTime(),inf.pmem);
+							gr1=this.list['!summary-iops'];
+							gr1.line1.append(date.getTime(),inf.readiops);
+							gr1.line2.append(date.getTime(),inf.writeiops);
+							gr1=this.list['!summary-bps'];
+							gr1.line1.append(date.getTime(),inf.readbps);
+							gr1.line2.append(date.getTime(),inf.writebps);
+						}
 					}else{
 						var nname=name+'-pcpu';
 						var gr=this.list[nname];

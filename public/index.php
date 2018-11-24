@@ -77,7 +77,7 @@ if(!$user_info['error'])
 		<?php if(isset($user_info_txt)) echo $user_info_txt; ?>
 	</script>
 </head>
-<body class="gadget1 login">
+<body class="gadget1 login <?php echo $uri;?>">
 
 <main><div class="main"><div id="content"><div id="ctop">
 <?php
@@ -87,7 +87,27 @@ if(file_exists($file_name)) include($file_name); else
 }
 $clonos->placeDialogs();
 ?>
-</div><div id="cdown"><div id="cinfo"></div></div></div></div></main>
+</div><div id="cdown"><div id="cinfo">
+		<div class="left">
+			<dl>
+				<dt>Имя клетки:</dt>
+				<dd>Jail1</dd>
+			</dl>
+		</div>
+		<div class="right">
+			<h2>Загрузка процессора:</h2>
+			<div class="graph v-black g-!summary-cpu l-pcpu"></div>
+			<br />
+			<h2>Использование памяти:</h2>
+			<div class="graph v-black g-!summary-mem l-pmem"></div>
+			<br />
+			<h2>Операций ввода/вывода:</h2>
+			<div class="graph v-black g-!summary-iops l-readiops,writeiops"></div>
+			<br />
+			<h2>Загрузка сети:</h2>
+			<div class="graph v-black g-!summary-bps l-readbps,writebps"></div>
+		</div>
+</div></div></div></div></main>
 
 <div class="menu"><div id="menu">
 	<div class="closer"></div>

@@ -1,0 +1,6 @@
+pkg.d
+bsdconf.d
+zfsinstall.d
+puppet.d
+convectix.d
+cbsd_queue.d

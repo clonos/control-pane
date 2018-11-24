@@ -1,0 +1,15 @@
+[program:wsclonos]
+environment=PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin",cbsd_workdir="/usr/jails"
+command=/usr/local/bin/node /usr/home/web/cp/clonos/node/wsClonos.js
+directory=/usr/home/web/cp/clonos/node
+numprocs=1
+numprocs_start=1
+autostart=true
+autorestart=true
+user=www
+stdout_logfile=/var/log/supervisor/wsclonos.log
+stderr_logfile=/var/log/supervisor/wsclonos.err
+stdout_logfile_maxbytes=2MB
+stdout_logfile_backups=5
+stderr_logfile_maxbytes=2MB
+stderr_logfile_backups=5

@@ -1,7 +1,7 @@
 [program:ws]
 environment=PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
-command=/root/bin/ws
-directory=/root/bin
+command=/usr/local/bin/clonos-ws
+directory=/usr/local/bin
 numprocs=1
 numprocs_start=1
 autostart=true
@@ -13,4 +13,3 @@ stdout_logfile_maxbytes=2MB
 stdout_logfile_backups=5
 stderr_logfile_maxbytes=2MB
 stderr_logfile_backups=5
-

@@ -20,4 +20,3 @@ supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
 
 [include]
 files=/usr/local/etc/supervisor.d/*.conf
-

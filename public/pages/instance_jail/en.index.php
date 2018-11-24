@@ -13,7 +13,7 @@ $clonos->useDialogs(array(
 		<tr>
 			<th class="txtleft wdt-150">Logo</th>
 			<th class="txtleft wdt-100">Name</th>
-			<th>Описание</th>
+			<th>Desc</th>
 		</tr>
 	</thead>
 	<tbody></tbody>

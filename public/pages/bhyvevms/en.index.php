@@ -4,10 +4,11 @@ $clonos->useDialogs(array(
 	'bhyve-new',
 	'bhyve-obtain',
 	'bhyve-clone',
+	'bhyve-rename',
 	'jail-settings-config-menu',
 ));
 ?>
-<h1>Bhyve VMs</h1>
+<h1>Виртуальные машины</h1>
 
 <p>
 	<span class="top-button icon-plus id:bhyve-new">Create from ISO</span>
@@ -19,10 +20,10 @@ $clonos->useDialogs(array(
 		<th class="wdt-120">Node name</th>
 		<th class="txtleft">VM</th>
 		<th class="wdt-120">Usage</th>
-		<th class="txtleft wdt-70">RAM</th>
+		<th class="txtcenter wdt-70">RAM</th>
 		<th class="wdt-30">CPU</th>
-		<th class="wdt-100">OS type</th>
-		<th class="wdt-120">Status</th>
+		<th class="txtcenter wdt-100">OS type</th>
+		<th class="txtcenter wdt-120">Status</th>
 		<th colspan="4" class="wdt-100">Action</th>
 		<th class="wdt-30">VNC</th>
 		<th class="txtcenter wdt-50">VNC port</th>

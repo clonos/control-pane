@@ -90,7 +90,7 @@ var clonos={
 		if(this.manual_close_menu) return;
 		var wdt=$(window).width();
 		if(wdt<800) $('body').addClass('gadget'); else $('body').removeClass('gadget');
-		setTimeout(graphs.onResize,500);
+		//setTimeout(graphs.onResize,500);
 	},
 	closerClick:function(event)
 	{
@@ -942,7 +942,7 @@ var clonos={
 			var razd=location.pathname;
 			if(['/overview/'].indexOf(razd)!=-1)
 			{
-				clonos.createGraphs();
+				this.createGraphs();
 			}
 		}
 	},
@@ -995,7 +995,7 @@ var clonos={
 		// Если мы в нужной таблице, то рисуем графики
 		if(['bhyveslist','jailslist'].indexOf(data.id)!=-1)
 		{
-			clonos.createGraphs();
+			this.createGraphs();
 		}
 	},
 	
@@ -3143,12 +3143,17 @@ graphs={
 	
 	wsconnect:function()
 	{
-		this.client_id=this.name;
-		this.socket = new WebSocket("ws://"+_server_name+":8024/graph"+location.pathname+"client-"+Math.random());
-		$(this.socket).on('open',$.proxy(this.wsopen,this))
-			.on('close',$.proxy(this.wsclose,this))
-			.on('error',$.proxy(this.wserror,this))
-			.on('message',$.proxy(this.wsmessage,this));
+		console.log('Поступила команда на подсоединение по ws');
+		if(!this.socket || this.socket.readyState==this.socket.CLOSED)
+		{
+			console.log('Соединяемся по сокету');
+			this.client_id=this.name;
+			this.socket = new WebSocket("ws://"+_server_name+":8024/graph"+location.pathname+"client-"+Math.random());
+			$(this.socket).on('open',$.proxy(this.wsopen,this))
+				.on('close',$.proxy(this.wsclose,this))
+				.on('error',$.proxy(this.wserror,this))
+				.on('message',$.proxy(this.wsmessage,this));
+		}
 	},
 	wsclose:function(event)
 	{
@@ -3160,18 +3165,24 @@ graphs={
 			var msg_type='error';
 			var msg='Соединение с сервером разорвано аварийно! Перезагрузите страницу!';
 		}
-		this.connected=false;
-		console.log('Соединение закрыто по неизвестной причине...');
-		this.socket=null;
-		setTimeout($.proxy(this.wsconnect,this),5000);
+		
+		if(this.socket.readyState==this.socket.CLOSED)
+		{
+			this.connected=false;
+			console.log('Соединение закрыто по неизвестной причине...');
+			this.socket=null;
+			setTimeout($.proxy(this.wsconnect,this),5000);
+		}
+		console.log('Произошло событие «close», нужно проверить что с соединением.');
 	},
 	wsopen:function(event)
 	{
 		this.connected=true;
+		console.log('Соединились по ws');
 	},
 	wserror:function(event)
 	{
-		this.connected=false;
+		//this.connected=false;
 		console.log('Какая-то ошибка в соединении сокета');
 	},
 	wsmessage:function(event)
@@ -3209,10 +3220,12 @@ graphs={
 						}
 					}else{
 						var gr=this.list[item.name+'-pcpu'];
+						if(gr)
 						{
 							if(gr) gr.line1.append(date.getTime(), item.pcpu);
 						}
 						var gr=this.list[item.name+'-pmem'];
+						if(gr)
 						{
 							if(gr) gr.line1.append(date.getTime(), item.pmem);
 						}
@@ -3258,6 +3271,7 @@ graphs={
 					}else{
 						var nname=name+'-pcpu';
 						var gr=this.list[nname];
+						if(gr)
 						{
 							if(gr) gr.line1.append(date.getTime(), inf.pcpu);
 							var res=larr.indexOf(nname);
@@ -3265,6 +3279,7 @@ graphs={
 						}
 						var nname=name+'-pmem';
 						var gr=this.list[nname];
+						if(gr)
 						{
 							if(gr) gr.line1.append(date.getTime(), inf.pmem);
 							var res=larr.indexOf(nname);

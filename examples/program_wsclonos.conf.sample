@@ -1,7 +1,7 @@
 [program:wsclonos]
 environment=PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin",cbsd_workdir="/usr/jails"
-command=/usr/local/bin/node /usr/home/web/cp/clonos/node/wsClonos.js
-directory=/usr/home/web/cp/clonos/node
+command=/usr/local/bin/node /usr/local/www/clonos/node/wsClonos.js
+directory=/usr/local/www/clonos/node
 numprocs=1
 numprocs_start=1
 autostart=true

@@ -1,7 +1,7 @@
 [program:vnc2wss]
 environment=PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
-command=/usr/local/bin/bash /usr/home/web/cp/clonos/public/novnc/utils/launch.sh --listen 6081 --vnc 127.0.0.1:5901
-directory=/usr/home/web/cp/clonos/public/novnc
+command=/usr/local/bin/bash /usr/local/www/clonos/public/novnc/utils/launch.sh --listen 6081 --vnc 127.0.0.1:5901
+directory=/usr/local/www/clonos/public/novnc
 stdout_logfile=/var/log/supervisor/vnc2wss.log
 stderr_logfile=/var/log/supervisor/vnc2wss.err
 numprocs=1

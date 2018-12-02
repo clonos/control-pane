@@ -101,10 +101,10 @@ $clonos->placeDialogs();
 			<h2>Использование памяти:</h2>
 			<div class="graph v-black g-!summary-mem l-pmem"></div>
 			<br />
-			<h2>Операций ввода/вывода:</h2>
+			<h2>I/O диска, iops:</h2>
 			<div class="graph v-black g-!summary-iops l-readiops,writeiops"></div>
 			<br />
-			<h2>Загрузка сети:</h2>
+			<h2>I/O диска, bit per seconds:</h2>
 			<div class="graph v-black g-!summary-bps l-readbps,writebps"></div>
 		</div>
 </div></div></div></div></main>
@@ -144,7 +144,7 @@ if(isset($_languages))foreach($_languages as $lng=>$lngname)
 
 <div class="login-area<?php if(!$user_info['error']) echo ' hide'; ?>"><?php echo $clonos->placeDialogByName('system-login'); ?>
 <div class="ccopy">ClonOS — is a powerfull system for&hellip;</div>
-<div class="ccopy">Jails, Virtualization, WebDeveloping, etc&hellip;</div>
+<div class="ccopy">Cloud computing, Lightweight containerization, Virtualization, etc&hellip;</div>
 </div>
 
 <div class="spinner"></div>

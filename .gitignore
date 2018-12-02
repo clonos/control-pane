@@ -3,3 +3,4 @@ media_import/*.size
 logs/*.log
 logs/*.err
 clonos/node/node_modules/*
+public/media/*

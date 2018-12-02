@@ -9,6 +9,8 @@ mount_devfs="#mount_devfs#";
 allow_mount="#allow_mount#";
 allow_devfs="#allow_devfs#";
 allow_nullfs="#allow_nullfs#";
+allow_fusefs="0";
+allow_raw_sockets="1";
 mount_fstab="#workdir#/jails-fstab/fstab.#jname#";
 arch="native";
 mkhostsfile="#mkhostsfile#";
@@ -22,14 +24,12 @@ mount_kernel="#mount_kernel#";
 mount_ports="#mount_ports#";
 astart="#astart#";
 data="#workdir#/jails-data/#jname#-data";
-
 vnet="#vnet#";
 nic_hwaddr="0";
 applytpl="#applytpl#";
 mdsize="#mdsize#";
 rcconf="#workdir#/jails-rcconf/rc.conf_#jname#";
 floatresolv="#floatresolv#";
-
 zfs_snapsrc="";
 
 exec_poststart="0";
@@ -41,24 +41,21 @@ exec_master_poststart="0";
 exec_master_poststop="0";
 exec_master_prestart="0";
 exec_master_prestop="0";
-
-#CBSD
-#pkg_bootstrap="1";
 pkg_bootstrap="#pkg_bootstrap#";
+with_img_helpers="#with_img_helpers#";
+runasap="1";
+allow_reserved_ports="1";
 
-user_pw_root='#user_pw_root#'
-interface="#interface#"
-jailskeldir="#workdir#/share/FreeBSD-jail-skel"
+persist="1";
+childrenmax="0";
+enforce_statfs="1";
 sysrc_enable="#sysrc_enable#"
 
+interface="#interface#";
+jailskeldir="#workdir#/share/FreeBSD-jail-skel";
 jail_profile="default";
+# root password
+user_pw_root='#user_pw_root#';
 exec_start="/bin/sh /etc/rc"
 exec_stop="/bin/sh /etc/rc.shutdown"
 emulator="jail"
-
-with_img_helpers="#with_img_helpers#"
-
-# CBSD
-#runasap="#runasap#"
-runasap="1"
-

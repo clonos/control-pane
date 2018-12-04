@@ -8,7 +8,7 @@ $clonos->useDialogs(array(
 	'jail-settings-config-menu',
 ));
 ?>
-<h1>Виртуальные машины</h1>
+<h1>Bhyve VMs</h1>
 
 <p>
 	<span class="top-button icon-plus id:bhyve-new">Create from ISO</span>

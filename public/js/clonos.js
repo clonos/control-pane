@@ -1700,8 +1700,11 @@ var clonos={
 		var tblid=$(tbl).attr('id');
 		
 if(tblid=='jailslist'){
-	var e=$(tr).parents('div.main');if(e){$(e).toggleClass('asplit');}
-	this.openedJailSummary=trid;
+	if(td==$(tr).children()[0] || td==$(tr).children()[1])
+	{
+		var e=$(tr).parents('div.main');if(e){$(e).toggleClass('asplit');}
+		this.openedJailSummary=trid;
+	}
 }
 		
 		var opt='jail';
@@ -3110,8 +3113,11 @@ if(tblid=='jailslist'){
 		if(res!=null)
 		{
 			var name=res[1];
-			var g=new graph(name,width,height,gr,tooltip1,tooltip2);
-			g.create();
+			if($.isEmptyObject(graphs.list[name]))
+			{
+				var g=new graph(name,width,height,gr,tooltip1,tooltip2);
+				g.create();
+			}
 		}
 	},
 	
@@ -3128,6 +3134,8 @@ if(tblid=='jailslist'){
 }
 
 /* --- GRAPH START --- */
+socket=null;
+
 graphs={
 	list:{},
 	
@@ -3144,12 +3152,12 @@ graphs={
 	wsconnect:function()
 	{
 		console.log('Поступила команда на подсоединение по ws');
-		if(!this.socket || this.socket.readyState==this.socket.CLOSED)
+		if(!socket || socket.readyState==socket.CLOSED)
 		{
 			console.log('Соединяемся по сокету');
 			this.client_id=this.name;
-			this.socket = new WebSocket("ws://"+_server_name+":8024/graph"+location.pathname+"client-"+Math.random());
-			$(this.socket).on('open',$.proxy(this.wsopen,this))
+			socket = new WebSocket("ws://"+_server_name+":8024/graph"+location.pathname+"client-"+Math.random());
+			$(socket).on('open',$.proxy(this.wsopen,this))
 				.on('close',$.proxy(this.wsclose,this))
 				.on('error',$.proxy(this.wserror,this))
 				.on('message',$.proxy(this.wsmessage,this));
@@ -3166,11 +3174,11 @@ graphs={
 			var msg='Соединение с сервером разорвано аварийно! Перезагрузите страницу!';
 		}
 		
-		if(this.socket.readyState==this.socket.CLOSED)
+		if(socket.readyState==socket.CLOSED)
 		{
 			this.connected=false;
 			console.log('Соединение закрыто по неизвестной причине...');
-			this.socket=null;
+			socket=null;
 			setTimeout($.proxy(this.wsconnect,this),5000);
 		}
 		console.log('Произошло событие «close», нужно проверить что с соединением.');

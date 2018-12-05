@@ -149,6 +149,7 @@ if(isset($_languages))foreach($_languages as $lng=>$lngname)
 
 <div class="spinner"></div>
 <div class="online icon-online" id="net-stat" onclick="ws_debug();"></div>
+<div class="copys">&nbsp;ver.: <?php echo file_get_contents($clonos->realpath.'version'); ?>&nbsp;</div>
 </body>
 </html>
 <?php //print_r($clonos->userGetInfo()); ?>

@@ -5,6 +5,7 @@ class ClonOS
 {
 	public $server_name='';
 	public $workdir='';
+	public $realpath='';
 	public $realpath_php='';
 	public $realpath_public='';
 	public $realpath_page='';
@@ -88,6 +89,9 @@ class ClonOS
 
 		$this->workdir=getenv('WORKDIR');
 			# // /usr/jails
+			
+		$this->realpath=$_REALPATH.'/';
+			# /usr/home/web/cp/clonos/
 			
 		$this->realpath_php=$_REALPATH.'/php/';
 			# /usr/home/web/cp/clonos/php/

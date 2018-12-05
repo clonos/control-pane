@@ -965,7 +965,7 @@ td.error {
 .tasklog {
 	width:60%;
 	max-width:60%;
-	margin-left:-30% !important;
+	/*margin-left:-30% !important;*/
 	left:50%;
 }
 .tasklog .window-content {
@@ -1613,4 +1613,15 @@ body.overview div.smoothie-chart-tooltip {
 	height:70px;
 	width:260px;
 	padding-left:10px !important;
+}
+
+.copys {
+	position:absolute;
+	bottom:0;
+	left:22px;
+	background-color:rgba(255,255,255,0.7);
+}
+
+#jailslist td:nth-child(1), #jailslist td:nth-child(2) {
+	cursor:pointer;
 }

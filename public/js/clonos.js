@@ -3265,16 +3265,21 @@ graphs={
 						//if($('#cdown').css('display')!='block')
 						if(clonos.openedJailSummary==name)
 						{
-							var gr1=this.list['!summary-cpu'];
+							var ngrs=['!summary-cpu','!summary-mem','!summary-iops','!summary-bps'];
+							var gr1=this.list[ngrs[0]];
 							gr1.line1.append(date.getTime(),inf.pcpu);
-							gr1=this.list['!summary-mem'];
+								res=larr.indexOf(ngrs[0]); if(res>-1) larr.splice(res,1);
+							gr1=this.list[ngrs[1]];
 							gr1.line1.append(date.getTime(),inf.pmem);
-							gr1=this.list['!summary-iops'];
+								res=larr.indexOf(ngrs[1]); if(res>-1) larr.splice(res,1);
+							gr1=this.list[ngrs[2]];
 							gr1.line1.append(date.getTime(),inf.readiops);
 							gr1.line2.append(date.getTime(),inf.writeiops);
-							gr1=this.list['!summary-bps'];
+								res=larr.indexOf(ngrs[2]); if(res>-1) larr.splice(res,1);
+							gr1=this.list[ngrs[3]];
 							gr1.line1.append(date.getTime(),inf.readbps);
 							gr1.line2.append(date.getTime(),inf.writebps);
+								res=larr.indexOf(ngrs[3]); if(res>-1) larr.splice(res,1);
 						}
 					}else{
 						var nname=name+'-pcpu';
@@ -3419,8 +3424,16 @@ graph.prototype.create=function()
 	}
 	var varr=this.graphView[view];
 	
-	this.line1 = new TimeSeries({resetBounds:false,resetBoundsInterval:3000});
-	this.line2 = new TimeSeries({resetBounds:false,resetBoundsInterval:3000});
+	var res=cl.match(/\bpr-no\b/);
+	if(res!=null)
+	{
+		varr.view.enableDpiScaling=true;
+		delete varr.view.maxValue;
+		//delete varr.view.minValue;
+	}
+	
+	this.line1 = new TimeSeries({resetBounds:true,resetBoundsInterval:1000});
+	this.line2 = new TimeSeries({resetBounds:true,resetBoundsInterval:1000});
 	
 	var back_color='rgba(0,0,0,0.02)';
 	var line1_color=varr.colors.line1_color;

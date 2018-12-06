@@ -95,17 +95,17 @@ $clonos->placeDialogs();
 			</dl>
 		</div>
 		<div class="right">
-			<h2>Загрузка процессора:</h2>
+			<h2>Загрузка процессора, %:</h2>
 			<div class="graph v-black g-!summary-cpu l-pcpu"></div>
 			<br />
-			<h2>Использование памяти:</h2>
+			<h2>Использование памяти, %:</h2>
 			<div class="graph v-black g-!summary-mem l-pmem"></div>
 			<br />
 			<h2>I/O диска, iops:</h2>
-			<div class="graph v-black g-!summary-iops l-readiops,writeiops"></div>
+			<div class="graph v-black g-!summary-iops l-readiops,writeiops pr-no"></div>
 			<br />
 			<h2>I/O диска, bit per seconds:</h2>
-			<div class="graph v-black g-!summary-bps l-readbps,writebps"></div>
+			<div class="graph v-black g-!summary-bps l-readbps,writebps pr-no"></div>
 		</div>
 </div></div></div></div></main>
 

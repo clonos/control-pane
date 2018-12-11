@@ -49,6 +49,10 @@ class Db
 				$file_name='/var/db/clonos/clonos.sqlite';
 				$connect='sqlite:'.$file_name;
 				break;
+			case 'racct':
+				$file_name=$this->_workdir.'/jails-system/'.$database['jname'].'/racct.sqlite';;
+				$connect='sqlite:'.$file_name;
+				break;
 		}
 		
 		/*

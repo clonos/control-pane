@@ -158,5 +158,7 @@ $lang=array(
 	'Please, wait for initialize Virtual Machine'=>'Пожалуйста, подождите пока инициализируется виртуальная машина',
 	'You can click here, or wait'=>'Вы можете кликнуть сюда или подождать',
 	'some time'=>'некоторое время',
-	//''=>'',
+	
+	'CPU usage'=>'Нагрузка процессора',
+	'Memory usage'=>'Использование памяти',
 );

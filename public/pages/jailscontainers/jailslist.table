@@ -2,7 +2,7 @@
 		<tr class="#nth-num##desktop##maintenance#" id="#jname#">
 			<td class="wordwreck node">#node#</td>
 			<td class="txtleft jname">#jname#</td>
-			<td class="graph g-#jname# l-cpu,mem wdt-120"></td>
+			<td class="graph g-#jname# l-cpu,mem wdt-120 te-%"></td>
 			<td class="txtleft wordwreck ip4_addr">#ip4_addr#</td>
 			<td class="jstatus wdt-120">#jstatus#</td>
 			<td class="ops"><span class="icon-cnt"><span class="icon-#icon#"></span></span></td>

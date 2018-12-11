@@ -372,6 +372,9 @@ class ClonOS
 				case 'imageRemove':
 					echo json_encode($this->imageRemove());
 					return;break;
+				case 'getSummaryInfo':
+					echo json_encode($this->getSummaryInfo());
+					return;break;
 					
 /*				case 'saveHelperValues':
 					echo json_encode($this->saveHelperValues());
@@ -2905,4 +2908,30 @@ class ClonOS
 		return $res;
 	}
 
+	function getSummaryInfo()
+	{
+		$form=$this->form;
+		$jail_name=$form['jname'];
+		$res=array();
+		
+		if(empty($jail_name)) return $res;
+		
+		$res['jname']=$jail_name;
+		
+		$db=new Db('racct',array('jname'=>$jail_name));
+		if($db!==false)
+		{
+			$quer=$db->select("SELECT '{$jail_name}' as name,idx as time,memoryuse,pcpu,pmem,maxproc,openfiles,readbps,writebps,readiops,writeiops FROM racct ORDER BY idx DESC LIMIT 25;");	// where idx%5=0
+			$res['__all']=$quer;
+		}
+		
+		//$workdir/jails-system/$jname/descr
+		$filename=$this->workdir.'/jails-system/'.$jail_name.'/descr';
+		if(file_exists($filename))
+		{
+			$res['description']=nl2br(file_get_contents($filename));
+		}
+		
+		return $res;
+	}
 }

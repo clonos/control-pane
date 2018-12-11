@@ -1699,13 +1699,19 @@ var clonos={
 		var tbl=$(tr).closest('table');
 		var tblid=$(tbl).attr('id');
 		
-if(tblid=='jailslist'){
-	if(td==$(tr).children()[0] || td==$(tr).children()[1])
-	{
-		var e=$(tr).parents('div.main');if(e){$(e).toggleClass('asplit');}
-		this.openedJailSummary=trid;
-	}
-}
+		if(tblid=='jailslist')
+		{
+			if(td==$(tr).children()[0] || td==$(tr).children()[1])
+			{
+				var aspl=$('div.main').hasClass('asplit');
+				if(!aspl) $('div.main').addClass('asplit');
+//				var e=$(tr).parents('div.main');if(e){$(e).toggleClass('asplit');}
+				this.getSummaryInfo(trid);
+				$('.sel',tbl).removeClass('sel');
+				$(tr).addClass('sel');
+				$('tbody',tbl).animate({scrollTop: $(tr).offset().top},400);
+			}
+		}
 		
 		var opt='jail';
 		if(tblid=='bhyveslist') opt='bhyve';
@@ -1809,6 +1815,9 @@ if(tblid=='jailslist'){
 				{
 					this.imageImport(trid,tblid);
 				}
+				return;break;
+			case 'split-close':
+				$('div.main').removeClass('asplit');
 				return;break;
 		}
 		
@@ -3083,6 +3092,7 @@ if(tblid=='jailslist'){
 		location.reload();
 	},
 	
+	graphs:{},
 	createGraphs:function()
 	{
 		var grs=$('.graph');
@@ -3113,9 +3123,10 @@ if(tblid=='jailslist'){
 		if(res!=null)
 		{
 			var name=res[1];
-			if($.isEmptyObject(graphs.list[name]))
+			if($.isEmptyObject(graphs.list[name]) || $('.g-'+name+' canvas').length==0)
 			{
 				var g=new graph(name,width,height,gr,tooltip1,tooltip2);
+				this.graphs[name]=g;
 				g.create();
 			}
 		}
@@ -3131,6 +3142,46 @@ if(tblid=='jailslist'){
 	{
 		delete graphs.list[id];
 	},
+	
+	getSummaryInfo:function(jname)
+	{
+		this.openedJailSummary=jname;
+		var posts=[{'name':'jname','value':jname}];
+		this.loadData('getSummaryInfo',$.proxy(this.onGetSummaryInfo,this),posts);
+	},
+	onGetSummaryInfo:function(data)
+	{
+		//debugger;
+		var grs=['-summary-cpu','-summary-mem','-summary-iops','-summary-bps'];
+		for(n=0,nl=grs.length;n<nl;n++)
+		{
+			this.graphs[grs[n]].line1.data=[];
+			this.graphs[grs[n]].line2.data=[];
+		}
+		
+		for(n in data.__all)
+		{
+			var str=data.__all[n];
+			var date = new Date();
+			date.setTime(str.time*1000);
+			
+			this.graphs[grs[0]].line1.append(date.getTime(),str.pcpu);
+			this.graphs[grs[1]].line1.append(date.getTime(),str.pmem);
+			this.graphs[grs[2]].line1.append(date.getTime(),str.readiops);
+			this.graphs[grs[2]].line2.append(date.getTime(),str.writeiops);
+			this.graphs[grs[3]].line1.append(date.getTime(),str.readbps);
+			this.graphs[grs[3]].line2.append(date.getTime(),str.writebps);
+		}
+		
+		delete data.__all;
+		var dl='';
+		for(n in data)
+		{
+			dl+='<dt>'+n+'</dt><dd>'+data[n]+'<dd>';
+		}
+		$('dl#summaryInfo').html(dl);
+	}
+
 }
 
 /* --- GRAPH START --- */
@@ -3265,7 +3316,7 @@ graphs={
 						//if($('#cdown').css('display')!='block')
 						if(clonos.openedJailSummary==name)
 						{
-							var ngrs=['!summary-cpu','!summary-mem','!summary-iops','!summary-bps'];
+							var ngrs=['-summary-cpu','-summary-mem','-summary-iops','-summary-bps'];
 							var gr1=this.list[ngrs[0]];
 							gr1.line1.append(date.getTime(),inf.pcpu);
 								res=larr.indexOf(ngrs[0]); if(res>-1) larr.splice(res,1);
@@ -3358,7 +3409,10 @@ function graph(name,width,height,el_parent,tooltip1,tooltip2)
 				enableDpiScaling:false,
 				tooltip:true,
 				maxValue:100,
-				minValue:0
+				minValue:0,
+				tooltipFormatter:graphTooltipFormatter,
+				tooltipTpl:'<div class="white">$tpl_body$</div>',
+				responsive:true,
 			},
 			colors:{
 				line1_color:'rgb(17,125,187)',
@@ -3390,6 +3444,9 @@ function graph(name,width,height,el_parent,tooltip1,tooltip2)
 				maxValue:100,
 				minValue:0,
 				tooltipLabel:'test',
+				tooltipFormatter:graphTooltipFormatter,
+				tooltipTpl:'<div class="black">$tpl_body$</div>',
+				responsive:true,
 			},
 			colors:{
 				line1_color:'rgb(0,255,0)',
@@ -3401,6 +3458,30 @@ function graph(name,width,height,el_parent,tooltip1,tooltip2)
 		}
 	};
 }
+graphTooltipFormatter=function(t,data)
+{
+	var l=this.options.tooltipLabel;
+	var timestampFormatter = SmoothieChart.timeFormatter,
+		lines = ['<span class="time">' + timestampFormatter(new Date(t)) + '</span>'];
+	
+	var tEnd=this.options.tooltipEnd || '%';
+	if(tEnd!='%') tEnd=' '+tEnd;
+
+	for (var i = 0; i < data.length; ++i)
+	{
+		label = data[i].series.options.tooltipLabel || ''
+		if (label !== ''){ label = label + ' '; }
+		lines.push('<span style="color:' + data[i].series.options.strokeStyle + '">' +
+		label +
+		this.options.yMaxFormatter(data[i].value, this.options.labels.precision) +
+		tEnd + '</span>');
+	}
+
+	var tpl=this.options.tooltipTpl;
+	var res=tpl.replace('$tpl_body$',lines.join('<br>'));
+
+	return res;
+}
 graph.prototype.create=function()
 {
 	var el_parent=$(this.el_parent);
@@ -3411,7 +3492,8 @@ graph.prototype.create=function()
 		this.el_id=el_parent;
 		this.is_init=true;
 	}
-	$(el_parent).append('<canvas id="g-'+this.name+'" width="'+this.width+'" height="'+this.height+'" vertical-align="middle"></canvas>');
+	//$(el_parent).append('<canvas id="g-'+this.name+'" width="'+this.width+'" height="'+this.height+'" vertical-align="middle"></canvas>');
+	$(el_parent).append('<canvas id="g-'+this.name+'" style="width:100%;height:'+this.height+'px" vertical-align="middle"></canvas>');
 	
 	var view;
 	var cl=$(el_parent).attr('class');
@@ -3430,6 +3512,12 @@ graph.prototype.create=function()
 		varr.view.enableDpiScaling=true;
 		delete varr.view.maxValue;
 		//delete varr.view.minValue;
+	}
+	
+	var res=cl.match(/te-([^ $]+)/);
+	if(res!=null)
+	{
+		varr.view.tooltipEnd=res[1];
 	}
 	
 	this.line1 = new TimeSeries({resetBounds:true,resetBoundsInterval:1000});

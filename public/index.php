@@ -87,25 +87,25 @@ if(file_exists($file_name)) include($file_name); else
 }
 $clonos->placeDialogs();
 ?>
-</div><div id="cdown"><div id="cinfo">
+</div><div id="cdown"><span class="split-close"></span><div id="cinfo">
 		<div class="left">
-			<dl>
+			<dl id="summaryInfo">
 				<dt>Имя клетки:</dt>
 				<dd>Jail1</dd>
 			</dl>
 		</div>
 		<div class="right">
-			<h2>Загрузка процессора, %:</h2>
-			<div class="graph v-black g-!summary-cpu l-pcpu"></div>
+			<h2><?php echo $clonos->translate('CPU usage');?>, %:</h2>
+			<div class="graph v-black g--summary-cpu l-cpu"></div>
 			<br />
-			<h2>Использование памяти, %:</h2>
-			<div class="graph v-black g-!summary-mem l-pmem"></div>
+			<h2><?php echo $clonos->translate('Memory usage');?>, %:</h2>
+			<div class="graph v-black g--summary-mem l-mem"></div>
 			<br />
-			<h2>I/O диска, iops:</h2>
-			<div class="graph v-black g-!summary-iops l-readiops,writeiops pr-no"></div>
+			<h2><?php echo $clonos->translate('I/O storage');?>, iops:</h2>
+			<div class="graph v-black g--summary-iops l-read,write pr-no te-iops"></div>
 			<br />
-			<h2>I/O диска, bit per seconds:</h2>
-			<div class="graph v-black g-!summary-bps l-readbps,writebps pr-no"></div>
+			<h2><?php echo $clonos->translate('I/O storage');?>, bit per seconds:</h2>
+			<div class="graph v-black g--summary-bps l-read,write pr-no te-bps"></div>
 		</div>
 </div></div></div></div></main>
 

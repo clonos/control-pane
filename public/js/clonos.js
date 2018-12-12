@@ -1709,7 +1709,7 @@ var clonos={
 				this.getSummaryInfo(trid);
 				$('.sel',tbl).removeClass('sel');
 				$(tr).addClass('sel');
-				$('tbody',tbl).animate({scrollTop: $(tr).offset().top},400);
+				$('tbody',tbl).animate({scrollTop: ($(tr).offset().top - $('tbody tr:first-child',tbl).offset().top)},400);
 			}
 		}
 		
@@ -1818,6 +1818,7 @@ var clonos={
 				return;break;
 			case 'split-close':
 				$('div.main').removeClass('asplit');
+				$('table.tsimple .sel').removeClass('sel');
 				return;break;
 		}
 		

@@ -80,9 +80,37 @@ var clonos={
 			.on('resize',$.proxy(this.onResize,this));
 		$('div.menu').on("touchstart",$.proxy(this.onTouchStart,this))
 			.on("touchend",$.proxy(this.onTouchEnd,this));
+		$('header .ch_theme').on('click',$.proxy(this.changeTheme,this));
 		
 		this.tasks.init(this);
 		this.wsconnect();
+	},
+	
+	changeTheme:function(e)
+	{
+		var target=e.target;
+		var theme=$(target).attr('class');
+		
+		this.changeThemeByName(theme);
+	},
+	changeThemeByName:function(theme)
+	{
+		var csss=$('link');
+		for(c=0,cl=csss.length;c<cl;c++)
+		{
+			var css=csss[c];
+			if($(css).hasClass('alternate'))
+			{
+				var hr=$(css).attr('id');
+				if(hr==theme)
+				{
+					$(css).prop('disabled',false);
+				}else{
+					$(css).prop('disabled',true);
+				}
+			}
+		}
+		localStorage.setItem('Theme',theme);
 	},
 	
 	onResize:function()
@@ -2113,6 +2141,8 @@ var clonos={
 	DDMenuClose:function()
 	{
 		$('table tr.sel').removeClass('sel');
+		if($('div.main').hasClass('asplit'))
+			$('tr#'+this.openedJailSummary).addClass('sel');
 		var menu=$('div#config-menu');
 		$(menu).css('display','none');
 		clearInterval(this.ddmenu_interval);
@@ -3398,7 +3428,8 @@ function graph(name,width,height,el_parent,tooltip1,tooltip2)
 					fillStyle:'rgba(0,0,0,0.02)',
 					sharpLines:true,
 					strokeStyle:'transparent',
-					borderVisible:true
+					borderVisible:true,
+					//millisPerLine:2000,
 				},
 				labels:{
 					fontSize:8,
@@ -3432,6 +3463,7 @@ function graph(name,width,height,el_parent,tooltip1,tooltip2)
 					//strokeStyle:'transparent',
 					borderVisible:true,
 					verticalSections:4,
+					millisPerLine:4000,
 				},
 				labels:{
 					//fontSize:8,
@@ -3439,7 +3471,7 @@ function graph(name,width,height,el_parent,tooltip1,tooltip2)
 					//fillStyle:'#000000',
 					precision:0,
 				},
-				millisPerPixel:100,
+				millisPerPixel:250,
 				enableDpiScaling:false,
 				tooltip:true,
 				maxValue:100,

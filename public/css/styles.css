@@ -1,5 +1,5 @@
 html {
-	background:#ddd;
+	background:#333;
 	margin:0;
 	height:100%;
 	width:100%;
@@ -165,6 +165,35 @@ header {
 }
 .header li:last-child {
 	border-right:none;
+}
+header .ch_theme {
+	position:absolute;
+	right:30px;
+	top:3px;
+}
+header .ch_theme span {
+	border-radius:50%;
+	border:1px solid black;
+	width:10px;
+	height:10px;
+	display:inline-block;
+	margin-right:10px;
+	cursor:pointer;
+}
+header .ch_theme span.light {
+	background-color:white;
+}
+header .ch_theme span.dark {
+	background-color:#777;
+}
+header .ch_theme span.h {
+	font-size:10px;
+	border-radius:0;
+	border:none;
+	vertical-align:middle;
+	margin-right:40px;
+	height:12px;
+	cursor:default;
 }
 
 .main {
@@ -437,7 +466,7 @@ thead td:first-child, td:first-child {
 	text-align:left;
 }
 .tsimple tbody td {
-	padding:8px 8px 8px 0; /*2px;*/
+	padding:8px 0; /*2px;*/
 	border-bottom:1px solid #f0f0f0;
 	overflow:hidden;
 	text-overflow:ellipsis;
@@ -1056,6 +1085,7 @@ http://dimox.name/custom-checkboxes-and-radio-buttons-using-css-only/
 #config-menu {
 	position:absolute;
 	display:inline-block;
+	z-index:10;
 }
 #config-menu ul
 {
@@ -1668,6 +1698,6 @@ dl#summaryInfo dt:after {
 dl#summaryInfo dd {
 	margin-left:20px;
     font-family:monospace;
-	font-size:normal;
+	font-size:10pt;
 	margin-bottom:10px;
 }

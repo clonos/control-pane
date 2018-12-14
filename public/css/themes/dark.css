@@ -1,0 +1,410 @@
+div.menu {
+	box-shadow:-7px 0px 10px 1px rgba(0,0,0,0.65);
+	background-color:#252526;
+}
+ul.menu li a {
+	color:rgba(255,255,255,0.7);
+}
+ul.menu li a:hover span {
+	color:white;
+}
+ul.menu a.sel span {
+	color:#7cdcf0;
+}
+ul.menu a:active span {
+	color:red !important;
+}
+main {
+	background-color:#1e1e1e;
+	box-shadow:7px 0px 10px 1px rgba(0,0,0,0.65);
+	border-right:1px solid #222;
+	color:white;
+}
+.closer {
+	border:1px solid black;
+	background-color:#333;
+}
+.header {
+	border-bottom: 5px solid #0F83A0;
+	background-color:#252526;
+}
+.header li {
+	border-right:1px solid #222;
+}
+.header li.mhome a {
+	background-color: #0F83A0;
+}
+.header li a {
+	color: #D5D5D5;
+	text-shadow: 0 1px 1px black;
+	border-left: 1px solid #383838;
+}
+.header #title {
+	color: white;
+}
+
+.asplit #cdown {
+	background-color:#f0f0f0;
+	border-top:1px solid silver;
+}
+
+.tsimple thead th, .tsimple thead td {
+	border-bottom:3px solid #337ab7;
+}
+.tsimple tbody td {
+	border-bottom:1px solid #777;
+}
+.tsimple tbody tr:nth-child(2n){
+	background-color: #333;
+}
+.tsimple tbody tr:nth-child(2n):hover {
+	background-color:rgba(255,255,255,0.4);
+}
+.tsimple tbody tr:hover {
+	background-color:rgba(255,255,255,0.3);
+}
+.tsimple tbody tr.del {
+	background-color: #ffe6e6;
+}
+.tsimple tbody tr.del:nth-child(2n) {
+	background-color:#fde3e3;
+}
+.tsimple .nth0 + .nth1 td, .tsimple .nth1 + .nth0 td {
+	border-top:2px solid #d1e7f3;
+}
+.tsimple tr.sel td {
+	background-color:rgba(255,255,255,0.2);
+}
+.tsimple tr.helper:hover {
+	background-color:rgba(255,255,255,0.2);
+}
+span.icon-cnt:hover .icon-play,
+span.icon-cnt:hover .icon-stop,
+.icon-cancel:hover,
+.icon-cog:hover,
+.icon-arrows-cw:hover,
+.icon-download:hover,
+.icon-export:hover {
+	color:black;
+}
+span.icon-desktop {
+	color:gray;
+}
+span.icon-desktop:hover {
+	color:black;
+}
+span.icon-spin6 {
+	color:black;
+}
+tr.busy .jstatus,
+tr.busy.s-on .jstatus,
+tr.busy.s-off .jstatus {
+	background-color:Lavender !important;
+}
+tr.s-on td.jstatus {
+	background-color:rgba(0,200,0,0.1);
+}
+tr.s-off td.jstatus {
+	background-color:rgba(200,0,0,0.1);
+}
+tr.maintenance td {
+	color:gray;
+}
+tr.maintenance td.jstatus {
+	background-color:#f0f0f0;
+}
+.tsimple .icon-lock {
+	color:silver;
+}
+.vnc-grey {
+	color:gray;
+}
+.vnc-wait {
+	background-color:white;
+}
+#content h1 {
+	color:#7cdcf0;
+}
+dialog {
+	border:1px solid rgba(0,0,0,.3);
+	background-color:#444;
+}
+dialog::backdrop,
+#backdrop {
+	background:rgba(0,0,0,.5);
+}
+dialog .panel {
+	background-color:white;
+}
+
+.window-box {
+	border:1px solid #6f7579;
+	color: white;
+}
+.window-box .close-but {
+	background-color:#555;
+}
+.window-box .buttons {
+	background-color:#555;
+	border-top:1px solid silver;
+}
+.buttons .button {
+	color:white;
+	background-color:#337ab7;
+	text-shadow:1px 1px 2px black;
+	box-shadow:0 4px 8px rgba(0,0,0,.3);
+}
+.buttons .button.red {
+	background-color:coral;
+	text-shadow:1px 1px 2px black;
+}
+
+.window-box h1 {
+	color:gray;
+}
+.window-box h2 {
+	color:gray;
+}
+.window-box h3 {
+	border-bottom:3px solid #387db6;
+}
+.window-box h3 small {
+	color:gray;
+}
+.window-box .mrow {
+	border-bottom:1px dotted silver;
+}
+.window-box .mrow small {
+	color:gray;
+}
+.window-box .mrow.installed,
+.window-box .mrow.installed small {
+	color:silver;
+}
+
+form.win fieldset {
+	border: 1px solid gray;
+}
+form.win input[type="text"]:required,
+form.win input[type="email"]:required,
+form.win input[type="password"]:required {
+	background-color:#fef7f7;
+	border:1px solid #d7a0a0;
+}
+form.win input[type="text"]:valid,
+form.win input[type="email"]:valid,
+form.win input[type="password"]:valid {
+	border:1px solid green;
+	background-color:Honeydew;
+}
+
+form.win input[type="email"]:invalid,
+form.win input[type="password"]:invalid {
+	background-color:#fef7f7;
+	border:1px solid #d7a0a0;
+}
+
+input[type=checkbox]:checked + label,
+input[type=radio]:checked + label {
+	color:#c3622c;
+}
+form.helper fieldset label {
+	color:black !important;
+}
+form.win .field-name {
+	color:#43c990;
+}
+
+.inp_comment {
+	color:red;
+}
+
+.cbsd-str {
+	color:gray;
+}
+.cbsd-cmd {
+	color:darkred;
+}
+.cbsd-lnch {
+	color:#337ab7;
+}
+
+.link {
+	color:#337ab7;
+}
+
+td.progress {
+	background-color:LemonChiffon;
+}
+td.ok {
+	background-color:rgba(0,200,0,0.1);
+}
+td.error {
+	background-color:rgba(200,0,0,0.1);
+}
+
+.window-content .helpers-list li {
+	border-bottom:1px dotted silver;
+}
+
+#config-menu ul
+{
+	border:1px solid gray;
+	background-color:white;
+}
+#config-menu li:hover {
+	background:#f0f0f0;
+}
+#config-menu .menu-cog {
+	color:#337ab7;
+	border:1px solid gray;
+	background-color:white;
+}
+
+span.top-button {
+	color: white;
+	background-color: #337ab7;
+	text-shadow: 1px 1px 2px black;
+}
+
+.noty_bar {
+	box-shadow:3px 3px 3px rgba(0,0,0,.5);
+}
+
+.spinner {
+	background-color:#337ab7;
+}
+
+.warning {
+	background-color:#fff0f0;
+	border:1px solid #d7a0a0;
+}
+
+form.helper {
+	border:1px solid gray;
+	background-color:#fafafa;
+	box-shadow:3px 3px 6px rgba(0,0,0,0.4);
+}
+form.helper div.form-field + h1 {
+	border-top:1px solid silver;
+}
+form.helper h1 {
+	background-color:#f0f0f0;
+	color:gray !important;
+	border-bottom:1px solid #ccc;
+}
+form.helper .buttons {
+	background:#f0f0f0;
+	border-top:1px solid silver;
+}
+form.helper fieldset {
+	border:1px solid silver;
+}
+
+input[type=range]::-moz-range-track {
+	background-color:white;
+	border:1px solid silver;
+}
+.range input[type="text"]:disabled {
+	background-color:#fcfcfc;
+	color:black;
+	border:1px solid silver;
+}
+
+.online, .offline {
+	background-color:white;
+}
+.online:before {color:green;}
+.offline:before {color:red;}
+
+.uploader .browser label {
+	background-color:#337ab7;
+	color:white;
+	box-shadow:2px 2px 2px #888888;
+}
+.uploader div.browser input {
+	border:solid transparent;
+}
+.uploader-progress {
+	background-color:white;
+}
+.uploader-progress .file {
+	border:1px solid silver;
+	margin-top:4px;
+}
+.uploader-progress .line {
+	background-color:#337ab7;
+}
+
+#debug {
+	border:3px double red;
+	background-color:antiquewhite;
+}
+#debug h1 {
+	background:darkred;
+	color:white;
+}
+
+div.login-area {
+	background-color:rgba(0,0,0,0.9);
+}
+dialog .login-header {
+	background-color:#e0e0e0;
+	color:#347ab7;
+	border-bottom:1px solid silver;
+}
+.ccopy {
+	color:white;
+}
+.login-wait {
+	background-color:rgba(255,255,255,0.9);
+}
+.login-error-nouser {
+	color:red;
+	background-color:rgba(255,250,250,0.9);
+}
+
+.loadersmall {
+	border:5px solid #f3f3f3;
+	border-top:5px solid #555;
+}
+
+
+div.smoothie-chart-tooltip {
+	background: #d0d0d0;	/* #fcfccc; */
+	color: black;
+    box-shadow:3px 3px 3px 0px rgba(0,0,0,0.2);
+}
+
+body.overview div.smoothie-chart-tooltip {
+	background:#3a3a3a;
+	color:white;
+}
+.smoothie-chart-tooltip .black {
+	background-color:#3a3a3a;
+}
+.smoothie-chart-tooltip .black .time {
+	color:white;
+}
+
+.asplit #cdown {
+	background-color:#444;
+	border-top:1px solid silver;
+	box-shadow:inset 0 2px 4px 0px rgba(0,0,0,0.1);
+}
+
+#cinfo h2 {
+	color:#7cdcf0;
+}
+
+.copys {
+	background-color:rgba(255,255,255,0.7);
+}
+
+dl#summaryInfo dt {
+	color:gray;
+}
+
+header .ch_theme span.h {
+	color:white;
+}

@@ -77,6 +77,20 @@ if(!$user_info['error'])
 		<?php if(isset($user_info_txt)) echo $user_info_txt; ?>
 	</script>
 </head>
+<script type="text/javascript">
+		try{
+			var theme=localStorage.getItem('Theme') || 'light';
+			var cs=['light','dark'];
+			for(c=0,cl=cs.length;c<cl;c++)
+			{
+				var css=cs[c];
+				var disabled=(theme==css)?'':' disabled="disabled"';
+				var hcss=$('<link rel="stylesheet" href="/css/themes/'+css+'.css" id="'+css+'" class="alternate"'+disabled+'>');
+				$('head').append(hcss);
+				$('#'+css).get(0).disabled=(theme!=css);
+			}
+		}catch(e){}
+</script>
 <body class="gadget1 login <?php echo $uri;?>">
 
 <main><div class="main"><div id="content"><div id="ctop">
@@ -116,7 +130,7 @@ echo $clonos->menu->html;
 ?><div id="console"></div>
 </div></div>
 
-<header><div class="header">
+<header><div class="ch_theme"><span class="h">THEMES:</span> <span class="light"></span><span class="dark"></span></div><div class="header">
 	<span id="title"><?php echo $clonos->menu->title; ?></span>
 	<ul>
 		<li class="mhome"><a href="/">Home</a></li>

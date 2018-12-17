@@ -130,7 +130,18 @@ echo $clonos->menu->html;
 ?><div id="console"></div>
 </div></div>
 
-<header><div class="ch_theme"><span class="h">THEMES:</span> <span class="light"></span><span class="dark"></span></div><div class="header">
+<header>
+	<div class="top-right">
+		<span class="txt">
+			<?php echo $clonos->translate('VERSION'),': ',file_get_contents($clonos->realpath.'version'); ?>
+			<span class="space"></span>
+			<?php echo $clonos->translate('THEMES'); ?>:
+		</span>
+		<span class="ch_theme">
+			 <span class="light"></span><span class="dark"></span>
+		</span>
+	</div>
+	<div class="header">
 	<span id="title"><?php echo $clonos->menu->title; ?></span>
 	<ul>
 		<li class="mhome"><a href="/">Home</a></li>
@@ -163,7 +174,6 @@ if(isset($_languages))foreach($_languages as $lng=>$lngname)
 
 <div class="spinner"></div>
 <div class="online icon-online" id="net-stat" onclick="ws_debug();"></div>
-<div class="copys">&nbsp;ver.: <?php echo file_get_contents($clonos->realpath.'version'); ?>&nbsp;</div>
 </body>
 </html>
 <?php //print_r($clonos->userGetInfo()); ?>

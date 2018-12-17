@@ -3208,7 +3208,7 @@ var clonos={
 		var dl='';
 		for(n in data)
 		{
-			dl+='<dt>'+n+'</dt><dd>'+data[n]+'<dd>';
+			dl+='<dt>'+this.translate(n)+'</dt><dd>'+data[n]+'<dd>';
 		}
 		$('dl#summaryInfo').html(dl);
 	}

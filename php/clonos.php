@@ -2932,6 +2932,30 @@ class ClonOS
 			$res['description']=nl2br(file_get_contents($filename));
 		}
 		
+		$sql="select host_hostname,ip4_addr,allow_mount,allow_nullfs,allow_fdescfs,interface,baserw,mount_ports,
+			  astart,vnet,mount_fdescfs,allow_tmpfs,allow_zfs,protected,allow_reserved_ports,allow_raw_sockets,
+			  allow_fusefs,allow_read_msgbuf,allow_vmm,allow_unprivileged_proc_debug
+			  from jails where jname='{$jail_name}'";
+		$db=new Db('base','local');
+		if($db!==false)
+		{
+			$quer=$db->selectAssoc($sql);
+			$html='<table class="summary_table">';
+			
+			foreach($quer as $q=>$k)
+			{
+				if(is_numeric($k) && ($k==0 || $k==1))
+				{
+					$k=($k==0)?'no':'yes';
+				}
+				$html.='<tr><td>'.$this->translate($q).'</td><td>'.$this->translate($k).'</td></tr>';
+			}
+			
+			$html.='</table>';
+			$res['properties']=$html;
+		}
+			 
+		
 		return $res;
 	}
 }

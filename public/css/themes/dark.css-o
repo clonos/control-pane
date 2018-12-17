@@ -250,16 +250,15 @@ td.error {
 #config-menu ul
 {
 	border:1px solid gray;
-	background-color:black;
+	background-color:white;
 }
 #config-menu li:hover {
-	/* background:#f0f0f0; */
-	background:#073642; */
+	background:#f0f0f0;
 }
 #config-menu .menu-cog {
 	color:#337ab7;
 	border:1px solid gray;
-	background-color:black;
+	background-color:white;
 }
 
 span.top-button {

@@ -1734,7 +1734,20 @@ var clonos={
 				var aspl=$('div.main').hasClass('asplit');
 				if(!aspl) $('div.main').addClass('asplit');
 //				var e=$(tr).parents('div.main');if(e){$(e).toggleClass('asplit');}
-				this.getSummaryInfo(trid);
+				this.getSummaryInfo(trid,tblid);
+				$('.sel',tbl).removeClass('sel');
+				$(tr).addClass('sel');
+				$('tbody',tbl).animate({scrollTop: ($(tr).offset().top - $('tbody tr:first-child',tbl).offset().top)},400);
+			}
+		}
+		if(tblid=='bhyveslist')
+		{
+			if(td==$(tr).children()[0] || td==$(tr).children()[1])
+			{
+				var aspl=$('div.main').hasClass('asplit');
+				if(!aspl) $('div.main').addClass('asplit');
+//				var e=$(tr).parents('div.main');if(e){$(e).toggleClass('asplit');}
+				this.getSummaryInfo(trid,tblid);
 				$('.sel',tbl).removeClass('sel');
 				$(tr).addClass('sel');
 				$('tbody',tbl).animate({scrollTop: ($(tr).offset().top - $('tbody tr:first-child',tbl).offset().top)},400);
@@ -3174,10 +3187,10 @@ var clonos={
 		delete graphs.list[id];
 	},
 	
-	getSummaryInfo:function(jname)
+	getSummaryInfo:function(jname,mode)
 	{
 		this.openedJailSummary=jname;
-		var posts=[{'name':'jname','value':jname}];
+		var posts=[{'name':'jname','value':jname},{'name':'mode','value':mode}];
 		this.loadData('getSummaryInfo',$.proxy(this.onGetSummaryInfo,this),posts);
 	},
 	onGetSummaryInfo:function(data)

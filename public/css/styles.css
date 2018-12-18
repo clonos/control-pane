@@ -1690,7 +1690,8 @@ body.overview div.smoothie-chart-tooltip {
 	background-color:rgba(255,255,255,0.7);
 }
 
-#jailslist td:nth-child(1), #jailslist td:nth-child(2) {
+#jailslist td:nth-child(1), #jailslist td:nth-child(2),
+#bhyveslist td:nth-child(1), #bhyveslist td:nth-child(2) {
 	cursor:pointer;
 }
 

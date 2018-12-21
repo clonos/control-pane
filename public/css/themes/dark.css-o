@@ -250,15 +250,16 @@ td.error {
 #config-menu ul
 {
 	border:1px solid gray;
-	background-color:white;
+	background-color:black;
 }
 #config-menu li:hover {
-	background:#f0f0f0;
+	/* background:#f0f0f0; */
+	background:#073642; */
 }
 #config-menu .menu-cog {
 	color:#337ab7;
 	border:1px solid gray;
-	background-color:white;
+	background-color:black;
 }
 
 span.top-button {
@@ -418,4 +419,42 @@ header .top-right {
 }
 .summary_table tr td:first-child {
 	padding-right:10px;
+}
+
+
+#menu .icon-chart-bar:before {
+	color:rgba(255,100,100,0.7);
+}
+#menu .icon-server:before {
+	color:rgba(100,255,100,0.7);
+}
+#menu .icon-cubes:before {
+	color:rgba(100,100,255,0.7);
+}
+#menu .icon-th-list:before {
+	color:rgba(100,255,255,0.7);
+}
+#menu .icon-plug:before {
+	color:rgba(255,100,255,0.7);
+}
+#menu .icon-key:before {
+	color:rgba(255,255,100,0.7);
+}
+#menu .icon-inbox:before {
+	color:rgba(100,255,100,0.7);
+}
+#menu .icon-upload:before {
+	color:rgba(255,100,100,0.7);
+}
+#menu .icon-database:before {
+	color:rgba(100,255,100,0.7);
+}
+#menu .icon-edit:before {
+	color:rgba(255,100,255,0.7);
+}
+#menu .icon-list-alt:before {
+	color:rgba(255,255,255,0.7);
+}
+#menu .icon-wpforms:before {
+	color:rgba(100,100,255,0.7);
 }

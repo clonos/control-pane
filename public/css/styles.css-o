@@ -458,7 +458,7 @@ thead td, thead th {
 	border-bottom: 1px solid #f0f0f0;
 }
 .tfill td {
-	background: #8798a6;
+	background: #D8E6F3;
 	border-bottom: 1px solid #f0f0f0;
 }
 thead td:first-child, td:first-child {

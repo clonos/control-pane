@@ -50,7 +50,11 @@ class Db
 				$connect='sqlite:'.$file_name;
 				break;
 			case 'racct':
-				$file_name=$this->_workdir.'/jails-system/'.$database['jname'].'/racct.sqlite';;
+				$file_name=$this->_workdir.'/jails-system/'.$database['jname'].'/racct.sqlite';
+				$connect='sqlite:'.$file_name;
+				break;
+			case 'bhyve':
+				$file_name=$this->_workdir.'/jails-system/'.$database['jname'].'/local.sqlite';
 				$connect='sqlite:'.$file_name;
 				break;
 		}

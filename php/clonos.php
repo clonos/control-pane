@@ -5,6 +5,7 @@ class ClonOS
 {
 	public $server_name='';
 	public $workdir='';
+	public $environment='';
 	public $realpath='';
 	public $realpath_php='';
 	public $realpath_public='';
@@ -89,6 +90,8 @@ class ClonOS
 
 		$this->workdir=getenv('WORKDIR');
 			# // /usr/jails
+		
+		$this->environment=getenv('APPLICATION_ENV');
 			
 		$this->realpath=$_REALPATH.'/';
 			# /usr/home/web/cp/clonos/
@@ -2911,6 +2914,7 @@ class ClonOS
 	function getSummaryInfo()
 	{
 		$form=$this->form;
+		$mode=$form['mode'];
 		$jail_name=$form['jname'];
 		$res=array();
 		
@@ -2923,6 +2927,12 @@ class ClonOS
 		{
 			$quer=$db->select("SELECT '{$jail_name}' as name,idx as time,memoryuse,pcpu,pmem,maxproc,openfiles,readbps,writebps,readiops,writeiops FROM racct ORDER BY idx DESC LIMIT 25;");	// where idx%5=0
 			$res['__all']=$quer;
+		}
+		
+		if($mode=='bhyveslist')
+		{
+			$res['properties']=$this->getSummaryInfoBhyves();
+			return $res;
 		}
 		
 		//$workdir/jails-system/$jname/descr
@@ -2958,4 +2968,64 @@ class ClonOS
 		
 		return $res;
 	}
+	function getSummaryInfoBhyves()
+	{
+		$form=$this->form;
+		$jname=$form['jname'];
+		$res='';
+		
+		/*
+		$bool=array(
+			'created','astart','vm_cpus','vm_os_type','vm_boot','vm_os_profile','bhyve_flags',
+			'vm_vnc_port','bhyve_vnc_tcp_bind','bhyve_vnc_resolution','ip4_addr','state_time',
+			'cd_vnc_wait','protected','hidden','maintenance','media_auto_eject','jailed'
+		);
+		*/
+		$bool=array('astart','hidden','jailed','cd_vnc_wait','protected','media_auto_eject');
+		$chck=array(
+			'bhyve_generate_acpi','bhyve_wire_memory','bhyve_rts_keeps_utc','bhyve_force_msi_irq',
+			'bhyve_x2apic_mode','bhyve_mptable_gen','bhyve_ignore_msr_acc','xhci'
+		);
+		
+		$db=new Db('bhyve',array('jname'=>$jname));
+		if($db!==false)
+		{
+			$sql="select created, astart, vm_cpus, vm_ram, vm_os_type, vm_boot, vm_os_profile, bhyve_flags,
+				vm_vnc_port, virtio_type, bhyve_vnc_tcp_bind, bhyve_vnc_resolution, cd_vnc_wait,
+				protected, hidden, maintenance, ip4_addr, vnc_password, state_time,
+				vm_hostbridge, vm_iso_path, vm_console, vm_efi, vm_rd_port, bhyve_generate_acpi,
+				bhyve_wire_memory, bhyve_rts_keeps_utc, bhyve_force_msi_irq, bhyve_x2apic_mode,
+				bhyve_mptable_gen, bhyve_ignore_msr_acc, bhyve_vnc_vgaconf text, media_auto_eject,
+				vm_cpu_topology, debug_engine, xhci, cd_boot_firmware, jailed from settings";
+			$quer=$db->selectAssoc($sql);
+			$html='<table class="summary_table">';
+			
+			foreach($quer as $q=>$k)
+			{
+				if(in_array($q,$bool))
+				{
+					$k=($k==0)?'no':'yes';
+				}
+				if(in_array($q,$chck))
+				{
+					//$k=($k==0)?'off':'on';
+					$k=($k==0)?'no':'yes';
+				}
+				
+				if($q=='vm_ram') $k=$this->fileSizeConvert($k);
+				if($q=='state_time') $k=date('d.m.Y H:i:s',$k);
+				
+				$html.='<tr><td>'.$this->translate($q).'</td><td>'.$this->translate($k).'</td></tr>';
+			}
+			
+			$html.='</table>';
+			$res=$html;
+		}else{
+			
+		}
+		
+		return $res;
+	}
 }
+
+

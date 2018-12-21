@@ -41,6 +41,9 @@ class Menu
 			$this->first_key=key($menu_config);
 		}
 		
+		if($parent->environment!='development')
+			unset($menu_config['sqlite']);
+		
 		$this->html='<ul class="menu">'.PHP_EOL;
 
 		//$qstr=trim($_SERVER['REQUEST_URI'],'/');

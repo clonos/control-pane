@@ -2606,7 +2606,7 @@ var clonos={
 	wsconnect:function()
 	{
 		this.client_id=Math.random(10000);	// поменять на сессию
-		this.socket = new WebSocket("ws://"+_server_name+":8023/clonos"+location.pathname);
+		this.socket = new WebSocket("ws://"+location.hostname+":8023/clonos"+location.pathname);
 		$(this.socket).on('open',$.proxy(this.wsopen,this))
 			.on('close',$.proxy(this.wsclose,this))
 			.on('error',$.proxy(this.wserror,this))
@@ -3251,7 +3251,7 @@ graphs={
 		{
 			console.log('Соединяемся по сокету');
 			this.client_id=this.name;
-			socket = new WebSocket("ws://"+_server_name+":8024/graph"+location.pathname+"client-"+Math.random());
+			socket = new WebSocket("ws://"+location.hostname+":8024/graph"+location.pathname+"client-"+Math.random());
 			$(socket).on('open',$.proxy(this.wsopen,this))
 				.on('close',$.proxy(this.wsclose,this))
 				.on('error',$.proxy(this.wserror,this))

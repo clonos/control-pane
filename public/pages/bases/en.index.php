@@ -6,7 +6,7 @@ $clonos->useDialogs(array(
 ?>
 <h1>FreeBSD bases:</h1>
 
-<p><span class="top-button icon-edit id:basescompile">Build for source code</span>
+<p><span class="top-button icon-edit id:basescompile">Build from source code</span>
 	<span class="top-button icon-gift id:getrepo">Fetch from repository</span></p>
 
 <table class="tsimple" id="baseslist" width="100%">

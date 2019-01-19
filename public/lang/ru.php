@@ -218,4 +218,6 @@ $lang=array(
 	'cd_vnc_wait'=>'запуск с CD ждет подключения VNC',
 	'vm_hostbridge'=>'тип северного моста (hostbridge)',
 	'vm_console'=>'тип консоли',
+	
+	'DONATE'=>'ПОДДЕРЖАТЬ ПРОЕКТ',
 );

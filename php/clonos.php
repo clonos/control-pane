@@ -2914,6 +2914,7 @@ class ClonOS
 	function getSummaryInfo()
 	{
 		$form=$this->form;
+		if(!isset($form['mode'])) $form['mode']='';
 		$mode=$form['mode'];
 		$jail_name=$form['jname'];
 		$res=array();

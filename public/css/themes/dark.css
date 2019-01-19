@@ -409,6 +409,9 @@ dl#summaryInfo dt {
 header .top-right {
 	color:white;
 }
+header .top-right a {
+	color:#FFFAA0;
+}
 
 
 .summary_table {

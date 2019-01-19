@@ -176,6 +176,9 @@ header .top-right {
 	cursor:default;
 	text-align:right;
 }
+header .top-right a {
+	color:darkred;
+}
 header .top-right .txt {
 	vertical-align:middle;
 	display:inline-block;

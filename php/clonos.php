@@ -132,10 +132,8 @@ class ClonOS {
 				$this->realpath_page=$this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
 		}
 		
-		if(isset($this->_vars['hash']))
-		{
-			$this->url_hash=preg_replace('/^#/','',$this->_vars['hash']);
-		}
+		if(isset($this->_vars['hash'])) $this->url_hash=preg_replace('/^#/','',$this->_vars['hash']);
+
 //		$this->json_name=$this->realpath_php.'pages'
 //		$clonos->json_name=$file_path.'a.json.php';
 		
@@ -173,195 +171,71 @@ class ClonOS {
 
 			unset($_POST);
 			switch($this->mode){
-				case 'login':
-					echo json_encode($this->login());
-					return;
-				case 'getTasksStatus':
-					echo json_encode($this->_getTasksStatus($this->form['jsonObj']));
-					return;
-				case 'getJsonPage':
-					if(file_exists($this->json_name)) include($this->json_name); else echo '{}';
-					return;
-				case 'freejname':
-					echo json_encode($this->getFreeJname());
-					break;
+				case 'login': echo json_encode($this->login()); return;
+				case 'getTasksStatus': echo json_encode($this->_getTasksStatus($this->form['jsonObj'])); return;
+				case 'getJsonPage': if(file_exists($this->json_name)) include($this->json_name); else echo '{}'; return;
+				case 'freejname': echo json_encode($this->getFreeJname()); break;
+				case 'helpersAdd': echo json_encode($this->helpersAdd($this->mode)); return;
+				case 'addHelperGroup': echo json_encode($this->addHelperGroup($this->mode)); return;
+				case 'addJailHelperGroup': echo json_encode($this->addJailHelperGroup()); return;
+				case 'deleteJailHelperGroup': echo json_encode($this->deleteJailHelperGroup()); return;
+				case 'deleteHelperGroup': echo json_encode($this->deleteHelperGroup($this->mode)); return;
+				case 'jailRestart': echo json_encode($this->jailRestart()); return;
+				case 'jailStart': echo json_encode($this->jailStart()); return;
+				case 'jailStop': echo json_encode($this->jailStop()); return;
+				case 'jailRemove': echo json_encode($this->jailRemove()); return;
+				case 'saveJailHelperValues': echo json_encode($this->saveJailHelperValues()); return;
 
-				case 'helpersAdd':
-					echo json_encode($this->helpersAdd($this->mode));
-					return;
-				case 'addHelperGroup':
-					echo json_encode($this->addHelperGroup($this->mode));
-					return;
-				case 'addJailHelperGroup':
-					echo json_encode($this->addJailHelperGroup());
-					return;
-				case 'deleteJailHelperGroup':
-					echo json_encode($this->deleteJailHelperGroup());
-					return;
-				case 'deleteHelperGroup':
-					echo json_encode($this->deleteHelperGroup($this->mode));
-					return;
-				case 'jailRestart':
-					echo json_encode($this->jailRestart());
-					return;
-				case 'jailStart':
-					echo json_encode($this->jailStart());
-					return;
-				case 'jailStop':
-					echo json_encode($this->jailStop());
-					return;
-				case 'jailRemove':
-					echo json_encode($this->jailRemove());
-					return;
-				case 'saveJailHelperValues':
-					echo json_encode($this->saveJailHelperValues());
-					return;
-				case 'saveHelperValues':
-					$redirect='/jailscontainers/';
-				case 'jailAdd':
-					if(!isset($redirect)) $redirect='';
-					echo json_encode($this->jailAdd($redirect));
-					return;
-				case 'jailClone':
-					echo json_encode($this->jailClone());
-					return;
-				case 'jailRename':
-					echo json_encode($this->jailRename());
-					return;
-				case 'bhyveRename':
-					echo json_encode($this->bhyveRename());
-					return;
-				case 'jailEdit':
-					echo json_encode($this->jailEdit());
-					return;
-				case 'jailEditVars':
-					echo json_encode($this->jailEditVars());
-					return;
-				case 'jailCloneVars':
-					echo json_encode($this->jailCloneVars());
-					return;
-				case 'jailRenameVars':
-					echo json_encode($this->jailRenameVars());
-					return;
-				case 'bhyveRenameVars':
-					echo json_encode($this->bhyveRenameVars());
-					return;
-				case 'bhyveRestart':
-					echo json_encode($this->bhyveRestart());
-					return;
-				case 'bhyveStart':
-					echo json_encode($this->bhyveStart());
-					return;
-				case 'bhyveStop':
-					echo json_encode($this->bhyveStop());
-					return;
-				case 'bhyveAdd':
-					echo json_encode($this->bhyveAdd());
-					return;
-				case 'bhyveRemove':
-					echo json_encode($this->bhyveRemove());
-					return;
-				case 'bhyveEdit':
-					echo json_encode($this->bhyveEdit());
-					return;
-				case 'bhyveEditVars':
-					echo json_encode($this->bhyveEditVars());
-					return;
-				case 'bhyveObtain':
-					echo json_encode($this->bhyveObtain());
-					return;
-				case 'bhyveClone':
-					echo json_encode($this->bhyveClone());
-					return;
+				case 'saveHelperValues': $redirect='/jailscontainers/';
+				case 'jailAdd': if(!isset($redirect)) $redirect=''; echo json_encode($this->jailAdd($redirect)); return;
 
-				
-				case 'authkeyAdd':
-					echo json_encode($this->authkeyAdd());
-					return;
-				case 'authkeyRemove':
-					echo json_encode($this->authkeyRemove());
-					return;
-					
-				case 'vpnetAdd':
-					echo json_encode($this->vpnetAdd());
-					return;
-				case 'vpnetRemove':
-					echo json_encode($this->vpnetRemove());
-					return;
-					
-				case 'updateBhyveISO':
-					echo json_encode($this->updateBhyveISO());
-					return;
+				case 'jailClone': echo json_encode($this->jailClone()); return;
+				case 'jailRename': echo json_encode($this->jailRename()); return;
+				case 'bhyveRename': echo json_encode($this->bhyveRename()); return;
+				case 'jailEdit': echo json_encode($this->jailEdit()); return;
+				case 'jailEditVars': echo json_encode($this->jailEditVars()); return;
+				case 'jailCloneVars': echo json_encode($this->jailCloneVars()); return;
+				case 'jailRenameVars': echo json_encode($this->jailRenameVars()); return;
+				case 'bhyveRenameVars': echo json_encode($this->bhyveRenameVars()); return;
+				case 'bhyveRestart': echo json_encode($this->bhyveRestart()); return;
+				case 'bhyveStart': echo json_encode($this->bhyveStart()); return;
+				case 'bhyveStop': echo json_encode($this->bhyveStop()); return;
+				case 'bhyveAdd': echo json_encode($this->bhyveAdd()); return;
+				case 'bhyveRemove': echo json_encode($this->bhyveRemove()); return;
+				case 'bhyveEdit': echo json_encode($this->bhyveEdit()); return;
+				case 'bhyveEditVars': echo json_encode($this->bhyveEditVars()); return;
+				case 'bhyveObtain': echo json_encode($this->bhyveObtain()); return;
+				case 'bhyveClone': echo json_encode($this->bhyveClone()); return;		
+				case 'authkeyAdd': echo json_encode($this->authkeyAdd()); return;
+				case 'authkeyRemove': echo json_encode($this->authkeyRemove()); return;
+				case 'vpnetAdd': echo json_encode($this->vpnetAdd()); return;
+				case 'vpnetRemove': echo json_encode($this->vpnetRemove()); return;
+				case 'updateBhyveISO': echo json_encode($this->updateBhyveISO()); return;
 				case 'mediaAdd':
 					//echo json_encode($this->mediaAdd());
 					return;
-				case 'mediaRemove':
-					echo json_encode($this->mediaRemove());
-					return;
-				case 'logLoad':
-					echo json_encode($this->logLoad());
-					return;
-				case 'logFlush':
-					echo json_encode($this->logFlush());
-					return;
-				case 'basesCompile':
-					echo json_encode($this->basesCompile());
-					return;
-				case 'repoCompile':
-					echo json_encode($this->repoCompile());
-					return;
-				case 'srcUpdate':
-					echo json_encode($this->srcUpdate());
-					return;
-				case 'srcRemove':
-					echo json_encode($this->srcRemove());
-					return;
-				case 'baseRemove':
-					echo json_encode($this->baseRemove());
-					return;
-				case 'usersAdd':
-					echo json_encode($this->usersAdd());
-					return;
-				case 'usersEdit':
-					echo json_encode($this->usersEdit());
-					return;
-				case 'userRemove':
-					echo json_encode($this->userRemove());
-					return;
-				case 'userGetInfo':
-					echo json_encode($this->userGetInfo());
-					return;
-				case 'userEditInfo':
-					echo json_encode($this->userEditInfo());
-					return;
-				case 'vmTemplateAdd':
-					echo json_encode($this->vmTemplateAdd());
-					return;
-				case 'vmTemplateEditInfo':
-					echo json_encode($this->vmTemplateEditInfo());
-					return;
-				case 'vmTemplateEdit':
-					echo json_encode($this->vmTemplateEdit());
-					return;
-				case 'vmTemplateRemove':
-					echo json_encode($this->vmTemplateRemove());
-					return;
-					
-				case 'getImportedImageInfo':
-					echo json_encode($this->getImportedImageInfo());
-					return;
-				case 'imageImport':
-					echo json_encode($this->imageImport());
-					return;
-				case 'imageExport':
-					echo json_encode($this->imageExport());
-					return;
-				case 'imageRemove':
-					echo json_encode($this->imageRemove());
-					return;
-				case 'getSummaryInfo':
-					echo json_encode($this->getSummaryInfo());
-					return;
+				case 'mediaRemove': echo json_encode($this->mediaRemove()); return;
+				case 'logLoad': echo json_encode($this->logLoad()); return;
+				case 'logFlush': echo json_encode($this->logFlush()); return;
+				case 'basesCompile': echo json_encode($this->basesCompile()); return;
+				case 'repoCompile': echo json_encode($this->repoCompile()); return;
+				case 'srcUpdate': echo json_encode($this->srcUpdate()); return;
+				case 'srcRemove': echo json_encode($this->srcRemove()); return;
+				case 'baseRemove': echo json_encode($this->baseRemove()); return;
+				case 'usersAdd': echo json_encode($this->usersAdd()); return;
+				case 'usersEdit': echo json_encode($this->usersEdit()); return;
+				case 'userRemove': echo json_encode($this->userRemove()); return;
+				case 'userGetInfo': echo json_encode($this->userGetInfo()); return;
+				case 'userEditInfo': echo json_encode($this->userEditInfo()); return;
+				case 'vmTemplateAdd': echo json_encode($this->vmTemplateAdd()); return;
+				case 'vmTemplateEditInfo': echo json_encode($this->vmTemplateEditInfo()); return;
+				case 'vmTemplateEdit': echo json_encode($this->vmTemplateEdit()); return;
+				case 'vmTemplateRemove': echo json_encode($this->vmTemplateRemove()); return;
+				case 'getImportedImageInfo': echo json_encode($this->getImportedImageInfo()); return;
+				case 'imageImport': echo json_encode($this->imageImport()); return;
+				case 'imageExport': echo json_encode($this->imageExport()); return;
+				case 'imageRemove': echo json_encode($this->imageRemove()); return;
+				case 'getSummaryInfo': echo json_encode($this->getSummaryInfo()); return;
 					
 /*				case 'saveHelperValues':
 					echo json_encode($this->saveHelperValues());
@@ -444,11 +318,10 @@ class ClonOS {
 		return 0;
 	}
 
-/* 	function get_node_info($nodename,$value)
-	{
+	function get_node_info($nodename,$value){
 		$db = new SQLite3($this->realpath."/var/db/nodes.sqlite"); $db->busyTimeout(5000);
 		if (!$db) return;
-		$sql = "SELECT $value FROM nodelist WHERE nodename='".SQLite3::escapeString($nodename)."'";
+		$sql = "SELECT $value FROM nodelist WHERE nodename='".Db::escape($nodename)."'";
 
 		$result = $db->query($sql);//->fetchArray(SQLITE3_ASSOC);
 		$row = array();
@@ -457,10 +330,9 @@ class ClonOS {
 			if(!isset($res["$value"])) return;
 			return $res["$value"];
 		}
-	} */
+	}
 	
-	function getRunningTasks($ids=array())
-	{
+	function getRunningTasks($ids=array()){
 		$check_arr=array(
 			'jcreate'=>'Creating',
 			'jstart'=>'Starting',
@@ -522,15 +394,12 @@ class ClonOS {
 /*
 	function getTaskStatus($task_id){
 		$status=$this->_db_tasks->selectAssoc("select status,logfile,errcode from taskd where id='{$task_id}'");
-		if($status['errcode']>0)
-		{
-			$status['errmsg']=file_get_contents($status['logfile']);
-		}
+		if($status['errcode']>0) $status['errmsg']=file_get_contents($status['logfile']);
+
 		return $status;
 	}
 */
-	function _getTasksStatus($jsonObj)
-	{
+	function _getTasksStatus($jsonObj){
 		//return $jsonObj;
 		$tasks=array();
 		$obj=json_decode($jsonObj,true);
@@ -570,62 +439,51 @@ class ClonOS {
 		$stat_array['imgremove']=&$stat_array['jremove'];
 		
 		
-		if(!empty($obj)) foreach($obj as $key=>$task)
-		{
+		if(!empty($obj)) foreach($obj as $key=>$task){
 			$op=$task['operation'];
 			$status=$task['status'];
-			if(in_array($op,$ops_array))
-			{
+			if(in_array($op,$ops_array)){
 				$res=false;
-				if($status==-1)
-				{
-					switch($op)
-					{
-						case 'jstart':	$res=$this->jailStart($key);break;
-						case 'jstop':	$res=$this->jailStop($key);break;
-						case 'jrestart':$res=$this->jailRestart($key);break;
-						//case 'jedit':	$res=$this->jailEdit('jail'.$key);break;
-						case 'jremove':	$res=$this->jailRemove($key);break;
+				if($status==-1){
+					switch($op){
+						case 'jstart':		$res=$this->jailStart($key);break;
+						case 'jstop':		$res=$this->jailStop($key);break;
+						case 'jrestart':	$res=$this->jailRestart($key);break;
+						//case 'jedit':		$res=$this->jailEdit('jail'.$key);break;
+						case 'jremove':		$res=$this->jailRemove($key);break;
 						
-						case 'bstart':	$res=$this->bhyveStart($key);break;
-						case 'bstop':	$res=$this->bhyveStop($key);break;
-						case 'brestart':$res=$this->bhyveRestart($key);break;
-						case 'bremove':	$res=$this->bhyveRemove($key);break;
+						case 'bstart':		$res=$this->bhyveStart($key);break;
+						case 'bstop':		$res=$this->bhyveStop($key);break;
+						case 'brestart':	$res=$this->bhyveRestart($key);break;
+						case 'bremove':		$res=$this->bhyveRemove($key);break;
 						case 'removesrc':	$res=$this->srcRemove($key);break;
-						case 'srcup':	$res=$this->srcUpdate($key);break;
+						case 'srcup':		$res=$this->srcUpdate($key);break;
 						case 'removebase':	$res=$this->baseRemove($key);break;
 						
 						//case 'jexport':	$res=$this->jailExport('jail'.$key,$task['jname'],$key);break;
 						//case 'jimport':	$res=$this->jailImport('jail'.$key,$task['jname'],$key);break;
 						//case 'jclone':	$res=$this->jailClone('jail'.$key,$key,$obj[$key]);break;
-						//case 'madd':	$res=$this->moduleAdd('jail'.$key,$task['jname'],$key);break;
+						//case 'madd':		$res=$this->moduleAdd('jail'.$key,$task['jname'],$key);break;
 						////case 'mremove':	$res=$this->moduleRemove('jail'.$key,$task['jname'],$key);break;
 						//case 'sstart':	$res=$this->serviceStart($task);break;
-						//case 'sstop':	$res=$this->serviceStop($task);break;
+						//case 'sstop':		$res=$this->serviceStop($task);break;
 						////case 'projremove':	$res=$this->projectRemove($key,$task);break;
 					}
 				}
 				
-				if($res!==false)
-				{
-					if($res['error'])
-						$obj[$key]['retval']=$res['retval'];
-					if(!empty($res['error_message']))
-						$obj[$key]['error_message']=$res['error_message'];
+				if($res!==false){
+					if($res['error']) $obj[$key]['retval']=$res['retval'];
+					if(!empty($res['error_message'])) $obj[$key]['error_message']=$res['error_message'];
 
-					if(isset($res['message']))
-					{
+					if(isset($res['message'])){
 						$task_id=intval($res['message']);
-						if($task_id>0)
-						{
+						if($task_id>0){
 							$tasks[]=$task_id;
 							$obj[$key]['task_id']=$task_id;
 							//$obj[$key]['txt_log']=file_get_contents('/tmp/taskd.'.$task_id.'.log');
 						}
 					}
-				}else{
-					$tasks[]=$task['task_id'];
-				}
+				}else $tasks[]=$task['task_id'];
 			}
 			
 			if($status==-1) $obj[$key]['status']=0;
@@ -642,8 +500,7 @@ class ClonOS {
 						$obj[$key]['status']=$stat['status'];
 						$num=($stat['status']<2?0:1);
 						$obj[$key]['txt_status']=$stat_array[$obj[$key]['operation']][$num];
-						if($stat['errcode']>0)
-						{
+						if($stat['errcode']>0){
 							$obj[$key]['errmsg']=file_get_contents($stat['logfile']);
 							$obj[$key]['txt_status']=$this->translate('Error');
 						}
@@ -749,7 +606,7 @@ class ClonOS {
 		$html='';
 		$db=new Db('base','local');
 		if($db!==false){
-			$jail=$db->selectAssoc("SELECT jname,ip4_addr,status,protected FROM jails WHERE jname='".SQLite3::escapeString($jname)."'");
+			$jail=$db->selectAssoc("SELECT jname,ip4_addr,status,protected FROM jails WHERE jname='".$db->escape($jname)."'");
 			$hres=$this->getTableChunk('jailslist','tbody');
 			if($hres!==false){
 				$html_tpl=$hres[1];
@@ -799,11 +656,9 @@ class ClonOS {
 		$db=new Db('helper',array('jname'=>$jail_name,'helper'=>$this->url_hash));
 		if($db->error) return array('error'=>true,'errorMessage'=>'No helper database!');
 		
-		foreach($form as $key=>$val)
-		{
-			if($key!='jname' && $key!='ip4_addr')
-			{
-				$query="update forms set new='".SQLite3::escapeString($val)."' where param='".SQLite3::escapeString($key)."'";
+		foreach($form as $key=>$val) {
+			if($key!='jname' && $key!='ip4_addr') {
+				$query="update forms set new='".$db->escape($val)."' where param='".$db->escape($key)."'";
 				$db->update($query);
 				unset($form[$key]);
 			}
@@ -814,8 +669,7 @@ class ClonOS {
 
 		$err='Helper values is saved!';
 		$taskId=-1;
-		if($res['retval']==0)
-		{
+		if($res['retval']==0) {
 			$err='Helper values was not saved!';
 			$taskId=$res['message'];
 		}
@@ -843,9 +697,8 @@ class ClonOS {
 					echo json_encode(array('error'=>true,'errorMessage'=>'Error on open temporary form database!'));
 					return;
 				}
-			}else{
-				$db_path=$this->_vars['db_path'];
-			}
+			}else $db_path=$this->_vars['db_path'];
+
 			
 			/*
 			$file_name=$this->workdir.'/formfile/'.$helper.'.sqlite';
@@ -857,7 +710,7 @@ class ClonOS {
 				if($db!==false){
 					foreach($form as $key=>$val){
 						if($key!='jname' && $key!='ip4_addr'){
-							$query="update forms set new='".SQLite3::escapeString($val)."' where param='".SQLite3::escapeString($key)."'";
+							$query="update forms set new='".$db->escape($val)."' where param='".$db->escape($key)."'";
 							$db->update($query);
 							unset($form[$key]);
 						}
@@ -873,7 +726,7 @@ class ClonOS {
 			if($db!==false){
 				foreach($form as $key=>$val){
 					if($key!='jname' && $key!='ip4_addr'){
-						$db->update("update forms set new='".SQLite3::escapeString($val)."' where param='".SQLite3::escapeString($key)."'");
+						$db->update("update forms set new='".$db->escape($val)."' where param='".$db->escape($key)."'");
 						unset($form[$key]);
 					}
 				}
@@ -984,6 +837,7 @@ class ClonOS {
 		
 		return array('errorMessage'=>$err,'jail_id'=>$jid,'taskId'=>$taskId,'mode'=>$this->mode,'redirect'=>$redirect,'db_path'=>$db_path);	//,'html'=>$html
 	}
+
 	function jailRenameVars(){
 		$form=$this->_vars['form_data'];
 		if(!isset($form['jail_id'])) return array('error'=>true,'error_message'=>'Bad jail id!');
@@ -991,7 +845,7 @@ class ClonOS {
 		$err=false;
 		$db=new Db('base','local');
 		if($db!==false){
-			$query="SELECT jname,host_hostname FROM jails WHERE jname='".SQLite3::escapeString($form['jail_id'])."';"; //,ip4_addr
+			$query="SELECT jname,host_hostname FROM jails WHERE jname='".$db->escape($form['jail_id'])."';"; //,ip4_addr
 			$res['vars']=$db->selectAssoc($query);
 		}else{
 			$err=true;
@@ -1026,7 +880,7 @@ class ClonOS {
 		$err=false;
 		$db=new Db('base','local');
 		if($db!==false){
-			$query="SELECT jname,host_hostname FROM jails WHERE jname='".SQLite3::escapeString($form['jail_id'])."';";	//,ip4_addr
+			$query="SELECT jname,host_hostname FROM jails WHERE jname='".$db->escape($form['jail_id'])."';";	//,ip4_addr
 			$res['vars']=$db->selectAssoc($query);
 		}else $err=true;
 
@@ -1058,7 +912,7 @@ class ClonOS {
 		$err=false;
 		$db=new Db('base','local');
 		if($db!==false){
-			$query="SELECT jname,host_hostname,ip4_addr,allow_mount,interface,mount_ports,astart,vnet FROM jails WHERE jname='".SQLite3::escapeString($form['jail_id'])."';";
+			$query="SELECT jname,host_hostname,ip4_addr,allow_mount,interface,mount_ports,astart,vnet FROM jails WHERE jname='".$db->escape($form['jail_id'])."';";
 			$res['vars']=$db->selectAssoc($query);
 		}else $err=true;
 		if(empty($res['vars']))	$err=true;
@@ -1118,6 +972,7 @@ class ClonOS {
 		//.' cbsd_queue_name=/clonos/'.$cbsd_queue_name.'/');	// autoflush=2
 		return $res;
 	}
+
 	function jailRestart(){	//$name
 		$form=$this->_vars['form_data'];
 		$username=$this->_user_info['username'];
@@ -1125,6 +980,7 @@ class ClonOS {
 		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd jrestart inter=0 jname='.$name);	// autoflush=2
 		return $res;
 	}
+
 	function jailRemove(){	//$name
 		$form=$this->_vars['form_data'];
 		$username=$this->_user_info['username'];
@@ -1224,7 +1080,7 @@ class ClonOS {
 		$err=false;
 		$db=new Db('base','local');
 		if($db!==false)	{
-			$query="SELECT b.jname as vm_name,vm_cpus,vm_ram,vm_vnc_port,bhyve_vnc_tcp_bind,interface FROM bhyve as b inner join jails as j on b.jname=j.jname and b.jname='".SQLite3::escapeString($form['jail_id'])."';";
+			$query="SELECT b.jname as vm_name,vm_cpus,vm_ram,vm_vnc_port,bhyve_vnc_tcp_bind,interface FROM bhyve as b inner join jails as j on b.jname=j.jname and b.jname='".$db->escape($form['jail_id'])."';";
 			$res['vars']=$db->selectAssoc($query);
 			
 			$res['vars']['vm_ram']=$this->fileSizeConvert($res['vars']['vm_ram']);
@@ -1255,7 +1111,7 @@ class ClonOS {
 		$new_name=$form['jname'];
 		$username=$this->_user_info['username'];
 		
-	$cmd="task owner=${username} mode=new /usr/local/bin/cbsd brename old=${old_name} new=${new_name} restart=1";
+		$cmd="task owner=${username} mode=new /usr/local/bin/cbsd brename old=${old_name} new=${new_name} restart=1";
 		$res=$this->cbsd_cmd($cmd);
 		
 		$err='Virtual Machine is not renamed!';
@@ -1267,8 +1123,8 @@ class ClonOS {
 		
 		return array('errorMessage'=>$err,'jail_id'=>$form['jname'],'taskId'=>$taskId,'mode'=>$this->mode);
 	}
-	function bhyveRenameVars()
-	{
+
+	function bhyveRenameVars(){
 		$form=$this->_vars['form_data'];
 		if(!isset($form['jail_id'])) return array('error'=>true,'error_message'=>'Bad jail id!');
 		
@@ -1276,7 +1132,7 @@ class ClonOS {
 		$err=false;
 		$db=new Db('base','local');
 		if($db!==false){
-			$query="SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden FROM bhyve WHERE jname='".SQLite3::escapeString($jname)."'";	//,ip4_addr
+			$query="SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden FROM bhyve WHERE jname='".$db->escape($jname)."'";	//,ip4_addr
 			$res['vars']=$db->selectAssoc($query);
 		}else $err=true;
 
@@ -1524,6 +1380,7 @@ class ClonOS {
 		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd bstart inter=0 jname='.$name);	// autoflush=2
 		return $res;
 	}
+
 	function bhyveStop(){
 		$form=$this->form;
 		$username=$this->_user_info['username'];
@@ -1531,6 +1388,7 @@ class ClonOS {
 		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd bstop inter=0 jname='.$name);	// autoflush=2
 		return $res;
 	}
+
 	function bhyveRestart(){
 		$form=$this->form;
 		$username=$this->_user_info['username'];
@@ -1538,6 +1396,7 @@ class ClonOS {
 		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd brestart inter=0 jname='.$name);	// autoflush=2
 		return $res;
 	}
+
 	function bhyveRemove(){ // $name
 		$form=$this->form;
 		$username=$this->_user_info['username'];
@@ -1549,9 +1408,10 @@ class ClonOS {
 	function authkeyAdd(){
 		$form=$this->form;
 		
-		$query="insert into authkey (name,authkey) values ('".SQLite3::escapeString($form['keyname'])."','".SQLite3::escapeString($form['keysrc'])."')";
 		
 		$db=new Db('base','authkey');
+
+		$query="insert into authkey (name,authkey) values ('".$db->escape($form['keyname'])."','".$db->escape($form['keysrc'])."')";
 		//$res=array('error'=>false,'lastId'=>2);
 		$res=$db->insert($query);
 		if($res['error']) return array('error'=>$res);
@@ -1585,13 +1445,13 @@ class ClonOS {
 		
 		return array('error'=>false,'auth_id'=>$form['auth_id']);
 	}
-	
+
 	function vpnetAdd(){
 		$form=$this->_vars['form_data'];
 		
-		$query="insert into vpnet (name,vpnet) values ('".SQLite3::escapeString($form['netname'])."','".SQLite3::escapeString($form['network'])."')";
 		
 		$db=new Db('base','vpnet');
+		$query="insert into vpnet (name,vpnet) values ('".$db->escape($form['netname'])."','".$db->escape($form['network'])."')";
 		
 		$res=$db->insert($query);
 		if($res['error']) return array('error'=>$res);
@@ -1615,22 +1475,22 @@ class ClonOS {
 		
 		return array('netname'=>$form['netname'],'html'=>$html);
 	}
+
 	function vpnetRemove(){
 		$form=$this->_vars['form_data'];
 		
 		$db=new Db('base','vpnet');
-		$res=$db->update('delete from vpnet where idx='.$form['vpnet_id']);
+		$res=$db->update('delete from vpnet where idx='.(int)$form['vpnet_id']);
 		if($res===false) return array('error'=>true,'res'=>print_r($res,true));
 		
 		return array('error'=>false,'vpnet_id'=>$form['vpnet_id']);
 	}
-	
-	
+
 	function mediaRemove(){
 		$form=$this->form;
 		$db=new Db('base','storage_media');
 		//$res=$db->update('delete from media where idx='.$form['media_id']);
-		$res=$db->selectAssoc('select * from media where idx='.$form['media_id']);
+		$res=$db->selectAssoc('select * from media where idx='.(int)$form['media_id']);
 		if($res===false || empty($res)) return array('error'=>true,'res'=>print_r($res,true));
 		
 		//if($res['jname']=='-')	// если медиа отвязана, то просто удаляем 
@@ -1655,7 +1515,7 @@ class ClonOS {
 		//return array('error'=>false,'media_id'=>$form['media_id']);
 		return $arr;
 	}
-	
+
 	function srcRemove(){
 		$form=$this->form;
 		$username=$this->_user_info['username'];
@@ -1712,6 +1572,7 @@ class ClonOS {
 		
 		return array('html'=>$html,'arr'=>$res);
 	}
+
 	function baseRemove(){	//$id
 		//$id=str_replace('base','',$id);
 		//base10.3-amd64-0
@@ -1728,17 +1589,17 @@ class ClonOS {
 		$res=$this->cbsd_cmd($cmd);
 		return $res;
 	}
-	
+
 	function basesCompile(){
 		$form=$this->form;
 		$username=$this->_user_info['username'];
 		if(!isset($form['sources']) || !is_numeric($form['sources'])) return array('error'=>true,'errorMessage'=>'Wrong OS type selected!');
-		$id=$form['sources'];
+		$id=(int)$form['sources'];
 		
 		$db=new Db('base','local');
 		if($db===false) return array('error'=>true,'errorMessage'=>'Database connect error!');
 
-		$base=$db->selectAssoc("SELECT idx,platform,ver FROM bsdsrc where idx=".SQLite3::escapeString($id));
+		$base=$db->selectAssoc("SELECT idx,platform,ver FROM bsdsrc where idx=".$id);
 		$ver=$base['ver'];
 		$stable_arr=array('release','stable');
 		$stable_num=strlen(intval($ver))<strlen($ver)?0:1;
@@ -1769,11 +1630,9 @@ class ClonOS {
 		$html='';
 		
 		$db=new Db('base','local');
-		if($db!==false)
-		{
-			if($bsdsrc)
-			{
-				$res=$db->selectAssoc("SELECT idx,platform,ver FROM bsdsrc where idx={$id}");
+		if($db!==false){
+			if($bsdsrc){
+				$res=$db->selectAssoc("SELECT idx,platform,ver FROM bsdsrc where idx=".(int)$id);
 				$res['name']='—';
 				$res['arch']='—';
 				$res['targetarch']='—';
@@ -1781,7 +1640,7 @@ class ClonOS {
 				$res['elf']='—';
 				$res['date']='—';
 			}else{
-				$res=$db->selectAssoc("SELECT idx,platform,name,arch,targetarch,ver,stable,elf,date FROM bsdbase where ver={$id}");
+				$res=$db->selectAssoc("SELECT idx,platform,name,arch,targetarch,ver,stable,elf,date FROM bsdbase where ver=".(int)$id);
 			}
 			$hres=$this->getTableChunk('baseslist','tbody');
 			if($hres!==false){
@@ -1817,7 +1676,7 @@ class ClonOS {
 		
 		return array('html'=>$html,'arr'=>$res);
 	}
-	
+
 	function repoCompile(){
 		$form=$this->form;
 		$username=$this->_user_info['username'];
@@ -1868,7 +1727,7 @@ class ClonOS {
 		
 		return array('errorMessage'=>'','jail_id'=>'base'.$bid,'taskId'=>$taskId,'html'=>$html,'mode'=>$this->mode,'txt_status'=>$this->translate('Fetching'));
 	}
-	
+
 	function logLoad(){
 		$form=$this->_vars['form_data'];
 		$log_id=$form['log_id'];
@@ -1955,6 +1814,7 @@ class ClonOS {
 		
 		return array('html'=>$res['html']);
 	}
+
 	function addHelperGroup($mode){
 		$module=$this->url_hash;
 		if(isset($this->form)) $form=$this->form; else $form=array();
@@ -2012,11 +1872,12 @@ class ClonOS {
 		
 		return array('html'=>$res['html']);
 	}
-	
+
 	function useDialogs($arr=array()){
 		//print_r($arr);
 		$this->_dialogs=$arr;
 	}
+
 	function placeDialogs(){
 		if(empty($this->_dialogs)) return;
 		echo PHP_EOL;
@@ -2029,7 +1890,7 @@ class ClonOS {
 			}
 		}
 	}
-	
+
 	function placeDialogByName($dialog_name=null){
 		if(is_null($dialog_name)) return;
 		echo PHP_EOL;
@@ -2039,10 +1900,9 @@ class ClonOS {
 			echo PHP_EOL,PHP_EOL;
 		}
 	}
-	
-	
+
 	function runVNC($jname)	{
-		$query="SELECT vnc_password FROM bhyve WHERE jname='".SQLite3::escapeString($jname)."'";
+		$query="SELECT vnc_password FROM bhyve WHERE jname='".$this->_db_local->escape($jname)."'";
 		$res=$this->_db_local->selectAssoc($query);
 
 		$pass='cbsd';
@@ -2060,8 +1920,7 @@ class ClonOS {
 		exit;
 	}
 	
-	function getFreeJname($in_helper=false,$type='jail')
-	{
+	function getFreeJname($in_helper=false,$type='jail'){
 		$arr=array();
 		$add_cmd=($in_helper)?' default_jailname='.$this->url_hash:'';
 		$add_cmd1=' default_jailname='.$type;
@@ -2075,9 +1934,7 @@ class ClonOS {
 		}
 		return $arr;
 	}
-	
-	
-	
+
 	function GhzConvert($Hz=0){
 		$h=1;$l='Mhz';
 		if($Hz>1000){$h=1000;$l='Ghz';}
@@ -2132,7 +1989,6 @@ class ClonOS {
 		
 		return '<span class="cbsd-str">'.$cmd_string.'</span>';
 	}
-	
 	
 	function register_media($path,$file,$ext){
 		$cmd='cbsd media mode=register name='.$file.' path='.$path.$file.' type='.$ext;
@@ -2209,6 +2065,7 @@ class ClonOS {
 		}
 		return array('form'=>$form);
 	}
+
 	function usersEdit(){
 		$form=$this->form;
 		
@@ -2219,9 +2076,9 @@ class ClonOS {
 		if($db===false)	return array('error'=>true,'error_message'=>'db connection lost!');
 
 		$user_id=(int)$form['user_id'];
-		$username=SQLite3::escapeString($form['username']);
-		$first_name=SQLite3::escapeString($form['first_name']);
-		$last_name=SQLite3::escapeString($form['last_name']);
+		$username=$db->escape($form['username']);
+		$first_name=$db->escape($form['first_name']);
+		$last_name=$db->escape($form['last_name']);
 		$is_active=0;
 		if(isset($form['actuser']) && $form['actuser']=='on') $is_active=1;
 		
@@ -2256,27 +2113,27 @@ class ClonOS {
 		if(isset($user_info['username']) && isset($user_info['password'])){
 			$db=new Db('clonos');
 			if($db!==false)	{
-				$res=$db->select("select username from auth_user where username='".SQLite3::escapeString($user_info['username'])."'");
+				$res=$db->select("select username from auth_user where username='".$db->escape($user_info['username'])."'");
 				if(!empty($res)){
 					$res['user_exsts']=true;
 					return $res;
 				}
 				
-				$username=SQLite3::escapeString($user_info['username']);
+				$username=$db->escape($user_info['username']);
 				$password=$this->getPasswordHash($user_info['password']);
-				$first_name=SQLite3::escapeString($user_info['first_name']);
-				$last_name=SQLite3::escapeString($user_info['last_name']);
+				$first_name=$db->escape($user_info['first_name']);
+				$last_name=$db->escape($user_info['last_name']);
 				$is_active=0;
 				if(isset($user_info['actuser']) && $user_info['actuser']=='on') $is_active=1;
 				$query=$db->query_protect("insert into auth_user
-				(username,password,first_name,last_name,is_active,date_joined)
-				values
-				('${username}','${password}','${first_name}','${last_name}',${is_active},datetime('now','localtime'))");
+					(username,password,first_name,last_name,is_active,date_joined) values
+					('${username}','${password}','${first_name}','${last_name}',${is_active},datetime('now','localtime'))");
 				$res=$db->insert($query);
 				return array('error'=>false,'res'=>$res);
 			}
 		}
 	}
+
 	function userRegisterCheck($user_info=array()){
 		/*
 		[0] => Array
@@ -2298,7 +2155,7 @@ class ClonOS {
 			$db=new Db('clonos');
 			if($db!==false){
 				$pass=$this->getPasswordHash($user_info['password']);
-				$res=$db->selectAssoc("select id,username,password from auth_user where username='".SQLite3::escapeString($user_info['login'])."' and is_active=1");
+				$res=$db->selectAssoc("select id,username,password from auth_user where username='".$db->escape($user_info['login'])."' and is_active=1");
 				if(empty($res) || $res['password'] != $pass){
 					sleep(3);
 					return array('errorCode'=>1,'message'=>'user not found!');
@@ -2306,7 +2163,7 @@ class ClonOS {
 				$res['errorCode']=0;
 				
 				$id=(int)$res['id'];
-				$ip=SQLite3::escapeString($this->_client_ip);
+				$ip=$db->escape($this->_client_ip);
 				$memory_hash=md5($id.$res['username'].time());
 				$secure_memory_hash=md5($memory_hash.$ip);
 				
@@ -2342,7 +2199,7 @@ class ClonOS {
 			$secure_memory_hash=md5($memory_hash.$this->_client_ip);
 			$db=new Db('clonos');
 			if($db!==false){
-				$query="select au.id,au.username from auth_user au, auth_list al where al.secure_sess_id='".SQLite3::escapeString($secure_memory_hash)."' and au.id=al.user_id and au.is_active=1";
+				$query="select au.id,au.username from auth_user au, auth_list al where al.secure_sess_id='".$secure_memory_hash."' and au.id=al.user_id and au.is_active=1";
 				//echo $query;
 				$res=$db->selectAssoc($query);
 				//print_r($res);
@@ -2374,11 +2231,11 @@ class ClonOS {
 		
 		if(!isset($form['user_id'])) return array('error'=>true,'error_message'=>'incorrect data!');
 		
-		$user_id=$form['user_id'];
 		$db=new Db('clonos');
 		if($db===false) return array('error'=>true,'error_message'=>'DB connection error!');
+		$user_id=(int)$form['user_id'];
 
-		$res=$db->selectAssoc("select username,first_name,last_name,is_active as actuser from auth_user where id=${user_id}");
+		$res=$db->selectAssoc("select username,first_name,last_name,is_active as actuser from auth_user where id=".$user_id);
 		return array(
 			'dialog'=>$form['dialog'],
 			'vars'=>$res,
@@ -2403,30 +2260,28 @@ class ClonOS {
 	
 	function vmTemplateAdd(){
 		$form=$this->form;
+
+		$db=new Db('base','local');
+		if($db===false) return $this->messageError('data incorrect!'); //array('error'=>true,'error_message'=>'data incorrect!');
 		
-		$name=SQLite3::escapeString($form['name']);
-		$description=SQLite3::escapeString($form['description']);
-		$pkg_vm_ram=SQLite3::escapeString($form['pkg_vm_ram']);
-		$pkg_vm_disk=SQLite3::escapeString($form['pkg_vm_disk']);
-		$pkg_vm_cpus=SQLite3::escapeString($form['pkg_vm_cpus']);
+		$name=$db->escape($form['name']);
+		$description=$db->escape($form['description']);
+		$pkg_vm_ram=$db->escape($form['pkg_vm_ram']);
+		$pkg_vm_disk=$db->escape($form['pkg_vm_disk']);
+		$pkg_vm_cpus=$db->escape($form['pkg_vm_cpus']);
 		$owner=$this->_user_info['username'];
 		$query="insert into vmpackages (name,description,pkg_vm_ram,pkg_vm_disk,pkg_vm_cpus,owner,timestamp)
 			values
 			('${name}','${description}','${pkg_vm_ram}','${pkg_vm_disk}','${pkg_vm_cpus}','${owner}',datetime('now','localtime'))";
 		
-		$db=new Db('base','local');
-		if($db!==false){
-			$res=$db->insert($query);
-			if($res!==false){
-				if(!$res['error']) return $this->messageSuccess($res); else return $this->messageError('sql error!',$res);
-			}
-			else return $this->messageError('sql error!');
-		}else{
-			return $this->messageError('data incorrect!'); //array('error'=>true,'error_message'=>'data incorrect!');
-		}
+		$res=$db->insert($query);
+		if($res===false) return $this->messageError('sql error!');
+		if(!$res['error']) return $this->messageSuccess($res); 
+
+		return $this->messageError('sql error!',$res);
 	}
-	function vmTemplateEditInfo()
-	{
+
+	function vmTemplateEditInfo(){
 		$form=$this->form;
 		
 		if(!isset($form['template_id'])) return $this->messageError('incorrect data!');
@@ -2444,19 +2299,20 @@ class ClonOS {
 		
 		$id=$form['template_id'];
 		if(!isset($id) || $id<1) $this->messageError('wrong data!');
-		$name=SQLite3::escapeString($form['name']);
-		$description=SQLite3::escapeString($form['description']);
-		$pkg_vm_ram=SQLite3::escapeString($form['pkg_vm_ram']);
-		$pkg_vm_disk=SQLite3::escapeString($form['pkg_vm_disk']);
-		$pkg_vm_cpus=SQLite3::escapeString($form['pkg_vm_cpus']);
+		$db=new Db('base','local');
+		if($db===false) return $this->messageError('db connection error!');
+
+		$name=$db->escape($form['name']);
+		$description=$db->escape($form['description']);
+		$pkg_vm_ram=$db->escape($form['pkg_vm_ram']);
+		$pkg_vm_disk=$db->escape($form['pkg_vm_disk']);
+		$pkg_vm_cpus=$db->escape($form['pkg_vm_cpus']);
 		$owner=$this->_user_info['username'];
 		$query="update vmpackages set
 			name='${name}',description='${description}',
 			pkg_vm_ram='${pkg_vm_ram}',pkg_vm_disk='${pkg_vm_disk}',
 			pkg_vm_cpus='${pkg_vm_cpus}',owner='${owner}',timestamp=datetime('now','localtime') where id=".(int)$id;
 		
-		$db=new Db('base','local');
-		if($db===false) return $this->messageError('db connection error!');
 
 		$res=$db->update($query);
 		if($res!==false) return $this->messageSuccess($res);
@@ -2469,18 +2325,15 @@ class ClonOS {
 		$form=$this->form;
 		
 		$id=$form['template_id'];
-		if(is_numeric($id) && $id>0){
-			$query="delete from vmpackages where id=".(int)$id;
-			$db=new Db('base','local');
-			if($db===false) return $this->messageError('DB connection error!');
+		if(!is_numeric($id) || (int)$id <= 0) return $this->messageError('wrong data!');
 
-			$res=$db->select($query);
-			return $this->messageSuccess($res);
-		}else{
-			return $this->messageError('wrong data!');
-		}
+		$query="delete from vmpackages where id=".(int)$id;
+		$db=new Db('base','local');
+		if($db===false) return $this->messageError('DB connection error!');
+
+		$res=$db->select($query);
+		return $this->messageSuccess($res);
 	}
-	
 	
 	function messageError($message,$vars=array()){
 		$rarr=array(
@@ -2496,7 +2349,6 @@ class ClonOS {
 		);
 		return array_merge($rarr,$vars);
 	}
-	
 	
 	function getImportedImages(){
 		$images=array();
@@ -2516,6 +2368,7 @@ class ClonOS {
 		}
 		return $files;
 	}
+
 	function getImportedImageInfo(){
 		$form=$this->form;
 		$name=$form['id'];
@@ -2555,9 +2408,8 @@ class ClonOS {
 		
 		$name_comment='';
 		$db=new Db('base','local');
-		if($db!==false)
-		{
-			$jail=$db->selectAssoc("SELECT jname FROM jails WHERE jname='{$jname}'");
+		if($db!==false){
+			$jail=$db->selectAssoc("SELECT jname FROM jails WHERE jname='".$db->escape($jname)."'");
 			
 			if($jname==$jail['jname']){
 				$jres=$this->getFreeJname(false,$type);
@@ -2567,7 +2419,8 @@ class ClonOS {
 			}
 		}
 		
-		return array('orig_jname'=>$orig_jname,'jname'=>$jname,'host_hostname'=>$hostname,'ip4_addr'=>$ip,'file_id'=>$imgname,'type'=>$type,'name_comment'=>$name_comment);
+		return array('orig_jname'=>$orig_jname,'jname'=>$jname,'host_hostname'=>$hostname,'ip4_addr'=>$ip,'file_id'=>$imgname,
+					'type'=>$type,'name_comment'=>$name_comment);
 	}
 
 	function getImageVar($name,$buf){
@@ -2635,7 +2488,8 @@ class ClonOS {
 		
 		$db=new Db('racct',array('jname'=>$jail_name));
 		if($db!==false){
-			$quer=$db->select("SELECT '{$jail_name}' as name,idx as time,memoryuse,pcpu,pmem,maxproc,openfiles,readbps,writebps,readiops,writeiops FROM racct ORDER BY idx DESC LIMIT 25;");	// where idx%5=0
+			$quer=$db->select("SELECT '{$jail_name}' as name,idx as time,memoryuse,pcpu,pmem,maxproc,openfiles,readbps,
+						  writebps,readiops,writeiops FROM racct ORDER BY idx DESC LIMIT 25;");	// where idx%5=0
 			$res['__all']=$quer;
 		}
 		
@@ -2669,8 +2523,7 @@ class ClonOS {
 		
 		return $res;
 	}
-	function getSummaryInfoBhyves()
-	{
+	function getSummaryInfoBhyves(){
 		$form=$this->form;
 		$jname=$form['jname'];
 		$res='';

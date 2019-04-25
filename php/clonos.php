@@ -602,7 +602,7 @@ class ClonOS {
 		$html='';
 		$db=new Db('base','local');
 		if($db->isConnected()){
-			$jail=$db->selectAssoc("SELECT jname,ip4_addr,status,protected FROM jails WHERE jname='".$db->escape($jname)."'");
+			$jail=$db->selectAssoc("SELECT jname,ip4_addr,status,protected FROM jails WHERE jname='{$db->escape($jname)}'");
 			$hres=$this->getTableChunk('jailslist','tbody');
 			if($hres!==false){
 				$html_tpl=$hres[1];
@@ -654,7 +654,7 @@ class ClonOS {
 		
 		foreach($form as $key=>$val) {
 			if($key!='jname' && $key!='ip4_addr') {
-				$query="update forms set new='".$db->escape($val)."' where param='".$db->escape($key)."'";
+				$query="update forms set new='{$db->escape($val)}' where param='{$db->escape($key)}'";
 				$db->update($query);
 				unset($form[$key]);
 			}
@@ -706,7 +706,7 @@ class ClonOS {
 				if($db->isConnected()){
 					foreach($form as $key=>$val){
 						if($key!='jname' && $key!='ip4_addr'){
-							$query="update forms set new='".$db->escape($val)."' where param='".$db->escape($key)."'";
+							$query="update forms set new='{$db->escape($val)}' where param='{$db->escape($key)}'";
 							$db->update($query);
 							unset($form[$key]);
 						}
@@ -722,7 +722,7 @@ class ClonOS {
 			if($db->isConnected()){
 				foreach($form as $key=>$val){
 					if($key!='jname' && $key!='ip4_addr'){
-						$db->update("update forms set new='".$db->escape($val)."' where param='".$db->escape($key)."'");
+						$db->update("update forms set new='{$db->escape($val)}' where param='{$db->escape($key)}'");
 						unset($form[$key]);
 					}
 				}
@@ -839,7 +839,7 @@ class ClonOS {
 		$err=false;
 		$db=new Db('base','local');
 		if($db->isConnected()){
-			$query="SELECT jname,host_hostname FROM jails WHERE jname='".$db->escape($form['jail_id'])."';"; //,ip4_addr
+			$query="SELECT jname,host_hostname FROM jails WHERE jname='{$db->escape($form['jail_id'])}';"; //,ip4_addr
 			$res['vars']=$db->selectAssoc($query);
 		}else $err=true;
 
@@ -872,7 +872,7 @@ class ClonOS {
 		$err=false;
 		$db=new Db('base','local');
 		if($db->isConnected()){
-			$query="SELECT jname,host_hostname FROM jails WHERE jname='".$db->escape($form['jail_id'])."';";	//,ip4_addr
+			$query="SELECT jname,host_hostname FROM jails WHERE jname='{$db->escape($form['jail_id'])}';";	//,ip4_addr
 			$res['vars']=$db->selectAssoc($query);
 		}else $err=true;
 
@@ -904,7 +904,7 @@ class ClonOS {
 		$err=false;
 		$db=new Db('base','local');
 		if($db->isConnected()){
-			$query="SELECT jname,host_hostname,ip4_addr,allow_mount,interface,mount_ports,astart,vnet FROM jails WHERE jname='".$db->escape($form['jail_id'])."';";
+			$query="SELECT jname,host_hostname,ip4_addr,allow_mount,interface,mount_ports,astart,vnet FROM jails WHERE jname='{$db->escape($form['jail_id'])}';";
 			$res['vars']=$db->selectAssoc($query);
 		}else $err=true;
 		if(empty($res['vars']))	$err=true;
@@ -1070,7 +1070,7 @@ class ClonOS {
 		$err=false;
 		$db=new Db('base','local');
 		if($db->isConnected())	{
-			$query="SELECT b.jname as vm_name,vm_cpus,vm_ram,vm_vnc_port,bhyve_vnc_tcp_bind,interface FROM bhyve as b inner join jails as j on b.jname=j.jname and b.jname='".$db->escape($form['jail_id'])."';";
+			$query="SELECT b.jname as vm_name,vm_cpus,vm_ram,vm_vnc_port,bhyve_vnc_tcp_bind,interface FROM bhyve as b inner join jails as j on b.jname=j.jname and b.jname='{$db->escape($form['jail_id'])}';";
 			$res['vars']=$db->selectAssoc($query);
 			
 			$res['vars']['vm_ram']=$this->fileSizeConvert($res['vars']['vm_ram'],1024,false,true);
@@ -1122,7 +1122,7 @@ class ClonOS {
 		$err=false;
 		$db=new Db('base','local');
 		if($db->isConnected()){
-			$query="SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden FROM bhyve WHERE jname='".$db->escape($jname)."'";	//,ip4_addr
+			$query="SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden FROM bhyve WHERE jname='{$db->escape($jname)}'";	//,ip4_addr
 			$res['vars']=$db->selectAssoc($query);
 		}else $err=true;
 
@@ -1408,7 +1408,7 @@ class ClonOS {
 		$db=new Db('base','authkey');
 		if(!$db->isConnected()) return array('error'=>'Database error');
 
-		$query="insert into authkey (name,authkey) values ('".$db->escape($form['keyname'])."','".$db->escape($form['keysrc'])."')";
+		$query="insert into authkey (name,authkey) values ('{$db->escape($form['keyname'])}','{$db->escape($form['keysrc'])}')";
 		//$res=array('error'=>false,'lastId'=>2);
 		$res=$db->insert($query);
 		if($res['error']) return array('error'=>$res);
@@ -1453,7 +1453,7 @@ class ClonOS {
 		if(!$db->isConnected()) return array('error'=>'Database error');
 
 		
-		$res=$db->insert("insert into vpnet (name,vpnet) values ('".$db->escape($form['netname'])."','".$db->escape($form['network'])."')");
+		$res=$db->insert("insert into vpnet (name,vpnet) values ('{$db->escape($form['netname'])}','{$db->escape($form['network'])}')");
 		if($res['error']) return array('error'=>$res);
 		
 		$html='';
@@ -1901,7 +1901,7 @@ class ClonOS {
 	}
 
 	function runVNC($jname)	{
-		$query="SELECT vnc_password FROM bhyve WHERE jname='".$this->_db_local->escape($jname)."'";
+		$query="SELECT vnc_password FROM bhyve WHERE jname='{$this->_db_local->escape($jname)}'";
 		$res=$this->_db_local->selectAssoc($query);
 
 		$pass='cbsd';
@@ -2110,7 +2110,7 @@ class ClonOS {
 		if(isset($user_info['username']) && isset($user_info['password'])){
 			$db=new Db('clonos');
 			if($db->isConnected()) {
-				$res=$db->select("select username from auth_user where username='".$db->escape($user_info['username'])."'");
+				$res=$db->select("select username from auth_user where username='{$db->escape($user_info['username'])}'");
 				if(!empty($res)){
 					$res['user_exsts']=true;
 					return $res;
@@ -2152,7 +2152,7 @@ class ClonOS {
 			$db=new Db('clonos');
 			if($db->isConnected()){
 				$pass=$this->getPasswordHash($user_info['password']);
-				$res=$db->selectAssoc("select id,username,password from auth_user where username='".$db->escape($user_info['login'])."' and is_active=1");
+				$res=$db->selectAssoc("select id,username,password from auth_user where username='{$db->escape($user_info['login'])}' and is_active=1");
 				if(empty($res) || $res['password'] != $pass){
 					sleep(3);
 					return array('errorCode'=>1,'message'=>'user not found!');
@@ -2401,7 +2401,7 @@ class ClonOS {
 		$name_comment='';
 		$db=new Db('base','local');
 		if($db->isConnected()){
-			$jail=$db->selectAssoc("SELECT jname FROM jails WHERE jname='".$db->escape($jname)."'");
+			$jail=$db->selectAssoc("SELECT jname FROM jails WHERE jname='{$db->escape($jname)}'");
 			
 			if($jname==$jail['jname']){
 				$jres=$this->getFreeJname(false,$type);
@@ -2497,7 +2497,7 @@ class ClonOS {
 		$sql="select host_hostname,ip4_addr,allow_mount,allow_nullfs,allow_fdescfs,interface,baserw,mount_ports,
 			  astart,vnet,mount_fdescfs,allow_tmpfs,allow_zfs,protected,allow_reserved_ports,allow_raw_sockets,
 			  allow_fusefs,allow_read_msgbuf,allow_vmm,allow_unprivileged_proc_debug
-			  from jails where jname='".$db->escape($jail_name)."'";
+			  from jails where jname='{$db->escape($jail_name)}'";
 		$db=new Db('base','local');
 		if($db->isConnected()){
 			$quer=$db->selectAssoc($sql);

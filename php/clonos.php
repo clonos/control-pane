@@ -2216,7 +2216,7 @@ class ClonOS {
 		if(is_numeric($id) && $id>0){
 			$query="delete from auth_user where id=".(int)$id;
 			$db=new Db('clonos');
-			if($db===false) return array('error'=>true,'error_message'=>'DB connection error!');
+			if(!$db->isConnected()) return array('error'=>true,'error_message'=>'DB connection error!');
 
 			$res=$db->select($query);
 			return $res;
@@ -2229,7 +2229,7 @@ class ClonOS {
 		if(!isset($form['user_id'])) return array('error'=>true,'error_message'=>'incorrect data!');
 		
 		$db=new Db('clonos');
-		if($db===false) return array('error'=>true,'error_message'=>'DB connection error!');
+		if(!$db->isConnected()) return array('error'=>true,'error_message'=>'DB connection error!');
 		$user_id=(int)$form['user_id'];
 
 		$res=$db->selectAssoc("select username,first_name,last_name,is_active as actuser from auth_user where id=".$user_id);
@@ -2245,7 +2245,7 @@ class ClonOS {
 	
 	function userGetInfo(){
 		$db=new Db('clonos');
-		if($db===false) return array('DB connection error!');
+		if(!$db->isConnected()) return array('DB connection error!');
 
 		$res=$db->select("select * from auth_user limit 1"); // TODO: What?!
 		return $res;
@@ -2333,17 +2333,12 @@ class ClonOS {
 	}
 	
 	function messageError($message,$vars=array()){
-		$rarr=array(
-			'error'=>true,
-			'error_message'=>$message,
-		);
+		$rarr=array('error'=>true, 'error_message'=>$message);
 		return array_merge($rarr,$vars);
 	}
 
 	function messageSuccess($vars=array()){
-		$rarr=array(
-			'error'=>false,
-		);
+		$rarr=array('error'=>false);
 		return array_merge($rarr,$vars);
 	}
 	
@@ -2502,7 +2497,7 @@ class ClonOS {
 		$sql="select host_hostname,ip4_addr,allow_mount,allow_nullfs,allow_fdescfs,interface,baserw,mount_ports,
 			  astart,vnet,mount_fdescfs,allow_tmpfs,allow_zfs,protected,allow_reserved_ports,allow_raw_sockets,
 			  allow_fusefs,allow_read_msgbuf,allow_vmm,allow_unprivileged_proc_debug
-			  from jails where jname='{$jail_name}'";
+			  from jails where jname='".$db->escape($jail_name)."'";
 		$db=new Db('base','local');
 		if($db->isConnected()){
 			$quer=$db->selectAssoc($sql);
@@ -2539,7 +2534,6 @@ class ClonOS {
 		);
 		
 		$db=new Db('bhyve',array('jname'=>$jname));
-//		if($db===false) return $this->messageError('DB connection error!');
 		if($db->isConnected()) {
 			$sql="select created, astart, vm_cpus, vm_ram, vm_os_type, vm_boot, vm_os_profile, bhyve_flags,
 				vm_vnc_port, virtio_type, bhyve_vnc_tcp_bind, bhyve_vnc_resolution, cd_vnc_wait,

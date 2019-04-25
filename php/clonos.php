@@ -171,69 +171,69 @@ class ClonOS {
 
 			unset($_POST);
 			switch($this->mode){
-				case 'login': echo json_encode($this->login()); return;
-				case 'getTasksStatus': echo json_encode($this->_getTasksStatus($this->form['jsonObj'])); return;
-				case 'getJsonPage': if(file_exists($this->json_name)) include($this->json_name); else echo '{}'; return;
-				case 'freejname': echo json_encode($this->getFreeJname()); break;
-				case 'helpersAdd': echo json_encode($this->helpersAdd($this->mode)); return;
-				case 'addHelperGroup': echo json_encode($this->addHelperGroup($this->mode)); return;
-				case 'addJailHelperGroup': echo json_encode($this->addJailHelperGroup()); return;
-				case 'deleteJailHelperGroup': echo json_encode($this->deleteJailHelperGroup()); return;
-				case 'deleteHelperGroup': echo json_encode($this->deleteHelperGroup($this->mode)); return;
-				case 'jailRestart': echo json_encode($this->jailRestart()); return;
-				case 'jailStart': echo json_encode($this->jailStart()); return;
-				case 'jailStop': echo json_encode($this->jailStop()); return;
-				case 'jailRemove': echo json_encode($this->jailRemove()); return;
-				case 'saveJailHelperValues': echo json_encode($this->saveJailHelperValues()); return;
+				case 'login':	 		echo json_encode($this->login()); return;
+				case 'getTasksStatus':		echo json_encode($this->_getTasksStatus($this->form['jsonObj'])); return;
+				case 'getJsonPage':		if(file_exists($this->json_name)) include($this->json_name); else echo '{}'; return;
+				case 'freejname':		echo json_encode($this->getFreeJname()); break;
+				case 'helpersAdd':		echo json_encode($this->helpersAdd($this->mode)); return;
+				case 'addHelperGroup':		echo json_encode($this->addHelperGroup($this->mode)); return;
+				case 'addJailHelperGroup':	echo json_encode($this->addJailHelperGroup()); return;
+				case 'deleteJailHelperGroup':	echo json_encode($this->deleteJailHelperGroup()); return;
+				case 'deleteHelperGroup':	echo json_encode($this->deleteHelperGroup($this->mode)); return;
+				case 'jailRestart':		echo json_encode($this->jailRestart()); return;
+				case 'jailStart':		echo json_encode($this->jailStart()); return;
+				case 'jailStop':		echo json_encode($this->jailStop()); return;
+				case 'jailRemove':		echo json_encode($this->jailRemove()); return;
+				case 'saveJailHelperValues':	echo json_encode($this->saveJailHelperValues()); return;
 
-				case 'saveHelperValues': $redirect='/jailscontainers/';
-				case 'jailAdd': if(!isset($redirect)) $redirect=''; echo json_encode($this->jailAdd($redirect)); return;
+				case 'saveHelperValues':	$redirect='/jailscontainers/';
+				case 'jailAdd': 		if(!isset($redirect)) $redirect=''; echo json_encode($this->jailAdd($redirect)); return;
 
-				case 'jailClone': echo json_encode($this->jailClone()); return;
-				case 'jailRename': echo json_encode($this->jailRename()); return;
-				case 'bhyveRename': echo json_encode($this->bhyveRename()); return;
-				case 'jailEdit': echo json_encode($this->jailEdit()); return;
-				case 'jailEditVars': echo json_encode($this->jailEditVars()); return;
-				case 'jailCloneVars': echo json_encode($this->jailCloneVars()); return;
-				case 'jailRenameVars': echo json_encode($this->jailRenameVars()); return;
-				case 'bhyveRenameVars': echo json_encode($this->bhyveRenameVars()); return;
-				case 'bhyveRestart': echo json_encode($this->bhyveRestart()); return;
-				case 'bhyveStart': echo json_encode($this->bhyveStart()); return;
-				case 'bhyveStop': echo json_encode($this->bhyveStop()); return;
-				case 'bhyveAdd': echo json_encode($this->bhyveAdd()); return;
-				case 'bhyveRemove': echo json_encode($this->bhyveRemove()); return;
-				case 'bhyveEdit': echo json_encode($this->bhyveEdit()); return;
-				case 'bhyveEditVars': echo json_encode($this->bhyveEditVars()); return;
-				case 'bhyveObtain': echo json_encode($this->bhyveObtain()); return;
-				case 'bhyveClone': echo json_encode($this->bhyveClone()); return;		
-				case 'authkeyAdd': echo json_encode($this->authkeyAdd()); return;
-				case 'authkeyRemove': echo json_encode($this->authkeyRemove()); return;
-				case 'vpnetAdd': echo json_encode($this->vpnetAdd()); return;
-				case 'vpnetRemove': echo json_encode($this->vpnetRemove()); return;
-				case 'updateBhyveISO': echo json_encode($this->updateBhyveISO()); return;
+				case 'jailClone':		echo json_encode($this->jailClone()); return;
+				case 'jailRename':		echo json_encode($this->jailRename()); return;
+				case 'bhyveRename':		echo json_encode($this->bhyveRename()); return;
+				case 'jailEdit':		echo json_encode($this->jailEdit()); return;
+				case 'jailEditVars':		echo json_encode($this->jailEditVars()); return;
+				case 'jailCloneVars':		echo json_encode($this->jailCloneVars()); return;
+				case 'jailRenameVars':		echo json_encode($this->jailRenameVars()); return;
+				case 'bhyveRenameVars':		echo json_encode($this->bhyveRenameVars()); return;
+				case 'bhyveRestart':		echo json_encode($this->bhyveRestart()); return;
+				case 'bhyveStart':		echo json_encode($this->bhyveStart()); return;
+				case 'bhyveStop':		echo json_encode($this->bhyveStop()); return;
+				case 'bhyveAdd':		echo json_encode($this->bhyveAdd()); return;
+				case 'bhyveRemove':		echo json_encode($this->bhyveRemove()); return;
+				case 'bhyveEdit':		echo json_encode($this->bhyveEdit()); return;
+				case 'bhyveEditVars':		echo json_encode($this->bhyveEditVars()); return;
+				case 'bhyveObtain':		echo json_encode($this->bhyveObtain()); return;
+				case 'bhyveClone':		echo json_encode($this->bhyveClone()); return;		
+				case 'authkeyAdd':		echo json_encode($this->authkeyAdd()); return;
+				case 'authkeyRemove':		echo json_encode($this->authkeyRemove()); return;
+				case 'vpnetAdd':		echo json_encode($this->vpnetAdd()); return;
+				case 'vpnetRemove':		echo json_encode($this->vpnetRemove()); return;
+				case 'updateBhyveISO':		echo json_encode($this->updateBhyveISO()); return;
 				case 'mediaAdd':
 					//echo json_encode($this->mediaAdd());
 					return;
-				case 'mediaRemove': echo json_encode($this->mediaRemove()); return;
-				case 'logLoad': echo json_encode($this->logLoad()); return;
-				case 'logFlush': echo json_encode($this->logFlush()); return;
-				case 'basesCompile': echo json_encode($this->basesCompile()); return;
-				case 'repoCompile': echo json_encode($this->repoCompile()); return;
-				case 'srcUpdate': echo json_encode($this->srcUpdate()); return;
-				case 'srcRemove': echo json_encode($this->srcRemove()); return;
-				case 'baseRemove': echo json_encode($this->baseRemove()); return;
-				case 'usersAdd': echo json_encode($this->usersAdd()); return;
-				case 'usersEdit': echo json_encode($this->usersEdit()); return;
-				case 'userRemove': echo json_encode($this->userRemove()); return;
-				case 'userGetInfo': echo json_encode($this->userGetInfo()); return;
-				case 'userEditInfo': echo json_encode($this->userEditInfo()); return;
-				case 'vmTemplateAdd': echo json_encode($this->vmTemplateAdd()); return;
-				case 'vmTemplateEditInfo': echo json_encode($this->vmTemplateEditInfo()); return;
-				case 'vmTemplateEdit': echo json_encode($this->vmTemplateEdit()); return;
-				case 'vmTemplateRemove': echo json_encode($this->vmTemplateRemove()); return;
-				case 'getImportedImageInfo': echo json_encode($this->getImportedImageInfo()); return;
-				case 'imageImport': echo json_encode($this->imageImport()); return;
-				case 'imageExport': echo json_encode($this->imageExport()); return;
+				case 'mediaRemove':		echo json_encode($this->mediaRemove()); return;
+				case 'logLoad':			echo json_encode($this->logLoad()); return;
+				case 'logFlush':		echo json_encode($this->logFlush()); return;
+				case 'basesCompile':		echo json_encode($this->basesCompile()); return;
+				case 'repoCompile':		echo json_encode($this->repoCompile()); return;
+				case 'srcUpdate':		echo json_encode($this->srcUpdate()); return;
+				case 'srcRemove':		echo json_encode($this->srcRemove()); return;
+				case 'baseRemove':		echo json_encode($this->baseRemove()); return;
+				case 'usersAdd':		echo json_encode($this->usersAdd()); return;
+				case 'usersEdit':		echo json_encode($this->usersEdit()); return;
+				case 'userRemove':		echo json_encode($this->userRemove()); return;
+				case 'userGetInfo':		echo json_encode($this->userGetInfo()); return;
+				case 'userEditInfo':		echo json_encode($this->userEditInfo()); return;
+				case 'vmTemplateAdd':		echo json_encode($this->vmTemplateAdd()); return;
+				case 'vmTemplateEditInfo':	echo json_encode($this->vmTemplateEditInfo()); return;
+				case 'vmTemplateEdit':		echo json_encode($this->vmTemplateEdit()); return;
+				case 'vmTemplateRemove':	echo json_encode($this->vmTemplateRemove()); return;
+				case 'getImportedImageInfo':	echo json_encode($this->getImportedImageInfo()); return;
+				case 'imageImport':		echo json_encode($this->imageImport()); return;
+				case 'imageExport':		echo json_encode($this->imageExport()); return;
 				case 'imageRemove': echo json_encode($this->imageRemove()); return;
 				case 'getSummaryInfo': echo json_encode($this->getSummaryInfo()); return;
 					
@@ -264,10 +264,8 @@ class ClonOS {
 	}
 
 	function translate($phrase){
-		if(isset($this->translate_arr[$phrase]))
-			return $this->translate_arr[$phrase];
-		else
-			return $phrase;
+		if(isset($this->translate_arr[$phrase])) return $this->translate_arr[$phrase];
+		return $phrase;
 	}
 
 	function getTableChunk($table_name='',$tag){
@@ -278,28 +276,23 @@ class ClonOS {
 		if(!file_exists($file_name)) return false;
 		$file=file_get_contents($file_name);
 		$pat='#[\s]*?<'.$tag.'[^>]*>(.*)<\/'.$tag.'>#iUs';
- 		if(preg_match($pat,$file,$res))
-		{
+ 		if(preg_match($pat,$file,$res)){
 			$this->table_templates[$table_name][$tag]=$res;
 			return $res;
 		}
+		return '';
 	}
 	
 	function check_locktime($nodeip){
 		$lockfile=$this->workdir."/ftmp/shmux_${nodeip}.lock";
-		if (!file_exists($lockfile)) {
-			return 0;
-		}
+		if (!file_exists($lockfile)) return 0;
 		
 		$cur_time = time();
 		$st_time=filemtime($lockfile);
 		
 		$difftime=(( $cur_time - $st_time ) / 60 );
-		if ( $difftime > 1 ) {
-			return round($difftime);
-		} else {
-			return 0; //lock exist but too fresh
-		}
+		if ( $difftime > 1 ) return round($difftime);
+		return 0; //lock exist but too fresh
 	}
 	
 	function check_vmonline($vm){
@@ -319,8 +312,9 @@ class ClonOS {
 	}
 
 	function get_node_info($nodename,$value){
-		$db = new SQLite3($this->realpath."/var/db/nodes.sqlite"); $db->busyTimeout(5000);
-		if (!$db) return;
+		$db = new SQLite3($this->realpath."/var/db/nodes.sqlite"); 
+		if (!$db) return; // This is (i think) impossible unless it has an exception.
+		$db->busyTimeout(5000);
 		$sql = "SELECT $value FROM nodelist WHERE nodename='".Db::escape($nodename)."'";
 
 		$result = $db->query($sql);//->fetchArray(SQLITE3_ASSOC);
@@ -504,7 +498,9 @@ class ClonOS {
 							$obj[$key]['errmsg']=file_get_contents($stat['logfile']);
 							$obj[$key]['txt_status']=$this->translate('Error');
 						}
-					#	Возвращаем IP клонированному джейлу, если он был присвоен по DHCP
+
+						//Return the IP of the cloned jail if it was assigned by DHCP
+
 						if($stat['status']==2){
 							switch($task['operation']){
 								case 'jcreate':
@@ -605,7 +601,7 @@ class ClonOS {
 		$stats=array(''=>'','jclone'=>'Cloned','jcreate'=>'Created');
 		$html='';
 		$db=new Db('base','local');
-		if($db!==false){
+		if($db->isConnected()){
 			$jail=$db->selectAssoc("SELECT jname,ip4_addr,status,protected FROM jails WHERE jname='".$db->escape($jname)."'");
 			$hres=$this->getTableChunk('jailslist','tbody');
 			if($hres!==false){
@@ -642,7 +638,7 @@ class ClonOS {
 	function saveSettingsCBSD(){
 		$form=$this->form;
 		
-		$arr=array('error'=>true,'errorMessage'=>'Method is not complete yet! line: 702');
+		$arr=array('error'=>true,'errorMessage'=>'Method is not complete yet! line: '.__LINE__);
 		return $arr;
 	}
 	
@@ -654,7 +650,7 @@ class ClonOS {
 		$jail_name=$this->uri_chunks[1];
 		
 		$db=new Db('helper',array('jname'=>$jail_name,'helper'=>$this->url_hash));
-		if($db->error) return array('error'=>true,'errorMessage'=>'No helper database!');
+		if(!$db->isConnected()) return array('error'=>true,'errorMessage'=>'No helper database!');
 		
 		foreach($form as $key=>$val) {
 			if($key!='jname' && $key!='ip4_addr') {
@@ -694,7 +690,7 @@ class ClonOS {
 			if(!isset($this->_vars['db_path'])){
 				$res=$this->cbsd_cmd('make_tmp_helper module='.$helper);
 				if($res['retval']==0) $db_path=$res['message']; else{
-					echo json_encode(array('error'=>true,'errorMessage'=>'Error on open temporary form database!'));
+					echo json_encode(array('error'=>true,'errorMessage'=>'Error opening temporary form database!'));
 					return;
 				}
 			}else $db_path=$this->_vars['db_path'];
@@ -707,7 +703,7 @@ class ClonOS {
 				copy($file_name,$tmp_name);
 				
 				$db=new Db('file',$tmp_name);
-				if($db!==false){
+				if($db->isConnected()){
 					foreach($form as $key=>$val){
 						if($key!='jname' && $key!='ip4_addr'){
 							$query="update forms set new='".$db->escape($val)."' where param='".$db->escape($key)."'";
@@ -723,7 +719,7 @@ class ClonOS {
 			*/
 			
 			$db=new Db('file',$db_path);
-			if($db!==false){
+			if($db->isConnected()){
 				foreach($form as $key=>$val){
 					if($key!='jname' && $key!='ip4_addr'){
 						$db->update("update forms set new='".$db->escape($val)."' where param='".$db->escape($key)."'");
@@ -778,9 +774,7 @@ class ClonOS {
 		$file_name='/tmp/'.$arr['jname'].'.conf';
 		
 		$file=file_get_contents($this->realpath_public.'templates/jail.tpl');
-		if(!empty($file)){
-			foreach($arr as $var=>$val) $file=str_replace('#'.$var.'#',$val,$file);
-		}
+		if(!empty($file)) foreach($arr as $var=>$val) $file=str_replace('#'.$var.'#',$val,$file);
 		file_put_contents($file_name,$file);
 		
 		$username=$this->_user_info['username'];
@@ -796,7 +790,7 @@ class ClonOS {
 			$taskId=$res['message'];
 		}
 		
-		// local - поменять на реальный сервер, на котором создаётся клетка!
+		// local - change to the real server on which the jail was created!
 		$jid=$arr['jname'];
 		
 		$table='jailslist';
@@ -805,8 +799,8 @@ class ClonOS {
 		if($hres!==false){
 			$html_tpl=$hres[1];
 			$vars=array(
-				'nth-num'=>'nth0',				// исправить на актуальные данные!
-				'node'=>'local',				// исправить на актуальные данные!
+				'nth-num'=>'nth0',		// TODO: fix actual data!
+				'node'=>'local',		// TODO: fix actual data!
 				'ip4_addr'=>str_replace(',',',<wbr />',$form['ip4_addr']),
 				'jname'=>$arr['jname'],
 				'jstatus'=>$this->translate('Creating'),
@@ -844,12 +838,10 @@ class ClonOS {
 		
 		$err=false;
 		$db=new Db('base','local');
-		if($db!==false){
+		if($db->isConnected()){
 			$query="SELECT jname,host_hostname FROM jails WHERE jname='".$db->escape($form['jail_id'])."';"; //,ip4_addr
 			$res['vars']=$db->selectAssoc($query);
-		}else{
-			$err=true;
-		}
+		}else $err=true;
 
 		if(empty($res['vars'])) $err=true;
 
@@ -879,7 +871,7 @@ class ClonOS {
 		
 		$err=false;
 		$db=new Db('base','local');
-		if($db!==false){
+		if($db->isConnected()){
 			$query="SELECT jname,host_hostname FROM jails WHERE jname='".$db->escape($form['jail_id'])."';";	//,ip4_addr
 			$res['vars']=$db->selectAssoc($query);
 		}else $err=true;
@@ -911,7 +903,7 @@ class ClonOS {
 		
 		$err=false;
 		$db=new Db('base','local');
-		if($db!==false){
+		if($db->isConnected()){
 			$query="SELECT jname,host_hostname,ip4_addr,allow_mount,interface,mount_ports,astart,vnet FROM jails WHERE jname='".$db->escape($form['jail_id'])."';";
 			$res['vars']=$db->selectAssoc($query);
 		}else $err=true;
@@ -941,9 +933,7 @@ class ClonOS {
 				$val=$form[$a];
 				if($val=='on') $val=1;
 				$str[]=$a.'='.$val;
-			}else{
-				$str[]=$a.'=0';
-			}
+			}else $str[]=$a.'=0';
 		}
 		
 		$cmd='jset jname='.$jname.' '.join(' ',$str);
@@ -1036,7 +1026,7 @@ class ClonOS {
 		$statuses=array('Not Launched','Launched','unknown-1','Maintenance','unknown-3','unknown-4','unknown-5','unknown-6');
 		$html='';
 		$db=new Db('base','local');
-		if($db!==false)	{
+		if($db->isConnected())	{
 			$bhyve=$db->selectAssoc("SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden FROM bhyve WHERE jname='{$jname}'");
 			$hres=$this->getTableChunk('bhyveslist','tbody');
 			if($hres!==false){
@@ -1079,11 +1069,11 @@ class ClonOS {
 		
 		$err=false;
 		$db=new Db('base','local');
-		if($db!==false)	{
+		if($db->isConnected())	{
 			$query="SELECT b.jname as vm_name,vm_cpus,vm_ram,vm_vnc_port,bhyve_vnc_tcp_bind,interface FROM bhyve as b inner join jails as j on b.jname=j.jname and b.jname='".$db->escape($form['jail_id'])."';";
 			$res['vars']=$db->selectAssoc($query);
 			
-			$res['vars']['vm_ram']=$this->fileSizeConvert($res['vars']['vm_ram']);
+			$res['vars']['vm_ram']=$this->fileSizeConvert($res['vars']['vm_ram'],1024,false,true);
 		}else{
 			$err=true;
 		}
@@ -1131,7 +1121,7 @@ class ClonOS {
 		$jname=$form['jail_id'];
 		$err=false;
 		$db=new Db('base','local');
-		if($db!==false){
+		if($db->isConnected()){
 			$query="SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden FROM bhyve WHERE jname='".$db->escape($jname)."'";	//,ip4_addr
 			$res['vars']=$db->selectAssoc($query);
 		}else $err=true;
@@ -1179,6 +1169,8 @@ class ClonOS {
 		
 		/* check mounted ISO */
 		$db=new Db('base','storage_media');
+		if(!$db->isConnected()) return(false); // TODO: Fix return
+
 		$res=$db->selectAssoc('select * from media where jname="'.$jname.'" and type="iso"');
 		if($res!==false && !empty($res)){
 			$cmd1="cbsd media mode=unregister name=\"${res['name']}\" path=\"${res['path']}\" jname=${jname} type=${res['type']}";
@@ -1244,6 +1236,7 @@ class ClonOS {
 			$iso_id=(int)$iso_id;
 			if($iso_id>0){
 				$db=new Db('base','storage_media');
+				if(!$db->isConnected()) return(false); // TODO: return error
 				$res=$db->selectAssoc('select name,path from media where idx='.$iso_id);
 				if($res===false || empty($res)) $iso=false;
 			}
@@ -1276,7 +1269,7 @@ class ClonOS {
 			$err='Virtual Machine was created!';
 			$taskId=$res['message'];
 		}
-		// local - поменять на реальный сервер, на котором создаётся клетка!
+		// local - change to the real server on which the jail is created!
 		$jid=$arr['jname'];
 		
 		$vm_ram=str_replace('g',' GB',$form['vm_ram']);
@@ -1286,8 +1279,8 @@ class ClonOS {
 		if($hres!==false){
 			$html_tpl=$hres[1];
 			$vars=array(
-				'nth-num'=>'nth0',				// исправить на актуальные данные!
-				'node'=>'local',				// исправить на актуальные данные!
+				'nth-num'=>'nth0',				// TODO: actual data
+				'node'=>'local',				// TODO: actual data
 				'jname'=>$arr['jname'],
 				'vm_status'=>$this->translate('Creating'),
 				'vm_cpus'=>$form['vm_cpus'],
@@ -1327,7 +1320,10 @@ class ClonOS {
 		
 		$key_name='/usr/home/olevole/.ssh/authorized_keys';
 		$key_id=$form['vm_authkey'];
+
 		$db=new Db('base','authkey');
+		if(!$db->isConnected())  return array('error'=>true,'errorMessage'=>'Database error!');
+
 		$nres=$db->selectAssoc('select name from authkey where idx='.$key_id);
 		if($nres['name']!==false) $key_name=$nres['name'];
 
@@ -1348,8 +1344,8 @@ class ClonOS {
 		if($hres!==false){
 			$html_tpl=$hres[1];
 			$vars=array(
-				'nth-num'=>'nth0',				// исправить на актуальные данные!
-				'node'=>'local',				// исправить на актуальные данные!
+				'nth-num'=>'nth0',				// TODO: actual data
+				'node'=>'local',				// TODO: actual data
 				'jname'=>$form['vm_name'],
 				'vm_status'=>$this->translate('Creating'),
 				'vm_cpus'=>$form['vm_cpus'],
@@ -1410,6 +1406,7 @@ class ClonOS {
 		
 		
 		$db=new Db('base','authkey');
+		if(!$db->isConnected()) return array('error'=>'Database error');
 
 		$query="insert into authkey (name,authkey) values ('".$db->escape($form['keyname'])."','".$db->escape($form['keysrc'])."')";
 		//$res=array('error'=>false,'lastId'=>2);
@@ -1440,6 +1437,8 @@ class ClonOS {
 		$form=$this->_vars['form_data'];
 		
 		$db=new Db('base','authkey');
+		if(!$db->isConnected()) return array('error'=>true,'res'=>'Database error');
+
 		$res=$db->update('delete from authkey where idx='.$form['auth_id']);
 		if($res===false) return array('error'=>true,'res'=>print_r($res,true));
 		
@@ -1451,9 +1450,10 @@ class ClonOS {
 		
 		
 		$db=new Db('base','vpnet');
-		$query="insert into vpnet (name,vpnet) values ('".$db->escape($form['netname'])."','".$db->escape($form['network'])."')";
+		if(!$db->isConnected()) return array('error'=>'Database error');
+
 		
-		$res=$db->insert($query);
+		$res=$db->insert("insert into vpnet (name,vpnet) values ('".$db->escape($form['netname'])."','".$db->escape($form['network'])."')");
 		if($res['error']) return array('error'=>$res);
 		
 		$html='';
@@ -1480,6 +1480,8 @@ class ClonOS {
 		$form=$this->_vars['form_data'];
 		
 		$db=new Db('base','vpnet');
+		if(!$db->isConnected()) return array('error'=>true,'res'=>'Database error');
+
 		$res=$db->update('delete from vpnet where idx='.(int)$form['vpnet_id']);
 		if($res===false) return array('error'=>true,'res'=>print_r($res,true));
 		
@@ -1489,6 +1491,8 @@ class ClonOS {
 	function mediaRemove(){
 		$form=$this->form;
 		$db=new Db('base','storage_media');
+		if(!$db->isConnected()) return array('error'=>true,'res'=>'Database error');
+
 		//$res=$db->update('delete from media where idx='.$form['media_id']);
 		$res=$db->selectAssoc('select * from media where idx='.(int)$form['media_id']);
 		if($res===false || empty($res)) return array('error'=>true,'res'=>print_r($res,true));
@@ -1500,18 +1504,15 @@ class ClonOS {
 		
 		$res=$this->cbsd_cmd($cmd);
 		
-		if($res['error'])
-		{
+		if($res['error']){
 			$arr['error']=true;
 			$arr['error_message']='File image was not deleted! '.$res['error_message'];
-		}else{
-			$arr['error']=false;
-		}
+		}else $arr['error']=false;
+
 		$arr['media_id']=$form['media_id'];
 		$arr['cmd']=$res;
 		//echo json_encode($arr);
 
-		
 		//return array('error'=>false,'media_id'=>$form['media_id']);
 		return $arr;
 	}
@@ -1542,29 +1543,29 @@ class ClonOS {
 		$id=str_replace('src','',$id);
 		if(!is_numeric($id)) return array('error'=>true,'errorMessage'=>'Wrong ID of sources!');
 		$db=new Db('base','local');
-		if($db!==false){
-			$res=$db->selectAssoc("SELECT idx,name,platform,ver,rev,date FROM bsdsrc where ver={$id}");
+		if(!$db->isConnected()) return array('error'=>true,'errorMessage'=>'Database error');
+
+		$res=$db->selectAssoc("SELECT idx,name,platform,ver,rev,date FROM bsdsrc where ver={$id}");
 			
-			$hres=$this->getTableChunk('srcslist','tbody');
-			if($hres!==false){
-				$html_tpl=$hres[1];
-				$ver=$res['ver'];
-				$vars=array(
-					'nth-num'=>'nth0',
-					'maintenance'=>' busy',
-					'node'=>'local',
-					'ver'=>$res['ver'],
-					'ver1'=>strlen(intval($res['ver']))<strlen($res['ver'])?'release':'stable',
-					'rev'=>$res['rev'],
-					'date'=>$res['date'],
-					'protitle'=>$this->translate('Update'),
-					'protitle'=>$this->translate('Delete'),
-				);
+		$hres=$this->getTableChunk('srcslist','tbody');
+		if($hres!==false){
+			$html_tpl=$hres[1];
+			$ver=$res['ver'];
+			$vars=array(
+				'nth-num'=>'nth0',
+				'maintenance'=>' busy',
+				'node'=>'local',
+				'ver'=>$res['ver'],
+				'ver1'=>strlen(intval($res['ver']))<strlen($res['ver'])?'release':'stable',
+				'rev'=>$res['rev'],
+				'date'=>$res['date'],
+				'protitle'=>$this->translate('Update'),
+				'protitle'=>$this->translate('Delete'),
+			);
 				
-				foreach($vars as $var=>$val) $html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
+			foreach($vars as $var=>$val) $html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
 				
-				$html=$html_tpl;
-			}
+			$html=$html_tpl;
 		}
 		
 		$html=preg_replace('#<tr[^>]*>#','',$html);
@@ -1597,7 +1598,7 @@ class ClonOS {
 		$id=(int)$form['sources'];
 		
 		$db=new Db('base','local');
-		if($db===false) return array('error'=>true,'errorMessage'=>'Database connect error!');
+		if(!$db->isConnected()) return array('error'=>true,'errorMessage'=>'Database connect error!');
 
 		$base=$db->selectAssoc("SELECT idx,platform,ver FROM bsdsrc where idx=".$id);
 		$ver=$base['ver'];
@@ -1630,7 +1631,7 @@ class ClonOS {
 		$html='';
 		
 		$db=new Db('base','local');
-		if($db!==false){
+		if($db->isConnected()){
 			if($bsdsrc){
 				$res=$db->selectAssoc("SELECT idx,platform,ver FROM bsdsrc where idx=".(int)$id);
 				$res['name']='—';
@@ -1791,9 +1792,8 @@ class ClonOS {
 		$username=$this->_user_info['username'];
 		
 		$helpers=array_keys($form);
-		if(!empty($helpers)) foreach($helpers as $helper)
-		{
-		$res=$this->cbsd_cmd('task owner=${username} mode=new /usr/local/bin/cbsd forms inter=0 module='.$helper.' jname='.$jail_id);
+		if(!empty($helpers)) foreach($helpers as $helper){
+			$res=$this->cbsd_cmd('task owner=${username} mode=new /usr/local/bin/cbsd forms inter=0 module='.$helper.' jname='.$jail_id);
 		}
 		return array('error'=>false);
 	}
@@ -1805,7 +1805,7 @@ class ClonOS {
 		$helper=$this->url_hash;
 		
 		$db=new Db('helper',array('jname'=>$jail_id,'helper'=>$helper));
-		if($db===false) return array('error'=>true,'errorMessage'=>'No database file!');
+		if(!$db->isConnected()) return array('error'=>true,'errorMessage'=>'No database file!');
 		
 		$db_path=$db->getFileName();
 		$res=$this->cbsd_cmd('forms inter=0 module='.$helper.' formfile='.$db_path.' group=add');
@@ -1883,8 +1883,7 @@ class ClonOS {
 		echo PHP_EOL;
 		foreach($this->_dialogs as $dialog_name){
 			$file_name=$this->realpath_public.'dialogs/'.$dialog_name.'.php';
-			if(file_exists($file_name))
-			{
+			if(file_exists($file_name)){
 				include($file_name);
 				echo PHP_EOL,PHP_EOL;
 			}
@@ -1942,7 +1941,7 @@ class ClonOS {
 		return round($Hz/$h,2).' '.$l;
 	}
 	
-	function fileSizeConvert($bytes,$bytes_in_mb=1024,$round=false){
+	function fileSizeConvert($bytes,$bytes_in_mb=1024,$round=false,$small=false){
 		$bytes = floatval($bytes);
 		$arBytes = array(
 			0 => array(
@@ -1972,7 +1971,7 @@ class ClonOS {
 			if($bytes >= $arItem["VALUE"]){
 				$result = $bytes / $arItem["VALUE"];
 				if($round) $result=round($result);
-				$result = str_replace(".", "," , strval(round($result, 2)))." ".strtoupper($arItem["UNIT"]);
+				$result = str_replace(".", "," , strval(round($result, 2))).($small?strtolower(substr($arItem['UNIT'],0,1)):" ".strtoupper($arItem["UNIT"]));
 				break;
 			}
 		}
@@ -1996,9 +1995,8 @@ class ClonOS {
 		if($res['error']){
 			$arr['error']=true;
 			$arr['error_message']='File image not registered!';
-		}else{
-			$arr['error']=false;
-		}
+		}else $arr['error']=false;
+
 		echo json_encode($arr);
 	}
 
@@ -2009,8 +2007,7 @@ class ClonOS {
 		if($res===false || empty($res)) return;
 		
 		$html='';
-		foreach($res as $r)
-		{
+		foreach($res as $r){
 			$html.='<option value="'.$r['idx'].'">'.$r['name'].'.'.$r['type'].'</option>';
 		}
 		return $html;
@@ -2073,7 +2070,7 @@ class ClonOS {
 			return array('error'=>true,'error_message'=>'incorrect data!');
 		
 		$db=new Db('clonos');
-		if($db===false)	return array('error'=>true,'error_message'=>'db connection lost!');
+		if(!$db->isConnected())	return array('error'=>true,'error_message'=>'db connection lost!');
 
 		$user_id=(int)$form['user_id'];
 		$username=$db->escape($form['username']);
@@ -2112,7 +2109,7 @@ class ClonOS {
 		if(empty($user_info)) return false;
 		if(isset($user_info['username']) && isset($user_info['password'])){
 			$db=new Db('clonos');
-			if($db!==false)	{
+			if($db->isConnected()) {
 				$res=$db->select("select username from auth_user where username='".$db->escape($user_info['username'])."'");
 				if(!empty($res)){
 					$res['user_exsts']=true;
@@ -2153,7 +2150,7 @@ class ClonOS {
 		if(empty($user_info)) return false;
 		if(isset($user_info['login']) && isset($user_info['password'])){
 			$db=new Db('clonos');
-			if($db!==false){
+			if($db->isConnected()){
 				$pass=$this->getPasswordHash($user_info['password']);
 				$res=$db->selectAssoc("select id,username,password from auth_user where username='".$db->escape($user_info['login'])."' and is_active=1");
 				if(empty($res) || $res['password'] != $pass){
@@ -2198,7 +2195,7 @@ class ClonOS {
 			$memory_hash=$_COOKIE['mhash'];
 			$secure_memory_hash=md5($memory_hash.$this->_client_ip);
 			$db=new Db('clonos');
-			if($db!==false){
+			if($db->isConnected()){
 				$query="select au.id,au.username from auth_user au, auth_list al where al.secure_sess_id='".$secure_memory_hash."' and au.id=al.user_id and au.is_active=1";
 				//echo $query;
 				$res=$db->selectAssoc($query);
@@ -2250,7 +2247,7 @@ class ClonOS {
 		$db=new Db('clonos');
 		if($db===false) return array('DB connection error!');
 
-		$res=$db->select("select * from auth_user limit 1");
+		$res=$db->select("select * from auth_user limit 1"); // TODO: What?!
 		return $res;
 	}
 	
@@ -2262,7 +2259,7 @@ class ClonOS {
 		$form=$this->form;
 
 		$db=new Db('base','local');
-		if($db===false) return $this->messageError('data incorrect!'); //array('error'=>true,'error_message'=>'data incorrect!');
+		if(!$db->isConnected()) return $this->messageError('data incorrect!'); //array('error'=>true,'error_message'=>'data incorrect!');
 		
 		$name=$db->escape($form['name']);
 		$description=$db->escape($form['description']);
@@ -2288,7 +2285,7 @@ class ClonOS {
 		
 		$tpl_id=$form['template_id'];
 		$db=new Db('base','local');
-		if($db===false) return $this->messageError('DB connection error!');
+		if(!$db->isConnected()) return $this->messageError('DB connection error!');
 
 		$res=$db->selectAssoc("select name,description,pkg_vm_ram,pkg_vm_disk,pkg_vm_cpus from vmpackages where id=".(int)$tpl_id);
 		return $this->messageSuccess(array('vars'=>$res,'template_id'=>(int)$tpl_id));
@@ -2300,7 +2297,7 @@ class ClonOS {
 		$id=$form['template_id'];
 		if(!isset($id) || $id<1) $this->messageError('wrong data!');
 		$db=new Db('base','local');
-		if($db===false) return $this->messageError('db connection error!');
+		if(!$db->isConnected()) return $this->messageError('db connection error!');
 
 		$name=$db->escape($form['name']);
 		$description=$db->escape($form['description']);
@@ -2329,7 +2326,7 @@ class ClonOS {
 
 		$query="delete from vmpackages where id=".(int)$id;
 		$db=new Db('base','local');
-		if($db===false) return $this->messageError('DB connection error!');
+		if(!$db->isConnected()) return $this->messageError('DB connection error!');
 
 		$res=$db->select($query);
 		return $this->messageSuccess($res);
@@ -2408,7 +2405,7 @@ class ClonOS {
 		
 		$name_comment='';
 		$db=new Db('base','local');
-		if($db!==false){
+		if($db->isConnected()){
 			$jail=$db->selectAssoc("SELECT jname FROM jails WHERE jname='".$db->escape($jname)."'");
 			
 			if($jname==$jail['jname']){
@@ -2487,7 +2484,7 @@ class ClonOS {
 		$res['jname']=$jail_name;
 		
 		$db=new Db('racct',array('jname'=>$jail_name));
-		if($db!==false){
+		if($db->isConnected()){
 			$quer=$db->select("SELECT '{$jail_name}' as name,idx as time,memoryuse,pcpu,pmem,maxproc,openfiles,readbps,
 						  writebps,readiops,writeiops FROM racct ORDER BY idx DESC LIMIT 25;");	// where idx%5=0
 			$res['__all']=$quer;
@@ -2507,7 +2504,7 @@ class ClonOS {
 			  allow_fusefs,allow_read_msgbuf,allow_vmm,allow_unprivileged_proc_debug
 			  from jails where jname='{$jail_name}'";
 		$db=new Db('base','local');
-		if($db!==false){
+		if($db->isConnected()){
 			$quer=$db->selectAssoc($sql);
 			$html='<table class="summary_table">';
 			
@@ -2542,9 +2539,8 @@ class ClonOS {
 		);
 		
 		$db=new Db('bhyve',array('jname'=>$jname));
-
 //		if($db===false) return $this->messageError('DB connection error!');
-		if($db!==false) {
+		if($db->isConnected()) {
 			$sql="select created, astart, vm_cpus, vm_ram, vm_os_type, vm_boot, vm_os_profile, bhyve_flags,
 				vm_vnc_port, virtio_type, bhyve_vnc_tcp_bind, bhyve_vnc_resolution, cd_vnc_wait,
 				protected, hidden, maintenance, ip4_addr, vnc_password, state_time,

@@ -1,21 +1,23 @@
 <?php
-class Db
-{
-	private $_pdo=null;
+
+class Db {
+	private $_pdo=null, $_connected;
 	private $_workdir='';
 	private $_filename='';
 	public $error=false;
 	public $error_message='';
-	
+
+
 	/*
-		$place = base (это базовый набор баз данных: local, nodes и т.д.)
-		$place = file (указываем конкретную базу данных по полному пути)
+		$place = base (This is a basic set of databases: local, nodes, etc)
+		$place = file (specify a specific database for the full pathth)
 	*/
 	function __destruct(){
 		//if($this->_pdo) $this->_pdo->close();
 	}
 	
 	function __construct($place='base',$database=''){
+		$this->_connected=false;
 		$this->_workdir=getenv('WORKDIR');	// /usr/jails/
 		
 		switch($place){
@@ -107,24 +109,18 @@ class Db
 			return false;
 		}
 		
-		if(empty($connect)) return false;
+		if(empty($connect)) return false; // Return from __construct doesn't work!
 
 		try {
 			$this->_pdo = new PDO($connect);
 			$this->_pdo->setAttribute(PDO::ATTR_TIMEOUT,5000);
+			$this->_connected=true;
+
 		}catch (PDOException $e){
 			$this->error=true;
 			$this->error_message=$e->getMessage();	//'DB Error';
 			return false;
 		}
-	}
-	
-	function getWorkdir(){
-		return $this->_workdir;
-	}
-	
-	function getFileName(){
-		return $this->_filename;
 	}
 	
 	function select($query){
@@ -161,7 +157,8 @@ class Db
 		return $error;	
 	}
 	
-	function escape($str){
-		return SQLite3::escapeString($str); // For now sqlite only!
-	}
+	function isConnected(){ return($this->_connected); }
+	function getWorkdir(){  return $this->_workdir;    }
+	function getFileName(){ return $this->_filename;   }
+	function escape($str){  return SQLite3::escapeString($str); } // For now sqlite only!
 }

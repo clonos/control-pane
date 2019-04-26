@@ -353,7 +353,7 @@ class ClonOS {
 		$res=array();
 		if(!empty($ids)){
 			$tid=join("','",$ids);
-			$query="select id,cmd,status,jname from taskd where status<2 and jname in ('{$tid}')"; //TODO: FIX INJECTION
+			$query="SELECT id,cmd,status,jname FROM taskd WHERE status<2 AND jname IN ('{$tid}')"; //TODO: FIX INJECTION
 			//echo $query;
 			$cmd='';
 			$txt_status='';
@@ -379,7 +379,7 @@ class ClonOS {
 	
 /*
 	function getProjectsListOnStart(){
-		$query='select * from projects';
+		$query='SELECT * FROM projects';
 		$res=$this->_db->select($query);
 		echo '	var projects=',json_encode($res),PHP_EOL;
 	}
@@ -387,8 +387,8 @@ class ClonOS {
 
 /*
 	function getTaskStatus($task_id){
-		$status=$this->_db_tasks->selectAssoc("select status,logfile,errcode 
-					from taskd where id='{$task_id}'");
+		$status=$this->_db_tasks->selectAssoc("SELECT status,logfile,errcode 
+					FROM taskd WHERE id='{$task_id}'");
 
 		if($status['errcode']>0) $status['errmsg']=file_get_contents($status['logfile']);
 
@@ -490,7 +490,7 @@ class ClonOS {
 		$ids=join(',',$tasks);
 		if(empty($ids)) return $obj;
 
-		$statuses=$this->_db_tasks->select("select id,status,logfile,errcode from taskd where id in ({$ids})"); // OK, is always int.
+		$statuses=$this->_db_tasks->select("SELECT id,status,logfile,errcode FROM taskd WHERE id IN ({$ids})"); // OK, is always int.
 
 		//print_r($statuses);
 		foreach($obj as $key=>$task){
@@ -1087,7 +1087,7 @@ class ClonOS {
 		$err=false;
 		$db=new Db('base','local');
 		if($db->isConnected())	{
-			$query="SELECT b.jname as vm_name,vm_cpus,vm_ram,vm_vnc_port,bhyve_vnc_tcp_bind,interface FROM bhyve as b inner join jails as j on b.jname=j.jname and b.jname='{$db->escape($form['jail_id'])}';";
+			$query="SELECT b.jname as vm_name,vm_cpus,vm_ram,vm_vnc_port,bhyve_vnc_tcp_bind,interface FROM bhyve AS b INNER JOIN jails AS j ON b.jname=j.jname AND b.jname='{$db->escape($form['jail_id'])}';";
 			$res['vars']=$db->selectAssoc($query);
 			
 			$res['vars']['vm_ram']=$this->fileSizeConvert($res['vars']['vm_ram'],1024,false,true);
@@ -1188,12 +1188,12 @@ class ClonOS {
 		$db=new Db('base','storage_media');
 		if(!$db->isConnected()) return(false); // TODO: Fix return
 
-		$res=$db->selectAssoc('select * from media where jname="'.$jname.'" and type="iso"');
+		$res=$db->selectAssoc('SELECT * FROM media WHERE jname="{$db->escape($jname)" AND type="iso"');
 		if($res!==false && !empty($res)){
 			$cmd1="cbsd media mode=unregister name=\"${res['name']}\" path=\"${res['path']}\" jname=${jname} type=${res['type']}";
 			//echo $cmd1,PHP_EOL,PHP_EOL;
 			$this->cbsd_cmd($cmd1);  // TODO: fix Shell injection
-			$res=$db->selectAssoc('select * from media where idx='.$form['vm_iso_image']);
+			$res=$db->selectAssoc('SELECT * FROM media WHERE idx='.(int)$form['vm_iso_image']); 
 			if($res!==false && !empty($res) && $form['vm_iso_image']!=-2){
 				$cmd2="cbsd media mode=register name=\"${res['name']}\" path=\"${res['path']}\" jname=${jname} type=${res['type']}";
 				$this->cbsd_cmd($cmd2);  // TODO: fix Shell injection
@@ -1254,7 +1254,7 @@ class ClonOS {
 			if($iso_id>0){
 				$db=new Db('base','storage_media');
 				if(!$db->isConnected()) return(false); // TODO: return error
-				$res=$db->selectAssoc('select name,path from media where idx='.$iso_id);
+				$res=$db->selectAssoc('SELECT name,path FROM media WHERE idx='.$iso_id); // OK, $iso_id is casted as int above.
 				if($res===false || empty($res)) $iso=false;
 			}
 			
@@ -1337,12 +1337,12 @@ class ClonOS {
 		$os_type=$os_items['type'];
 		
 		$key_name='/usr/home/olevole/.ssh/authorized_keys';
-		$key_id=$form['vm_authkey'];
+		$key_id=(int)$form['vm_authkey'];
 
 		$db=new Db('base','authkey');
 		if(!$db->isConnected())  return array('error'=>true,'errorMessage'=>'Database error!');
 
-		$nres=$db->selectAssoc('select name from authkey where idx='.$key_id);
+		$nres=$db->selectAssoc('SELECT name FROM authkey WHERE idx='.$key_id); // Ok, casted as int above.
 		if($nres['name']!==false) $key_name=$nres['name'];
 
 		$cmd="task owner=${username} mode=new /usr/local/bin/cbsd vm_obtain jname={$form['vm_name']} vm_size={$form['vm_size']} vm_cpus={$form['vm_cpus']} vm_ram={$form['vm_ram']} vm_os_type={$os_type} mask={$form['mask']} ip4_addr={$form['ip4_addr']} gw={$form['gateway']} authkey={$key_name} pw={$form['vm_password']} vnc_password={$form['vnc_password']}";
@@ -1436,7 +1436,7 @@ class ClonOS {
 		if(!$db->isConnected()) return array('error'=>'Database error');
 
 		//$res=array('error'=>false,'lastId'=>2);
-		$res=$db->insert("insert into authkey (name,authkey) values ('{$db->escape($form['keyname'])}','{$db->escape($form['keysrc'])}')");
+		$res=$db->insert("INSERT INTO authkey (name,authkey) VALUES ('{$db->escape($form['keyname'])}','{$db->escape($form['keysrc'])}')");
 		if($res['error']) return array('error'=>$res);
 		
 		$html='';
@@ -1465,7 +1465,7 @@ class ClonOS {
 		$db=new Db('base','authkey');
 		if(!$db->isConnected()) return array('error'=>true,'res'=>'Database error');
 
-		$res=$db->update('delete from authkey where idx='.$form['auth_id']);
+		$res=$db->update('DELETE FROM authkey WHERE idx='.$form['auth_id']);
 		if($res===false) return array('error'=>true,'res'=>print_r($res,true));
 		
 		return array('error'=>false,'auth_id'=>$form['auth_id']);
@@ -1479,7 +1479,7 @@ class ClonOS {
 		if(!$db->isConnected()) return array('error'=>'Database error');
 
 		
-		$res=$db->insert("insert into vpnet (name,vpnet) values ('{$db->escape($form['netname'])}','{$db->escape($form['network'])}')");
+		$res=$db->insert("INSERT INTO vpnet (name,vpnet) VALUES ('{$db->escape($form['netname'])}','{$db->escape($form['network'])}')");
 		if($res['error']) return array('error'=>$res);
 		
 		$html='';
@@ -1508,7 +1508,7 @@ class ClonOS {
 		$db=new Db('base','vpnet');
 		if(!$db->isConnected()) return array('error'=>true,'res'=>'Database error');
 
-		$res=$db->update('delete from vpnet where idx='.(int)$form['vpnet_id']);
+		$res=$db->update('DELETE FROM vpnet WHER idx='.(int)$form['vpnet_id']);
 		if($res===false) return array('error'=>true,'res'=>print_r($res,true));
 		
 		return array('error'=>false,'vpnet_id'=>$form['vpnet_id']);
@@ -1519,11 +1519,11 @@ class ClonOS {
 		$db=new Db('base','storage_media');
 		if(!$db->isConnected()) return array('error'=>true,'res'=>'Database error');
 
-		//$res=$db->update('delete from media where idx='.$form['media_id']);
-		$res=$db->selectAssoc('select * from media where idx='.(int)$form['media_id']);
+		//$res=$db->update('DELETE FROM media WHERE idx='.$form['media_id']);
+		$res=$db->selectAssoc('SELECT * FROM media WHERE idx='.(int)$form['media_id']);
 		if($res===false || empty($res)) return array('error'=>true,'res'=>print_r($res,true));
 		
-		//if($res['jname']=='-')	// если медиа отвязана, то просто удаляем 
+		//if($res['jname']=='-')	// если медиа отвязана, то про�
 		//print_r($res);exit;
 		$cmd='media mode=remove name="'.$res['name'].'" path="'.$res['path'].'" jname="'.$res['jname'].'" type="'.$res['type'].'"';	//.$res['name']
 		//echo $cmd;exit;
@@ -1572,11 +1572,12 @@ class ClonOS {
 	function getSrcInfo($id){
 		$id=str_replace('src','',$id);
 		if(!is_numeric($id)) return array('error'=>true,'errorMessage'=>'Wrong ID of sources!');
+		$id=(int)$id; // Just to be sure..
 		$db=new Db('base','local');
 		if(!$db->isConnected()) return array('error'=>true,'errorMessage'=>'Database error');
 
-		$res=$db->selectAssoc("SELECT idx,name,platform,ver,rev,date FROM bsdsrc where ver={$id}");
-			
+		$res=$db->selectAssoc("SELECT idx,name,platform,ver,rev,date FROM bsdsrc WHERE ver=".$id); // Ok, casted int above.
+
 		$hres=$this->getTableChunk('srcslist','tbody');
 		if($hres!==false){
 			$html_tpl=$hres[1];
@@ -1617,7 +1618,8 @@ class ClonOS {
 		$stable=$res[3];
 
 		// TODO: fix Shell injection
-		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd removebase inter=0 stable='.$stable.' ver='.$ver.' arch='.$arch.' jname=#'.$orig_id);
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd removebase inter=0 stable='.
+						$stable.' ver='.$ver.' arch='.$arch.' jname=#'.$orig_id);
 
 		return $res;
 	}
@@ -1631,7 +1633,7 @@ class ClonOS {
 		$db=new Db('base','local');
 		if(!$db->isConnected()) return array('error'=>true,'errorMessage'=>'Database connect error!');
 
-		$base=$db->selectAssoc("SELECT idx,platform,ver FROM bsdsrc where idx=".$id);
+		$base=$db->selectAssoc("SELECT idx,platform,ver FROM bsdsrc WHERE idx=".$id); // Casted above as 
 		$ver=$base['ver'];
 		$stable_arr=array('release','stable');
 		$stable_num=strlen(intval($ver))<strlen($ver)?0:1;
@@ -1665,7 +1667,7 @@ class ClonOS {
 		$db=new Db('base','local');
 		if($db->isConnected()){
 			if($bsdsrc){
-				$res=$db->selectAssoc("SELECT idx,platform,ver FROM bsdsrc where idx=".(int)$id);
+				$res=$db->selectAssoc("SELECT idx,platform,ver FROM bsdsrc WHERE idx=".(int)$id);
 				$res['name']='—';
 				$res['arch']='—';
 				$res['targetarch']='—';
@@ -1673,7 +1675,7 @@ class ClonOS {
 				$res['elf']='—';
 				$res['date']='—';
 			}else{
-				$res=$db->selectAssoc("SELECT idx,platform,name,arch,targetarch,ver,stable,elf,date FROM bsdbase where ver=".(int)$id);
+				$res=$db->selectAssoc("SELECT idx,platform,name,arch,targetarch,ver,stable,elf,date FROM bsdbase WHERE ver=".(int)$id);
 			}
 			$hres=$this->getTableChunk('baseslist','tbody');
 			if($hres!==false){
@@ -1749,7 +1751,9 @@ class ClonOS {
 		}
 		
 		// TODO: fix Shell injection
-		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd repo action=get sources=base inter=0 stable='.$stable_num.' ver='.$ver.' jname=#base'.$bid);
+		$res=$this->cbsd_cmd('task owner='.$username.' mode=new /usr/local/bin/cbsd repo action=get sources=base inter=0 stable='.
+							$stable_num.' ver='.$ver.' jname=#base'.$bid);
+
 		//$res['retval']=0;$res['message']=3;
 		
 		$err='';
@@ -1943,7 +1947,7 @@ class ClonOS {
 		if($res!==false) $pass=$res['vnc_password'];
 		
 		$res=$this->cbsd_cmd("vm_vncwss jname={$jname} permit={$this->_client_ip}");
-		//$res=$this->_db_local->selectAssoc('select nodeip from local');
+		//$res=$this->_db_local->selectAssoc("SELECT nodeip FROM local");
 		//$nodeip=$res['nodeip'];
 		// need for IPv4/IPv6 regex here, instead of strlen
 		//if(strlen($nodeip)<7) $nodeip='127.0.0.1';
@@ -2050,7 +2054,7 @@ class ClonOS {
 
 	function updateBhyveISO($iso=''){
 		$db=new Db('base','storage_media');
-		$res=$db->select('select * from media where type="iso"');
+		$res=$db->select('SELECT * FROM media WHERE type="iso"');
 		if($res===false || empty($res)) return array(); //array('error'=>true,'error_message'=>'Profile ISO is not find!');
 		
 		$sel='';
@@ -2120,7 +2124,7 @@ class ClonOS {
 			$pwd_sql=",password='${password}'";
 		}
 			
-		$query="update auth_user set username='${username}'".$pwd_sql.",first_name='${first_name}',last_name='${last_name}',is_active=${is_active} where id=${user_id}";
+		$query="UPDATE auth_user SET username='${username}'".$pwd_sql.",first_name='${first_name}',last_name='${last_name}',is_active=${is_active} WHERE id=".(int)$user_id;
 		
 		//echo $query;
 			
@@ -2145,7 +2149,7 @@ class ClonOS {
 		if(isset($user_info['username']) && isset($user_info['password'])){
 			$db=new Db('clonos');
 			if($db->isConnected()) {
-				$res=$db->select("select username from auth_user where username='{$db->escape($user_info['username'])}'");
+				$res=$db->select("SELECT username FROM auth_user WHERE username='{$db->escape($user_info['username'])}'");
 				if(!empty($res)){
 					$res['user_exsts']=true;
 					return $res;
@@ -2157,8 +2161,8 @@ class ClonOS {
 				$last_name=$db->escape($user_info['last_name']);
 				$is_active=0;
 				if(isset($user_info['actuser']) && $user_info['actuser']=='on') $is_active=1;
-				$query=$db->query_protect("insert into auth_user
-					(username,password,first_name,last_name,is_active,date_joined) values
+				$query=$db->query_protect("INSERT INTO auth_user
+					(username,password,first_name,last_name,is_active,date_joined) VALUES
 					('${username}','${password}','${first_name}','${last_name}',${is_active},datetime('now','localtime'))");
 				$res=$db->insert($query);
 				return array('error'=>false,'res'=>$res);
@@ -2187,7 +2191,7 @@ class ClonOS {
 			$db=new Db('clonos');
 			if($db->isConnected()){
 				$pass=$this->getPasswordHash($user_info['password']);
-				$res=$db->selectAssoc("select id,username,password from auth_user where username='{$db->escape($user_info['login'])}' and is_active=1");
+				$res=$db->selectAssoc("SELECT id,username,password FROM auth_user WHERE username='{$db->escape($user_info['login'])}' AND is_active=1");
 				if(empty($res) || $res['password'] != $pass){
 					sleep(3);
 					return array('errorCode'=>1,'message'=>'user not found!');
@@ -2205,13 +2209,13 @@ class ClonOS {
 				*/
 				
 				//$query="update auth_list set secure_sess_id='${secure_memory_hash}',auth_time=datetime('now','localtime') where sess_id='${memory_hash}'";	//sess_id='${memory_hash}',
-				$query="update auth_list set sess_id='${memory_hash}',secure_sess_id='${secure_memory_hash}',auth_time=datetime('now','localtime') where user_id=${id} and user_ip='${ip}'";
+				$query="UPDATE auth_list SET sess_id='${memory_hash}',secure_sess_id='${secure_memory_hash}',auth_time=datetime('now','localtime') WHERE user_id=${id} AND user_ip='${ip}'";
 				$qres=$db->update($query);
 				//print_r($qres);
 				if(isset($qres['rowCount'])){
 					if($qres['rowCount']==0){
-						$query="insert into auth_list
-							(user_id,sess_id,secure_sess_id,user_ip,auth_time) values
+						$query="INSERT INTO auth_list
+							(user_id,sess_id,secure_sess_id,user_ip,auth_time) VALUES
 							(${id},'${memory_hash}','${secure_memory_hash}','${ip}',datetime('now','localtime'))";
 						$qres=$db->insert($query);
 					}
@@ -2231,7 +2235,7 @@ class ClonOS {
 			$secure_memory_hash=md5($memory_hash.$this->_client_ip);
 			$db=new Db('clonos');
 			if($db->isConnected()){
-				$query="select au.id,au.username from auth_user au, auth_list al where al.secure_sess_id='".$secure_memory_hash."' and au.id=al.user_id and au.is_active=1";
+				$query="SELECT au.id,au.username FROM auth_user au, auth_list al WHERE al.secure_sess_id='".$secure_memory_hash."' AND au.id=al.user_id AND au.is_active=1";
 				//echo $query;
 				$res=$db->selectAssoc($query);
 				//print_r($res);
@@ -2249,7 +2253,7 @@ class ClonOS {
 		
 		$id=$form['user_id'];
 		if(is_numeric($id) && $id>0){
-			$query="delete from auth_user where id=".(int)$id;
+			$query="DELETE FROM auth_user WHERE id=".(int)$id;
 			$db=new Db('clonos');
 			if(!$db->isConnected()) return array('error'=>true,'error_message'=>'DB connection error!');
 
@@ -2267,7 +2271,7 @@ class ClonOS {
 		if(!$db->isConnected()) return array('error'=>true,'error_message'=>'DB connection error!');
 		$user_id=(int)$form['user_id'];
 
-		$res=$db->selectAssoc("select username,first_name,last_name,is_active as actuser from auth_user where id=".$user_id);
+		$res=$db->selectAssoc("SELECT username,first_name,last_name,is_active AS actuser FROM auth_user WHERE id=".$user_id);
 		return array(
 			'dialog'=>$form['dialog'],
 			'vars'=>$res,
@@ -2282,7 +2286,7 @@ class ClonOS {
 		$db=new Db('clonos');
 		if(!$db->isConnected()) return array('DB connection error!');
 
-		$res=$db->select("select * from auth_user limit 1"); // TODO: What?!
+		$res=$db->select("SELECT * FROM auth_user LIMIT 1"); // TODO: What?!
 		return $res;
 	}
 	
@@ -2302,8 +2306,8 @@ class ClonOS {
 		$pkg_vm_disk=$db->escape($form['pkg_vm_disk']);
 		$pkg_vm_cpus=$db->escape($form['pkg_vm_cpus']);
 		$owner=$this->_user_info['username'];
-		$query="insert into vmpackages (name,description,pkg_vm_ram,pkg_vm_disk,pkg_vm_cpus,owner,timestamp)
-			values
+		$query="INSERT INTO vmpackages (name,description,pkg_vm_ram,pkg_vm_disk,pkg_vm_cpus,owner,timestamp)
+			VALUES
 			('${name}','${description}','${pkg_vm_ram}','${pkg_vm_disk}','${pkg_vm_cpus}','${owner}',datetime('now','localtime'))";
 		
 		$res=$db->insert($query);
@@ -2359,7 +2363,7 @@ class ClonOS {
 		$id=$form['template_id'];
 		if(!is_numeric($id) || (int)$id <= 0) return $this->messageError('wrong data!');
 
-		$query="delete from vmpackages where id=".(int)$id;
+		$query="DELETE FROM vmpackages WHERE id=".(int)$id;
 		$db=new Db('base','local');
 		if(!$db->isConnected()) return $this->messageError('DB connection error!');
 
@@ -2533,10 +2537,10 @@ class ClonOS {
 		$filename=$this->workdir.'/jails-system/'.$jail_name.'/descr';
 		if(file_exists($filename)) $res['description']=nl2br(file_get_contents($filename));
 		
-		$sql="select host_hostname,ip4_addr,allow_mount,allow_nullfs,allow_fdescfs,interface,baserw,mount_ports,
+		$sql="SELECT host_hostname,ip4_addr,allow_mount,allow_nullfs,allow_fdescfs,interface,baserw,mount_ports,
 			  astart,vnet,mount_fdescfs,allow_tmpfs,allow_zfs,protected,allow_reserved_ports,allow_raw_sockets,
 			  allow_fusefs,allow_read_msgbuf,allow_vmm,allow_unprivileged_proc_debug
-			  from jails where jname='{$db->escape($jail_name)}'";
+			  FROM jails WHERE jname='{$db->escape($jail_name)}'";
 		$db=new Db('base','local');
 		if($db->isConnected()){
 			$quer=$db->selectAssoc($sql);
@@ -2574,13 +2578,13 @@ class ClonOS {
 		
 		$db=new Db('bhyve',array('jname'=>$jname));
 		if($db->isConnected()) {
-			$sql="select created, astart, vm_cpus, vm_ram, vm_os_type, vm_boot, vm_os_profile, bhyve_flags,
+			$sql="SELECT created, astart, vm_cpus, vm_ram, vm_os_type, vm_boot, vm_os_profile, bhyve_flags,
 				vm_vnc_port, virtio_type, bhyve_vnc_tcp_bind, bhyve_vnc_resolution, cd_vnc_wait,
 				protected, hidden, maintenance, ip4_addr, vnc_password, state_time,
 				vm_hostbridge, vm_iso_path, vm_console, vm_efi, vm_rd_port, bhyve_generate_acpi,
 				bhyve_wire_memory, bhyve_rts_keeps_utc, bhyve_force_msi_irq, bhyve_x2apic_mode,
 				bhyve_mptable_gen, bhyve_ignore_msr_acc, bhyve_vnc_vgaconf text, media_auto_eject,
-				vm_cpu_topology, debug_engine, xhci, cd_boot_firmware, jailed from settings";
+				vm_cpu_topology, debug_engine, xhci, cd_boot_firmware, jailed FROM settings";
 			$quer=$db->selectAssoc($sql);
 			$html='<table class="summary_table">';
 			

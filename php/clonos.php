@@ -1508,7 +1508,7 @@ class ClonOS {
 		$db=new Db('base','vpnet');
 		if(!$db->isConnected()) return array('error'=>true,'res'=>'Database error');
 
-		$res=$db->update('DELETE FROM vpnet WHER idx='.(int)$form['vpnet_id']);
+		$res=$db->update('DELETE FROM vpnet WHERE idx='.(int)$form['vpnet_id']);
 		if($res===false) return array('error'=>true,'res'=>print_r($res,true));
 		
 		return array('error'=>false,'vpnet_id'=>$form['vpnet_id']);

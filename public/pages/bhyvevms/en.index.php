@@ -12,9 +12,7 @@ $clonos->useDialogs(array(
 
 <p>
 	<span class="top-button icon-plus id:bhyve-new">Create from ISO</span>
-<?php if($clonos->environment=='development') { ?>
-	<span class="top-button icon-plus id:bhyve-obtain">Obtain from lib</span>
-<?php } ?>
+	<span class="top-button icon-plus id:bhyve-obtain">Cloud images</span>
 </p>
 
 <table class="tsimple" id="bhyveslist" width="100%">

@@ -2,12 +2,12 @@
 
 '''
 Use matplotlib to generate performance charts
-Copyright 2011 Joel Martin
+Copyright (C) 2018 The noVNC Authors
 Licensed under MPL-2.0 (see docs/LICENSE.MPL-2.0)
 '''
 
 # a bar plot with errorbars
-import sys, json, pprint
+import sys, json
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties

@@ -1345,7 +1345,7 @@ class ClonOS {
 		$nres=$db->selectAssoc('SELECT name FROM authkey WHERE idx='.$key_id); // Ok, casted as int above.
 		if($nres['name']!==false) $key_name=$nres['name'];
 
-		$cmd="task owner=${username} mode=new /usr/local/bin/cbsd vm_obtain jname={$form['vm_name']} vm_size={$form['vm_size']} vm_cpus={$form['vm_cpus']} vm_ram={$form['vm_ram']} vm_os_type={$os_type} mask={$form['mask']} ip4_addr={$form['ip4_addr']} gw={$form['gateway']} authkey={$key_name} pw={$form['vm_password']} vnc_password={$form['vnc_password']}";
+		$cmd="task owner=${username} mode=new /usr/local/bin/cbsd bcreate jname={$form['vm_name']} vm_os_profile=cloud-FreeBSD-ufs-x64-12.0 imgsize={$form['vm_size']} vm_cpus={$form['vm_cpus']} vm_ram={$form['vm_ram']} vm_os_type={$os_type} mask={$form['mask']} ip4_addr={$form['ip4_addr']} ci_ip4_addr={$form['ip4_addr']} ci_gw4={$form['gateway']} ci_user_pubkey={$key_name} ci_user_pw_user={$form['vm_password']} vnc_password={$form['vnc_password']}";
 		
 		// TODO: fix Shell injection
 		$res=$this->cbsd_cmd($cmd);

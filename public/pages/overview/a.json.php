@@ -55,6 +55,6 @@ if($res_array['average']>0)
 	$res_array['average']=$this->GhzConvert($res_array['average']/($res_array['num-nodes']?:1));
 }
 
-$res_array['sum-ram']=$this->fileSizeConvert($res_array['sum-ram']*1024*1024,1024,true);
+$res_array['sum-ram']=$this->fileSizeConvert($res_array['sum-ram']/1024/1024/1024,true);
 
 echo json_encode($res_array);

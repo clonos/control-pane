@@ -180,8 +180,8 @@ class Config
 	{
 		$array=array();
 		$array1=array();
-		// $res=ClonOS::cbsd_cmd('get_bhyve_profiles src=vm'); for obtain/library
-		$res=ClonOS::cbsd_cmd('get_bhyve_profiles src=vm');
+		// $res=ClonOS::cbsd_cmd('get_bhyve_profiles src=vm clonos=1'); for obtain/library
+		$res=ClonOS::cbsd_cmd('get_bhyve_profiles src=vm clonos=1');
 		if($res['retval']==0)
 		{
 			$this->os_types=$this->create_bhyve_profiles($res);

@@ -52,6 +52,10 @@
 				<input type="password" name="vm_password" value="cbsd" placeholder="3-20 symbols" pattern=".{3,20}" maxlength="20"></input> <small>— <?php echo $this->translate('default is');?>: «cbsd»</small>
 			</p>
 			<p>
+				<span class="field-name"><?php echo $this->translate('USER Password');?>:</span>
+				<input type="password" name="user_password" value="" placeholder="3-20 symbols" pattern=".{3,20}" maxlength="20"></input> <small>— <?php echo $this->translate('напиши осознанный текст');?></small>
+			</p>
+			<p>
 				<span class="field-name"><?php echo $this->translate('Authkey');?>:</span>
 				<select name="vm_authkey">
 <?php echo $this->config->authkeys_list(); ?>

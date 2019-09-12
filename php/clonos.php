@@ -1336,17 +1336,36 @@ class ClonOS {
 		$os_items=$os_types[$os_num]['items'][$item_num];
 		$os_type=$os_items['type'];
 		
+		// os select
+		// проработать кэш профилей, чтобы можно было нормально вытаскивать данные
+		list($one,$two)=explode('.',$sel_os,2);
+		//echo '<pre>';print_r($os_types);
+		//print_r($os_types[1]);exit;
+		/*
+		if(isset($os_types[$one]))
+		{
+			if(isset($os_types[$one]['items'][$two]))
+				$os_profile=$os_types[$one]['items'][$two]['profile'];
+		}
+		*/
+//		$os_profile=$os_items['profile'];
+//		echo '<pre>';echo $sel_os,PHP_EOL,PHP_EOL;var_dump($os_types);exit;
+		
 		$key_name='/usr/home/olevole/.ssh/authorized_keys';
 		$key_id=(int)$form['vm_authkey'];
 
 		$db=new Db('base','authkey');
 		if(!$db->isConnected())  return array('error'=>true,'errorMessage'=>'Database error!');
 
-		$nres=$db->selectAssoc('SELECT name FROM authkey WHERE idx='.$key_id); // Ok, casted as int above.
-		if($nres['name']!==false) $key_name=$nres['name'];
-
-		$cmd="task owner=${username} mode=new /usr/local/bin/cbsd bcreate jname={$form['vm_name']} vm_os_profile=cloud-FreeBSD-ufs-x64-12.0 imgsize={$form['vm_size']} vm_cpus={$form['vm_cpus']} vm_ram={$form['vm_ram']} vm_os_type={$os_type} mask={$form['mask']} ip4_addr={$form['ip4_addr']} ci_ip4_addr={$form['ip4_addr']} ci_gw4={$form['gateway']} ci_user_pubkey={$key_name} ci_user_pw_user={$form['vm_password']} vnc_password={$form['vnc_password']}";
+		//$nres=$db->selectAssoc('SELECT name FROM authkey WHERE idx='.$key_id); // Ok, casted as int above.
+		//if($nres['name']!==false) $key_name=$nres['name'];
+		$nres=$db->selectAssoc('SELECT authkey FROM authkey WHERE idx='.$key_id);
+		if($nres['authkey']!==false) $authkey=$nres['authkey'];
 		
+		$user_pw=(!empty($form['user_password']))?' ci_user_pw_user='.$form['user_password'].' ':'';
+
+		$cmd="task owner=${username} mode=new /usr/local/bin/cbsd bcreate jname={$form['vm_name']} vm_os_profile=\"{$os_profile}\" imgsize={$form['vm_size']} vm_cpus={$form['vm_cpus']} vm_ram={$form['vm_ram']} vm_os_type={$os_type} mask={$form['mask']} ip4_addr={$form['ip4_addr']} ci_ip4_addr={$form['ip4_addr']} ci_gw4={$form['gateway']} ci_user_pubkey=\"{$authkey}\" ci_user_pw_user={$form['vm_password']} {$user_pw}vnc_password={$form['vnc_password']}";
+		echo $cmd;exit;
 		// TODO: fix Shell injection
 		$res=$this->cbsd_cmd($cmd);
 		$err='Virtual Machine is not created!';
@@ -1980,8 +1999,10 @@ class ClonOS {
 		return round($Hz/$h,2).' '.$l;
 	}
 	
-	function fileSizeConvert($bytes,$bytes_in_mb=1024,$round=false,$small=false){
-		$bytes = floatval($bytes);
+	function fileSizeConvert(int $bytes,$bytes_in_mb=1024,$round=false,$small=false){
+		//$bytes = intval($bytes);
+		//var_dump($bytes);exit;
+		
 		$arBytes = array(
 			0 => array(
 				"UNIT" => "tb",

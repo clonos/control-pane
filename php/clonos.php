@@ -1329,6 +1329,7 @@ class ClonOS {
 		$username=$this->_user_info['username'];
 		
 		$os_types=$this->config->os_types;
+		$os_types_obtain=$this->config->os_types_obtain;
 		$sel_os=$form['vm_os_profile'];
 		list($os_num,$item_num)=explode('.',$sel_os);
 		if(!isset($os_types[$os_num])) return array('error'=>true,'errorMessage'=>'Error in list of OS types!');
@@ -1337,19 +1338,13 @@ class ClonOS {
 		$os_type=$os_items['type'];
 		
 		// os select
-		// проработать кэш профилей, чтобы можно было нормально вытаскивать данные
 		list($one,$two)=explode('.',$sel_os,2);
-		//echo '<pre>';print_r($os_types);
-		//print_r($os_types[1]);exit;
-		/*
-		if(isset($os_types[$one]))
+		
+		if(isset($os_types_obtain[$one]))
 		{
-			if(isset($os_types[$one]['items'][$two]))
-				$os_profile=$os_types[$one]['items'][$two]['profile'];
+			if(isset($os_types_obtain[$one]['items'][$two]))
+				$os_profile=$os_types_obtain[$one]['items'][$two]['profile'];
 		}
-		*/
-//		$os_profile=$os_items['profile'];
-//		echo '<pre>';echo $sel_os,PHP_EOL,PHP_EOL;var_dump($os_types);exit;
 		
 		$key_name='/usr/home/olevole/.ssh/authorized_keys';
 		$key_id=(int)$form['vm_authkey'];
@@ -1365,7 +1360,8 @@ class ClonOS {
 		$user_pw=(!empty($form['user_password']))?' ci_user_pw_user='.$form['user_password'].' ':'';
 
 		$cmd="task owner=${username} mode=new /usr/local/bin/cbsd bcreate jname={$form['vm_name']} vm_os_profile=\"{$os_profile}\" imgsize={$form['vm_size']} vm_cpus={$form['vm_cpus']} vm_ram={$form['vm_ram']} vm_os_type={$os_type} mask={$form['mask']} ip4_addr={$form['ip4_addr']} ci_ip4_addr={$form['ip4_addr']} ci_gw4={$form['gateway']} ci_user_pubkey=\"{$authkey}\" ci_user_pw_user={$form['vm_password']} {$user_pw}vnc_password={$form['vnc_password']}";
-		echo $cmd;exit;
+		
+		//echo $cmd;exit;
 		// TODO: fix Shell injection
 		$res=$this->cbsd_cmd($cmd);
 		$err='Virtual Machine is not created!';

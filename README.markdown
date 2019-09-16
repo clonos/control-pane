@@ -32,14 +32,14 @@ For installing on FreeBSD: https://clonos.tekroutine.com/installation_on_freebsd
 
 Tested with following OSes and distribution:
 
-- FreeBSD 11.0+
-- Linux Ubuntu 16.04+
-- pfSense 2.4+
-- OPNSense 16.7+
+- FreeBSD 12.0, 12.1
+- FreeBSD 13-CURRENT (HEAD)
+
+Errata: https://clonos.tekroutine.com/errata.html
 
 ## Contributing
 
-* Fork me on GitHub: [https://github.com/clonos/cp.git](https://github.com/clonos/cp.git)
+* Fork me on GitHub: [git@github.com:clonos/control-pane.git](git@github.com:clonos/control-pane.git)
 * Commit your changes (`git commit -am 'Added some feature'`)
 * Push to the branch (`git push`)
 * Create new Pull Request

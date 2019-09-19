@@ -1337,13 +1337,18 @@ class ClonOS {
 		$os_items=$os_types[$os_num]['items'][$item_num];
 		$os_type=$os_items['type'];
 		
+		//echo '<pre>';print_r($os_types_obtain);exit;
+		
 		// os select
 		list($one,$two)=explode('.',$sel_os,2);
 		
 		if(isset($os_types_obtain[$one]))
 		{
 			if(isset($os_types_obtain[$one]['items'][$two]))
+			{
 				$os_profile=$os_types_obtain[$one]['items'][$two]['profile'];
+				$os_type=$os_types_obtain[$one]['items'][$two]['type'];
+			}
 		}
 		
 		$key_name='/usr/home/olevole/.ssh/authorized_keys';

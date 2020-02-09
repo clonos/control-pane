@@ -3,17 +3,39 @@
 relative_path="1";
 jname="#jname#";
 path="#workdir#/jails/#jname#";
+data="#workdir#/jails-data/#jname#-data";
+rcconf="#workdir#/jails-rcconf/rc.conf_#jname#";
+
+# FQDN for environment
 host_hostname="#host_hostname#";
+# default environment IP
 ip4_addr="#ip4_addr#";
+
+# start with system boot?
+astart="#astart#";
+
+# first NIC hardware address
+nic_hwaddr="0";
+
+# create from ZFS snapshot?
+zfs_snapsrc="";
+# run immediately upon creation
+runasap="1";
+# bind to interface
+interface="#interface#";
+rctl_nice="1"
+jailskeldir="#workdir#/share/FreeBSD-jail-skel"
+jail_profile="default"
 mount_devfs="#mount_devfs#";
 allow_mount="#allow_mount#";
 allow_devfs="#allow_devfs#";
 allow_nullfs="#allow_nullfs#";
 allow_fusefs="0";
 allow_raw_sockets="1";
-mount_fstab="#workdir#/jails-fstab/fstab.#jname#";
+mount_fstab="#workdir#/jails-fstab/#jname#/fstab";
+mount_fstab_old="#workdir#/jails-fstab/fstab.#jname#";
 arch="native";
-mkhostsfile="#mkhostsfile#";
+mkhostsfile="1";
 devfs_ruleset="#devfs_ruleset#";
 ver="#ver#";
 basename="";
@@ -22,15 +44,10 @@ mount_src="#mount_src#";
 mount_obj="#mount_obj#";
 mount_kernel="#mount_kernel#";
 mount_ports="#mount_ports#";
-astart="#astart#";
-data="#workdir#/jails-data/#jname#-data";
 vnet="#vnet#";
-nic_hwaddr="0";
 applytpl="#applytpl#";
 mdsize="#mdsize#";
-rcconf="#workdir#/jails-rcconf/rc.conf_#jname#";
 floatresolv="#floatresolv#";
-zfs_snapsrc="";
 
 exec_poststart="0";
 exec_poststop="";
@@ -41,21 +58,25 @@ exec_master_poststart="0";
 exec_master_poststop="0";
 exec_master_prestart="0";
 exec_master_prestop="0";
+
 pkg_bootstrap="#pkg_bootstrap#";
 with_img_helpers="#with_img_helpers#";
-runasap="1";
+
 allow_reserved_ports="1";
+allow_unprivileged_proc_debug="1";
 
 persist="1";
 childrenmax="0";
 enforce_statfs="1";
-sysrc_enable="#sysrc_enable#"
+sysrc_enable="#sysrc_enable#";
 
-interface="#interface#";
-jailskeldir="#workdir#/share/FreeBSD-jail-skel";
-jail_profile="default";
-# root password
-user_pw_root='#user_pw_root#';
+mnt_start="0";
+mnt_stop="0";
+
+allow_mlock="0";
 exec_start="/bin/sh /etc/rc"
 exec_stop="/bin/sh /etc/rc.shutdown"
 emulator="jail"
+
+# root password
+user_pw_root='#user_pw_root#';

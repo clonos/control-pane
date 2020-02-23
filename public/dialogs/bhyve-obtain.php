@@ -37,7 +37,7 @@
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('IP address');?>:</span>
-				<input type="text" name="ip4_addr" value="DHCP" pattern="^DHCP$|^(?:[0-9]{1,3}\.){3}[0-9]{1,3}(\/[\d]{1,3})?$" required="required" />
+				<input type="text" name="ip4_addr" value="DHCP" pattern="^DHCP$|^DHCP[vV]6$|^(?:[0-9]{1,3}\.){3}[0-9]{1,3}(\/[\d]{1,3})?$" required="required" />
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('Gateway');?>:</span>

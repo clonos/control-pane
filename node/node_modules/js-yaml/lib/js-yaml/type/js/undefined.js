@@ -7,6 +7,7 @@ function resolveJavascriptUndefined() {
 }
 
 function constructJavascriptUndefined() {
+  /*eslint-disable no-undefined*/
   return undefined;
 }
 
@@ -15,7 +16,7 @@ function representJavascriptUndefined() {
 }
 
 function isUndefined(object) {
-  return 'undefined' === typeof object;
+  return typeof object === 'undefined';
 }
 
 module.exports = new Type('tag:yaml.org,2002:js/undefined', {

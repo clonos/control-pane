@@ -8,8 +8,9 @@
     "url": "git@github.com:clonos/cp.git"
   },
   "dependencies": {
-    "ws": "6.1.0",
-    "nodestalker": "0.1.21"
+    "js-yaml": ">=3.13.1",
+    "nodestalker": "^0.1.22",
+    "ws": "6.1.0"
   },
   "devDependencies": {},
   "scripts": {},

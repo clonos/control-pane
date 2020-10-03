@@ -5,11 +5,11 @@ var helper = require('./helper');
 var util = require('util');
 
 var commandBegin = "RESERVED 1 4\r\n";
-var data1 = new Buffer([1,2,3,4]);
-var data2 = new Buffer(data1);
+var data1 = Buffer.alloc(4, [1,2,3,4]);
+var data2 = Buffer.alloc(4, data1);
 var commandEnd = "\r\n";
 
-var command = new Buffer(commandBegin.length + data1.length + commandEnd.length);
+var command = Buffer.alloc(commandBegin.length + data1.length + commandEnd.length);
 command.write(commandBegin, 0, commandBegin.length, 'binary');
 data1.copy(command, commandBegin.length, 0, data1.length);
 command.write(commandEnd, commandBegin.length + data1.length, commandEnd.length, 'binary');

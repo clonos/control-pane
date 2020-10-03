@@ -4,8 +4,8 @@ var assert = require('assert');
 var helper = require('./helper');
 var util = require('util');
 
-var data1 = new Buffer([1,2,3,4]);
-var data2 = new Buffer([1,2,3,4]);
+var data1 = Buffer.alloc(4, [1,2,3,4]);
+var data2 = Buffer.alloc(4, [1,2,3,4]);
 
 helper.bind(function(conn, data) {
 	if(String(data).indexOf('put') > -1) {

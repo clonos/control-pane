@@ -631,7 +631,7 @@ BeanstalkClient.prototype._createPutCommand = function(data, priority, delay, tt
 		var commandBegin = 'put ' + priority + ' ' + delay + ' ' + ttr + ' ' + data.length + '\r\n';
 		var commandEnd = '\r\n';
 
-		command = new Buffer(commandBegin.length + data.length + commandEnd.length);
+		command = Buffer.alloc(commandBegin.length + data.length + commandEnd.length);
 		command.write(commandBegin, 0, commandBegin.length, 'binary');
 		data.copy(command, commandBegin.length, 0, data.length);
 		command.write(commandEnd, commandBegin.length + data.length, commandEnd.length, 'binary');

@@ -2,23 +2,20 @@
 
 
 function isNothing(subject) {
-  return (undefined === subject) || (null === subject);
+  return (typeof subject === 'undefined') || (subject === null);
 }
 
 
 function isObject(subject) {
-  return ('object' === typeof subject) && (null !== subject);
+  return (typeof subject === 'object') && (subject !== null);
 }
 
 
 function toArray(sequence) {
-  if (Array.isArray(sequence)) {
-    return sequence;
-  } else if (isNothing(sequence)) {
-    return [];
-  } else {
-    return [ sequence ];
-  }
+  if (Array.isArray(sequence)) return sequence;
+  else if (isNothing(sequence)) return [];
+
+  return [ sequence ];
 }
 
 
@@ -50,7 +47,7 @@ function repeat(string, count) {
 
 
 function isNegativeZero(number) {
-  return (0 === number) && (Number.NEGATIVE_INFINITY === 1 / number);
+  return (number === 0) && (Number.NEGATIVE_INFINITY === 1 / number);
 }
 
 

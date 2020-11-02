@@ -1,5 +1,11 @@
 <?php
 //include_once($_REALPATH.'/forms.php');
+// Sentry
+//if($clonos->environment=='development') {
+require ('../vendor/autoload.php');
+Sentry\init(['dsn' => 'https://MASK' ]);
+//}
+
 
 class ClonOS {
 	public $server_name='';
@@ -17,6 +23,8 @@ class ClonOS {
 	public $table_templates=array();
 	public $url_hash='';
 	public $media_import='';
+	public $json_req=false;
+	public $sys_vars=array();
 	
 	private $_post=false;
 	private $_db=null;
@@ -152,12 +160,15 @@ class ClonOS {
 		if(isset($this->_vars['form_data'])) $this->form=$this->_vars['form_data'];
 		
 		$ures=$this->userAutologin();
+		$this->sys_vars['authorized']=false;
 		if($ures!==false){
 			if(isset($ures['id']) && is_numeric($ures['id']) && $ures['id']>0){
 				$this->_user_info=$ures;
 				$this->_user_info['unregistered']=false;
+				$this->sys_vars['authorized']=true;
 			}else{
 				$this->_user_info['unregistered']=true;
+				if($this->json_req) exit;
 			}
 		}
 		
@@ -168,8 +179,23 @@ class ClonOS {
 					exit;
 				}
 			}
+			
+			if($this->_user_info['unregistered'] && $this->mode!='login')
+			{
+				echo json_encode(array('error'=>true,'unregistered_user'=>true));
+				exit;
+			}
 
 			unset($_POST);
+			$cfunc='ccmd_'.$this->mode;
+			if(method_exists($this,$cfunc))
+			{
+				$ccmd_res=array();
+				$ccmd_res=$this->$cfunc();
+				//print_r($ccmd_res);
+				//return;
+			}
+			
 			switch($this->mode){
 				case 'login':	 		echo json_encode($this->login()); return;
 				case 'getTasksStatus':		echo json_encode($this->_getTasksStatus($this->form['jsonObj'])); return;
@@ -245,6 +271,9 @@ class ClonOS {
 		}
 	}
 	
+	function ccmd_login(){
+		return array('hi'=>'hello');
+	}
 	function login(){
 		$form=$this->_vars['form_data'];
 		
@@ -775,7 +804,7 @@ class ClonOS {
 		$sysrc=array();
 		if(isset($form['serv-ftpd'])) $sysrc[]=$form['serv-ftpd'];
 		if(isset($form['serv-sshd'])) $sysrc[]=$form['serv-sshd'];
-		$arr['sysrc_enable']=join($sysrc,' ');
+		$arr['sysrc_enable']=implode(' ',$sysrc);
 		
 		/* create jail */
 		$file_name='/tmp/'.$arr['jname'].'.conf';

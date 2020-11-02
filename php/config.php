@@ -201,6 +201,7 @@ class Config
 	}
 	function create_bhyve_profiles($info)
 	{
+		$array1=array();
 		$res=json_decode($info['message'],true);
 		if(!empty($res))foreach($res as $item)
 		{

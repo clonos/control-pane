@@ -43,6 +43,7 @@ if(empty($uri))
 	exit;
 }
 
+
 error_reporting(E_ALL);
 
 $user_info=$clonos->userAutologin();

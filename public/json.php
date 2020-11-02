@@ -10,6 +10,7 @@ $path=trim($_POST['path'],$_ds);
 $_REALPATH=realpath('../');
 include($_REALPATH.'/php/clonos.php');
 $clonos=new ClonOS($_REALPATH);
+$clonos->json_req=true;
 
 //$file_path=$_REALPATH.$_ds.'public/pages'.$_ds.$path.$_ds;
 //$clonos->json_name=$file_path.'a.json.php';

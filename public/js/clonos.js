@@ -4,6 +4,7 @@ var clonos={
 	manual_close_menu:false,
 	lastX:0,
 	oldHash:'',
+	authorized:false,
 	commands:
 	{
 		'jstart':{stat:['Not launched','Starting','Launched'],cmd:'jailStart'},
@@ -913,6 +914,7 @@ var clonos={
 		
 		if(typeof data['unregistered_user']!='undefined')
 		{
+			this.authorized=false;
 			this.loginFadeIn();
 			return;
 		}
@@ -923,6 +925,14 @@ var clonos={
 			{
 				this.notify(data.error_message,'error');
 				return;
+			}
+		}
+		
+		if(typeof(data['username'])=='string' && typeof(data['errorCode']!='undefined'))
+		{
+			if(data.errorCode==0 && data.username!='')
+			{
+				this.authorized=true;
 			}
 		}
 		
@@ -1641,6 +1651,7 @@ var clonos={
 	bodyClick:function(event)
 	{
 		//debugger;
+		//if(!this.authorized) location.reload();
 		var target=event.target;
 		if($(target).parents('form').length>0)
 		{
@@ -2099,6 +2110,15 @@ var clonos={
 	},
 	loginFadeIn:function()
 	{
+		if($('#login').length==0)
+		{
+			location.reload();
+			return;
+			/*
+			alert('I think, you are delete login area from code. Are you a hacker?'+"\nPlease, reload the page and don't do magick with code!");
+			*/
+			//$('#unregistered_user').show();
+		}
 		$('#login').show();
 		$('.login-wait').hide();
 		$('.login-area').fadeIn(200);

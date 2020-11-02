@@ -6,3 +6,5 @@ clonos/node/node_modules/*
 public/media/*.iso
 public/media/*.img
 public/media/*.size
+composer.lock
+vendor

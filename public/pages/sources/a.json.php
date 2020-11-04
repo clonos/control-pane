@@ -85,6 +85,7 @@ if($hres!==false)
 		$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
 }
 
+/*
 echo json_encode(array(
 	'tbody'=>$html,
 	'error'=>false,
@@ -93,3 +94,12 @@ echo json_encode(array(
 	'tasks'=>$tasks,
 	'template'=>$html_tpl,
 ));
+*/
+$included_result_array=array(
+	'tbody'=>$html,
+	'error'=>false,
+	'func'=>'fillTable',
+	'id'=>'srcslist',
+	'tasks'=>$tasks,
+	'template'=>$html_tpl,
+);

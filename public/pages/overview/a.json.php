@@ -34,7 +34,8 @@ if(!empty($nodenames))foreach($nodenames as $name)
 	$ndb=new Db('base',trim($name));
 	if($ndb===false)
 	{
-		echo json_encode(array('error'=>true,'error_message'=>$ndb->error_message));
+		//echo json_encode(array('error'=>true,'error_message'=>$ndb->error_message));
+		$included_result_array=array('error'=>true,'error_message'=>$ndb->error_message);
 		exit;
 	}
 	
@@ -57,4 +58,5 @@ if($res_array['average']>0)
 
 $res_array['sum-ram']=$this->fileSizeConvert((int) $res_array['sum-ram'],1024,true);
 
-echo json_encode($res_array);
+//echo json_encode($res_array);
+$included_result_array=$res_array;

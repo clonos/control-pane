@@ -60,10 +60,18 @@ if($res!==false)
 		}
 	}
 
+	/*
 	echo json_encode(array(
 		'tbody'=>$html,
 		'error'=>false,
 		'func'=>'fillTable',
 		'id'=>'taskloglist',
 	));
+	*/
+	$included_result_array=array(
+		'tbody'=>$html,
+		'error'=>false,
+		'func'=>'fillTable',
+		'id'=>'taskloglist',
+	);
 }

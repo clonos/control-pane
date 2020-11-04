@@ -33,9 +33,17 @@ if(!empty($res))foreach($res as $r)
 
 $html=str_replace(array("\n","\r","\t"),'',$html);
 
+/*
 echo json_encode(array(
 	'tbody'=>$html,
 	'error'=>false,
 	'func'=>'fillTable',
 	'id'=>'packageslist',
 ));
+*/
+$included_result_array=array(
+	'tbody'=>$html,
+	'error'=>false,
+	'func'=>'fillTable',
+	'id'=>'packageslist',
+);

@@ -74,6 +74,7 @@ if(empty($hash))
 	
 	$html=str_replace(array("\n","\r","\t"),'',$html);
 
+	/*
 	echo json_encode(array(
 		'tbody'=>$html,
 		'error'=>false,
@@ -81,12 +82,25 @@ if(empty($hash))
 		'id'=>'helperslist',
 		'helpers_list'=>$helpers_list_html,
 	));
+	*/
+	$included_result_array=array(
+		'tbody'=>$html,
+		'error'=>false,
+		'func'=>'fillTable',
+		'id'=>'helperslist',
+		'helpers_list'=>$helpers_list_html,
+	);
 	return;
 }else{
 #	Открываем настройки хелпера
 	
 	$db=new Db('helper',array('jname'=>$jail_name,'helper'=>$hash));
-	if($db->error) {echo json_encode(array('error'=>true,'errorMessage'=>'No helper database!'));return;}
+	if($db->error)
+	{
+		//echo json_encode(array('error'=>true,'errorMessage'=>'No helper database!'));
+		$included_result_array=array('error'=>true,'errorMessage'=>'No helper database!');
+		return;
+	}
 
 	$db_path=$db->getFileName();
 	$form=new Forms($jail_name,$hash,$db_path);
@@ -95,4 +109,8 @@ if(empty($hash))
 }
 
 
-echo json_encode(array('html'=>$res['html'],'func'=>'fillTab'));	//,'currents'=>$res['currents']
+//echo json_encode(array('html'=>$res['html'],'func'=>'fillTab'));	//,'currents'=>$res['currents']
+$included_result_array=array(
+	'html'=>$res['html'],
+	'func'=>'fillTab'
+);

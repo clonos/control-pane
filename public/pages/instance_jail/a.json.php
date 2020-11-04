@@ -85,9 +85,18 @@ if($res['retval']==0)
 
 $html=str_replace(array("\n","\r","\t"),'',$html);
 
+/*
 echo json_encode(array(
 	'tbody'=>$html,
 	'error'=>false,
 	'func'=>'fillTable',
 	'id'=>'instanceslist',
 ));
+*/
+
+$included_result_array=array(
+	'tbody'=>$html,
+	'error'=>false,
+	'func'=>'fillTable',
+	'id'=>'instanceslist',
+);

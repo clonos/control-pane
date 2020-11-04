@@ -187,81 +187,110 @@ class ClonOS {
 			}
 
 			unset($_POST);
+			
+			// functions, running without parameters
+			$new_array=array();
 			$cfunc='ccmd_'.$this->mode;
 			if(method_exists($this,$cfunc))
 			{
 				$ccmd_res=array();
 				$ccmd_res=$this->$cfunc();
-				//print_r($ccmd_res);
-				//return;
+				
+				if(is_array($ccmd_res))
+					$new_array=array_merge($this->sys_vars,$ccmd_res);
+				else
+				{
+					echo json_encode($ccmd_res);
+					return;
+				}
+				echo json_encode($new_array);
+				return;
 			}
 			
+			$included_result_array='';
 			switch($this->mode){
-				case 'login':	 		echo json_encode($this->login()); return;
+				//case 'login':	 		echo json_encode($this->login()); return;
 				case 'getTasksStatus':		echo json_encode($this->_getTasksStatus($this->form['jsonObj'])); return;
-				case 'getJsonPage':		if(file_exists($this->json_name)) include($this->json_name); else echo '{}'; return;
-				case 'freejname':		echo json_encode($this->getFreeJname()); break;
+				
+				/*
+				case '_getJsonPage':
+					if(file_exists($this->json_name))
+					{
+						include($this->json_name);
+						
+						if(is_array($included_result_array))
+						{
+							$new_array=array_merge($this->sys_vars,$included_result_array);
+							echo json_encode($new_array);
+							return;
+						} else echo '{}';
+						
+					} else echo '{}'; return;
+				*/
+				//case 'freejname':		echo json_encode($this->getFreeJname()); break;
 				case 'helpersAdd':		echo json_encode($this->helpersAdd($this->mode)); return;
 				case 'addHelperGroup':		echo json_encode($this->addHelperGroup($this->mode)); return;
-				case 'addJailHelperGroup':	echo json_encode($this->addJailHelperGroup()); return;
-				case 'deleteJailHelperGroup':	echo json_encode($this->deleteJailHelperGroup()); return;
+				//case 'addJailHelperGroup':	echo json_encode($this->addJailHelperGroup()); return;
+				//case 'deleteJailHelperGroup':	echo json_encode($this->deleteJailHelperGroup()); return;
 				case 'deleteHelperGroup':	echo json_encode($this->deleteHelperGroup($this->mode)); return;
-				case 'jailRestart':		echo json_encode($this->jailRestart()); return;
-				case 'jailStart':		echo json_encode($this->jailStart()); return;
-				case 'jailStop':		echo json_encode($this->jailStop()); return;
-				case 'jailRemove':		echo json_encode($this->jailRemove()); return;
-				case 'saveJailHelperValues':	echo json_encode($this->saveJailHelperValues()); return;
+				//case 'jailRestart':		echo json_encode($this->jailRestart()); return;
+				//case 'jailStart':		echo json_encode($this->jailStart()); return;
+				//case 'jailStop':		echo json_encode($this->jailStop()); return;
+				//case 'jailRemove':		echo json_encode($this->jailRemove()); return;
+				//case 'saveJailHelperValues':	echo json_encode($this->saveJailHelperValues()); return;
 
 				case 'saveHelperValues':	$redirect='/jailscontainers/';
 				case 'jailAdd': 		if(!isset($redirect)) $redirect=''; echo json_encode($this->jailAdd($redirect)); return;
 
-				case 'jailClone':		echo json_encode($this->jailClone()); return;
-				case 'jailRename':		echo json_encode($this->jailRename()); return;
-				case 'bhyveRename':		echo json_encode($this->bhyveRename()); return;
-				case 'jailEdit':		echo json_encode($this->jailEdit()); return;
-				case 'jailEditVars':		echo json_encode($this->jailEditVars()); return;
-				case 'jailCloneVars':		echo json_encode($this->jailCloneVars()); return;
-				case 'jailRenameVars':		echo json_encode($this->jailRenameVars()); return;
-				case 'bhyveRenameVars':		echo json_encode($this->bhyveRenameVars()); return;
-				case 'bhyveRestart':		echo json_encode($this->bhyveRestart()); return;
-				case 'bhyveStart':		echo json_encode($this->bhyveStart()); return;
-				case 'bhyveStop':		echo json_encode($this->bhyveStop()); return;
-				case 'bhyveAdd':		echo json_encode($this->bhyveAdd()); return;
-				case 'bhyveRemove':		echo json_encode($this->bhyveRemove()); return;
-				case 'bhyveEdit':		echo json_encode($this->bhyveEdit()); return;
-				case 'bhyveEditVars':		echo json_encode($this->bhyveEditVars()); return;
-				case 'bhyveObtain':		echo json_encode($this->bhyveObtain()); return;
-				case 'bhyveClone':		echo json_encode($this->bhyveClone()); return;		
-				case 'authkeyAdd':		echo json_encode($this->authkeyAdd()); return;
-				case 'authkeyRemove':		echo json_encode($this->authkeyRemove()); return;
-				case 'vpnetAdd':		echo json_encode($this->vpnetAdd()); return;
-				case 'vpnetRemove':		echo json_encode($this->vpnetRemove()); return;
-				case 'updateBhyveISO':		echo json_encode($this->updateBhyveISO()); return;
+				//case 'jailClone':		echo json_encode($this->jailClone()); return;
+				//case 'jailRename':		echo json_encode($this->jailRename()); return;
+				//case 'bhyveRename':		echo json_encode($this->bhyveRename()); return;
+				//case 'jailEdit':		echo json_encode($this->jailEdit()); return;
+				//case 'jailEditVars':		echo json_encode($this->jailEditVars()); return;
+				//case 'jailCloneVars':		echo json_encode($this->jailCloneVars()); return;
+				//case 'jailRenameVars':		echo json_encode($this->jailRenameVars()); return;
+				//case 'bhyveRenameVars':		echo json_encode($this->bhyveRenameVars()); return;
+				//case 'bhyveRestart':		echo json_encode($this->bhyveRestart()); return;
+				//case 'bhyveStart':		echo json_encode($this->bhyveStart()); return;
+				//case 'bhyveStop':		echo json_encode($this->bhyveStop()); return;
+				//case 'bhyveAdd':		echo json_encode($this->bhyveAdd()); return;
+				//case 'bhyveRemove':		echo json_encode($this->bhyveRemove()); return;
+				//case 'bhyveEdit':		echo json_encode($this->bhyveEdit()); return;
+				//case 'bhyveEditVars':		echo json_encode($this->bhyveEditVars()); return;
+				//case 'bhyveObtain':		echo json_encode($this->bhyveObtain()); return;
+				//case 'bhyveClone':		echo json_encode($this->bhyveClone()); return;		
+				//case 'authkeyAdd':		echo json_encode($this->authkeyAdd()); return;
+				//case 'authkeyRemove':		echo json_encode($this->()); return;
+				//case 'vpnetAdd':		echo json_encode($this->vpnetAdd()); return;
+				//case 'vpnetRemove':		echo json_encode($this->vpnetRemove()); return;
+				//case 'updateBhyveISO':		echo json_encode($this->updateBhyveISO()); return;
+				/*
 				case 'mediaAdd':
 					//echo json_encode($this->mediaAdd());
 					return;
-				case 'mediaRemove':		echo json_encode($this->mediaRemove()); return;
-				case 'logLoad':			echo json_encode($this->logLoad()); return;
-				case 'logFlush':		echo json_encode($this->logFlush()); return;
-				case 'basesCompile':		echo json_encode($this->basesCompile()); return;
-				case 'repoCompile':		echo json_encode($this->repoCompile()); return;
-				case 'srcUpdate':		echo json_encode($this->srcUpdate()); return;
-				case 'srcRemove':		echo json_encode($this->srcRemove()); return;
-				case 'baseRemove':		echo json_encode($this->baseRemove()); return;
-				case 'usersAdd':		echo json_encode($this->usersAdd()); return;
-				case 'usersEdit':		echo json_encode($this->usersEdit()); return;
-				case 'userRemove':		echo json_encode($this->userRemove()); return;
-				case 'userGetInfo':		echo json_encode($this->userGetInfo()); return;
-				case 'userEditInfo':		echo json_encode($this->userEditInfo()); return;
-				case 'vmTemplateAdd':		echo json_encode($this->vmTemplateAdd()); return;
-				case 'vmTemplateEditInfo':	echo json_encode($this->vmTemplateEditInfo()); return;
-				case 'vmTemplateEdit':		echo json_encode($this->vmTemplateEdit()); return;
-				case 'vmTemplateRemove':	echo json_encode($this->vmTemplateRemove()); return;
-				case 'getImportedImageInfo':	echo json_encode($this->getImportedImageInfo()); return;
-				case 'imageImport':		echo json_encode($this->imageImport()); return;
-				case 'imageExport':		echo json_encode($this->imageExport()); return;
-				case 'imageRemove': echo json_encode($this->imageRemove()); return;
-				case 'getSummaryInfo': echo json_encode($this->getSummaryInfo()); return;
+				*/
+				//case 'mediaRemove':		echo json_encode($this->mediaRemove()); return;
+				//case 'logLoad':			echo json_encode($this->logLoad()); return;
+				//case 'logFlush':		echo json_encode($this->logFlush()); return;
+				//case 'basesCompile':		echo json_encode($this->basesCompile()); return;
+				//case 'repoCompile':		echo json_encode($this->repoCompile()); return;
+				//case 'srcUpdate':		echo json_encode($this->srcUpdate()); return;
+				//case 'srcRemove':		echo json_encode($this->srcRemove()); return;
+				//case 'baseRemove':		echo json_encode($this->baseRemove()); return;
+				//case 'usersAdd':		echo json_encode($this->usersAdd()); return;
+				//case 'usersEdit':		echo json_encode($this->usersEdit()); return;
+				//case 'userRemove':		echo json_encode($this->userRemove()); return;
+				//case 'userGetInfo':		echo json_encode($this->userGetInfo()); return;
+				//case 'userEditInfo':		echo json_encode($this->userEditInfo()); return;
+				//case 'vmTemplateAdd':		echo json_encode($this->vmTemplateAdd()); return;
+				//case 'vmTemplateEditInfo':	echo json_encode($this->vmTemplateEditInfo()); return;
+				//case 'vmTemplateEdit':		echo json_encode($this->vmTemplateEdit()); return;
+				//case 'vmTemplateRemove':	echo json_encode($this->vmTemplateRemove()); return;
+				//case 'getImportedImageInfo':	echo json_encode($this->getImportedImageInfo()); return;
+				//case 'imageImport':		echo json_encode($this->imageImport()); return;
+				//case 'imageExport':		echo json_encode($this->imageExport()); return;
+				//case 'imageRemove': echo json_encode($this->imageRemove()); return;
+				//case 'getSummaryInfo': echo json_encode($this->getSummaryInfo()); return;
 					
 /*				case 'saveHelperValues':
 					echo json_encode($this->saveHelperValues());
@@ -271,10 +300,25 @@ class ClonOS {
 		}
 	}
 	
-	function ccmd_login(){
-		return array('hi'=>'hello');
+	function ccmd_getJsonPage()
+	{
+		$included_result_array=false;
+		if(file_exists($this->json_name))
+		{
+			include($this->json_name);
+			
+			if(is_array($included_result_array))
+			{
+				$new_array=array_merge($this->sys_vars,$included_result_array);
+				echo json_encode($new_array);
+				exit;
+			}
+		}
+		echo '{}';
+		exit;
 	}
-	function login(){
+	
+	function ccmd_login(){
 		$form=$this->_vars['form_data'];
 		
 		return $this->userRegisterCheck($form);
@@ -563,7 +607,7 @@ class ClonOS {
 		return $obj;
 	}
 	
-	function jailRename() {
+	function ccmd_jailRename() {
 		$form=$this->_vars['form_data'];
 		
 		$host_hostname=$form['host_hostname'];
@@ -587,7 +631,7 @@ class ClonOS {
 		return array('errorMessage'=>$err,'jail_id'=>$form['jname'],'taskId'=>$taskId,'mode'=>$this->mode);
 	}
 
-	function jailClone() {
+	function ccmd_jailClone() {
 		$form=$this->_vars['form_data'];
 		$username=$this->_user_info['username'];
 		
@@ -676,7 +720,7 @@ class ClonOS {
 		return $arr;
 	}
 	
-	function saveJailHelperValues(){
+	function ccmd_saveJailHelperValues(){
 		$form=$this->form;
 		$username=$this->_user_info['username'];
 		
@@ -869,7 +913,7 @@ class ClonOS {
 		return array('errorMessage'=>$err,'jail_id'=>$jid,'taskId'=>$taskId,'mode'=>$this->mode,'redirect'=>$redirect,'db_path'=>$db_path);	//,'html'=>$html
 	}
 
-	function jailRenameVars(){
+	function ccmd_jailRenameVars(){
 		$form=$this->_vars['form_data'];
 		if(!isset($form['jail_id'])) return array('error'=>true,'error_message'=>'Bad jail id!');
 		
@@ -902,7 +946,7 @@ class ClonOS {
 		return $res;
 	}
 
-	function jailCloneVars(){
+	function ccmd_jailCloneVars(){
 		$form=$this->_vars['form_data'];
 		if(!isset($form['jail_id'])) return array('error'=>true,'error_message'=>'Bad jail id!');
 		
@@ -934,7 +978,7 @@ class ClonOS {
 		return $res;
 	}
 
-	function jailEditVars(){
+	function ccmd_jailEditVars(){
 		$form=$this->_vars['form_data'];
 		if(!isset($form['jail_id'])) return array('error'=>true,'error_message'=>'Bad jail id!');
 		
@@ -959,7 +1003,7 @@ class ClonOS {
 		$res['jail_id']=$form['jail_id'];
 		return $res;
 	}
-	function jailEdit(){
+	function ccmd_jailEdit(){
 		$form=$this->_vars['form_data'];
 		
 		$str=array();
@@ -980,7 +1024,7 @@ class ClonOS {
 		return $res;
 	}
 
-	function jailStart(){	//$name
+	function ccmd_jailStart(){	//$name
 
 		$form=$this->_vars['form_data'];
 		$username=$this->_user_info['username'];
@@ -992,7 +1036,7 @@ class ClonOS {
 		//.' cbsd_queue_name=/clonos/'.$cbsd_queue_name.'/');	// autoflush=2
 		return $res;
 	}
-	function jailStop(){	//$name
+	function ccmd_jailStop(){	//$name
 		$form=$this->_vars['form_data'];
 		$username=$this->_user_info['username'];
 		$name=$form['jname'];
@@ -1004,7 +1048,8 @@ class ClonOS {
 		return $res;
 	}
 
-	function jailRestart(){	//$name
+	//function jailRestart(){	//$name
+	function ccmd_jailRestart(){	//$name
 		$form=$this->_vars['form_data'];
 		$username=$this->_user_info['username'];
 		$name=$form['jname'];
@@ -1014,7 +1059,7 @@ class ClonOS {
 		return $res;
 	}
 
-	function jailRemove(){	//$name
+	function ccmd_jailRemove(){	//$name
 		$form=$this->_vars['form_data'];
 		$username=$this->_user_info['username'];
 		$name=$form['jname'];
@@ -1024,7 +1069,7 @@ class ClonOS {
 		return $res;
 	}
 
-	function bhyveClone(){
+	function ccmd_bhyveClone(){
 		$form=$this->_vars['form_data'];
 		$username=$this->_user_info['username'];
 		
@@ -1109,7 +1154,7 @@ class ClonOS {
 		
 		return array('html'=>$html);
 	}
-	function bhyveEditVars(){
+	function ccmd_bhyveEditVars(){
 		$form=$this->_vars['form_data'];
 		if(!isset($form['jail_id'])) return array('error'=>true,'error_message'=>'Bad jail id!');
 		
@@ -1137,10 +1182,10 @@ class ClonOS {
 		$res['error']=false;
 		$res['dialog']=$form['dialog'];
 		$res['jail_id']=$form['jail_id'];
-		$res['iso_list']=$this->updateBhyveISO($form['jail_id']);
+		$res['iso_list']=$this->ccmd_updateBhyveISO($form['jail_id']);
 		return $res;
 	}
-	function bhyveRename(){
+	function ccmd_bhyveRename(){
 		$form=$this->_vars['form_data'];
 		
 		$old_name=$form['oldJail'];
@@ -1160,7 +1205,7 @@ class ClonOS {
 		return array('errorMessage'=>$err,'jail_id'=>$form['jname'],'taskId'=>$taskId,'mode'=>$this->mode);
 	}
 
-	function bhyveRenameVars(){
+	function ccmd_bhyveRenameVars(){
 		$form=$this->_vars['form_data'];
 		if(!isset($form['jail_id'])) return array('error'=>true,'error_message'=>'Bad jail id!');
 		
@@ -1188,7 +1233,7 @@ class ClonOS {
 		return $res;
 	}
 
-	function bhyveEdit(){
+	function ccmd_bhyveEdit(){
 		$form=$this->form;
 		
 		$str=array();
@@ -1240,7 +1285,7 @@ class ClonOS {
 		return $res;
 	}
 
-	function bhyveAdd(){
+	function ccmd_bhyveAdd(){
 		$form=$this->form;
 		
 		
@@ -1353,7 +1398,7 @@ class ClonOS {
 		return array('errorMessage'=>$err,'jail_id'=>$jid,'taskId'=>$taskId,'html'=>$html,'mode'=>$this->mode);
 	}
 
-	function bhyveObtain(){
+	function ccmd_bhyveObtain(){
 		$form=$this->_vars['form_data'];
 		$username=$this->_user_info['username'];
 		
@@ -1381,6 +1426,7 @@ class ClonOS {
 		}
 		
 		$key_name='/usr/home/olevole/.ssh/authorized_keys';
+		if(!isset($form['vm_authkey'])) $form['vm_authkey']=0;
 		$key_id=(int)$form['vm_authkey'];
 
 		$db=new Db('base','authkey');
@@ -1390,6 +1436,7 @@ class ClonOS {
 		//if($nres['name']!==false) $key_name=$nres['name'];
 		$nres=$db->selectAssoc('SELECT authkey FROM authkey WHERE idx='.$key_id);
 		if($nres['authkey']!==false) $authkey=$nres['authkey'];
+	//var_dump($nres);exit;
 		
 		$user_pw=(!empty($form['user_password']))?' ci_user_pw_user='.$form['user_password'].' ':'';
 
@@ -1437,7 +1484,7 @@ class ClonOS {
 		return array('errorMessage'=>$err,'jail_id'=>$form['vm_name'],'taskId'=>$taskId,'html'=>$html,'mode'=>$this->mode);
 	}
 
-	function bhyveStart(){
+	function ccmd_bhyveStart(){
 		$form=$this->form;
 		$username=$this->_user_info['username'];
 		$name=$form['jname'];
@@ -1447,7 +1494,7 @@ class ClonOS {
 		return $res;
 	}
 
-	function bhyveStop(){
+	function ccmd_bhyveStop(){
 		$form=$this->form;
 		$username=$this->_user_info['username'];
 		$name=$form['jname'];
@@ -1457,7 +1504,7 @@ class ClonOS {
 		return $res;
 	}
 
-	function bhyveRestart(){
+	function ccmd_bhyveRestart(){
 		$form=$this->form;
 		$username=$this->_user_info['username'];
 		$name=$form['jname'];
@@ -1467,7 +1514,7 @@ class ClonOS {
 		return $res;
 	}
 
-	function bhyveRemove(){ // $name
+	function ccmd_bhyveRemove(){ // $name
 		$form=$this->form;
 		$username=$this->_user_info['username'];
 		$name=$form['jname'];
@@ -1477,7 +1524,7 @@ class ClonOS {
 		return $res;
 	}
 
-	function authkeyAdd(){
+	function ccmd_authkeyAdd(){
 		$form=$this->form;
 		
 		
@@ -1508,7 +1555,7 @@ class ClonOS {
 		return array('keyname'=>$form['keyname'],'html'=>$html);
 	}
 
-	function authkeyRemove(){
+	function ccmd_authkeyRemove(){
 		$form=$this->_vars['form_data'];
 		
 		$db=new Db('base','authkey');
@@ -1520,7 +1567,7 @@ class ClonOS {
 		return array('error'=>false,'auth_id'=>$form['auth_id']);
 	}
 
-	function vpnetAdd(){
+	function ccmd_vpnetAdd(){
 		$form=$this->_vars['form_data'];
 		
 		
@@ -1551,7 +1598,7 @@ class ClonOS {
 		return array('netname'=>$form['netname'],'html'=>$html);
 	}
 
-	function vpnetRemove(){
+	function ccmd_vpnetRemove(){
 		$form=$this->_vars['form_data'];
 		
 		$db=new Db('base','vpnet');
@@ -1563,7 +1610,7 @@ class ClonOS {
 		return array('error'=>false,'vpnet_id'=>$form['vpnet_id']);
 	}
 
-	function mediaRemove(){
+	function ccmd_mediaRemove(){
 		$form=$this->form;
 		$db=new Db('base','storage_media');
 		if(!$db->isConnected()) return array('error'=>true,'res'=>'Database error');
@@ -1592,7 +1639,7 @@ class ClonOS {
 		return $arr;
 	}
 
-	function srcRemove(){
+	function ccmd_srcRemove(){
 		$form=$this->form;
 		$username=$this->_user_info['username'];
 		$ver=$form['jname'];
@@ -1604,7 +1651,7 @@ class ClonOS {
 		return $res;
 	}
 
-	function srcUpdate(){
+	function ccmd_srcUpdate(){
 		$form=$this->form;
 		$username=$this->_user_info['username'];
 		$ver=$form['jname'];
@@ -1654,7 +1701,7 @@ class ClonOS {
 		return array('html'=>$html,'arr'=>$res);
 	}
 
-	function baseRemove(){	//$id
+	function ccmd_baseRemove(){	//$id
 		//$id=str_replace('base','',$id);
 		//base10.3-amd64-0
 		$form=$this->form;
@@ -1673,7 +1720,7 @@ class ClonOS {
 		return $res;
 	}
 
-	function basesCompile(){
+	function ccmd_basesCompile(){
 		$form=$this->form;
 		$username=$this->_user_info['username'];
 		if(!isset($form['sources']) || !is_numeric($form['sources'])) return array('error'=>true,'errorMessage'=>'Wrong OS type selected!');
@@ -1761,7 +1808,7 @@ class ClonOS {
 		return array('html'=>$html,'arr'=>$res);
 	}
 
-	function repoCompile(){
+	function ccmd_repoCompile(){
 		$form=$this->form;
 		$username=$this->_user_info['username'];
 		if(!isset($form['version']) || !is_numeric($form['version'])) return array('error'=>true,'errorMessage'=>'Wrong OS type input!');
@@ -1815,7 +1862,7 @@ class ClonOS {
 		return array('errorMessage'=>'','jail_id'=>'base'.$bid,'taskId'=>$taskId,'html'=>$html,'mode'=>$this->mode,'txt_status'=>$this->translate('Fetching'));
 	}
 
-	function logLoad(){
+	function ccmd_logLoad(){
 		$form=$this->_vars['form_data'];
 		$log_id=$form['log_id'];
 		if(!is_numeric($log_id)) return array('error'=>'Log ID must be a number');
@@ -1846,7 +1893,7 @@ class ClonOS {
 		
 		return array('error'=>'Log file is not exists!');
 	}
-	function logFlush(){
+	function ccmd_logFlush(){
 		$res=$this->cbsd_cmd('task mode=flushall');
 		return $res;
 	}
@@ -1885,7 +1932,8 @@ class ClonOS {
 		return array('error'=>false);
 	}
 
-	function addJailHelperGroup(){
+	//function addJailHelperGroup(){
+	function ccmd_addJailHelperGroup(){
 //		$form=$this->form;
 		if($this->uri_chunks[0]!='jailscontainers' || empty($this->uri_chunks[1]) || empty($this->url_hash)) return array('error'=>true,'errorMessage'=>'Bad url!');
 		$jail_id=$this->uri_chunks[1];
@@ -1941,7 +1989,8 @@ class ClonOS {
 		return array('db_path'=>$db_path,'html'=>$res['html']);
 	}
 
-	function deleteJailHelperGroup(){
+	//function deleteJailHelperGroup(){
+	function ccmd_deleteJailHelperGroup(){
 		$form=$this->form;
 		if(!isset($this->uri_chunks[1]) || !isset($this->url_hash)) return array('error'=>true,'errorMessage'=>'Bad url!');
 		
@@ -2007,7 +2056,8 @@ class ClonOS {
 		exit;
 	}
 	
-	function getFreeJname($in_helper=false,$type='jail'){
+	//function getFreeJname($in_helper=false,$type='jail'){
+	function ccmd_getFreeJname($in_helper=false,$type='jail'){
 		$arr=array();
 		$add_cmd=($in_helper)?' default_jailname='.$this->url_hash:'';
 		$add_cmd1=' default_jailname='.$type;
@@ -2103,7 +2153,7 @@ class ClonOS {
 		return $html;
 	}
 
-	function updateBhyveISO($iso=''){
+	function ccmd_updateBhyveISO($iso=''){
 		$db=new Db('base','storage_media');
 		$res=$db->select('SELECT * FROM media WHERE type="iso"');
 		if($res===false || empty($res)) return array(); //array('error'=>true,'error_message'=>'Profile ISO is not find!');
@@ -2140,7 +2190,7 @@ class ClonOS {
 		return $html;
 	}
 	
-	function usersAdd(){
+	function ccmd_usersAdd(){
 		$form=$this->form;
 		
 		$res=$this->userRegister($form);
@@ -2153,7 +2203,7 @@ class ClonOS {
 		return array('form'=>$form);
 	}
 
-	function usersEdit(){
+	function ccmd_usersEdit(){
 		$form=$this->form;
 		
 		if(!isset($form['user_id']) || !is_numeric($form['user_id']) || $form['user_id']<1)
@@ -2299,7 +2349,7 @@ class ClonOS {
 		return array('error'=>true);
 	}
 	
-	function userRemove(){
+	function ccmd_userRemove(){
 		$form=$this->form;
 		
 		$id=$form['user_id'];
@@ -2313,7 +2363,7 @@ class ClonOS {
 		}
 	}
 	
-	function userEditInfo(){
+	function ccmd_userEditInfo(){
 		$form=$this->form;
 		
 		if(!isset($form['user_id'])) return array('error'=>true,'error_message'=>'incorrect data!');
@@ -2333,7 +2383,7 @@ class ClonOS {
 
 	}
 	
-	function userGetInfo(){
+	function ccmd_userGetInfo(){
 		$db=new Db('clonos');
 		if(!$db->isConnected()) return array('DB connection error!');
 
@@ -2345,7 +2395,7 @@ class ClonOS {
 		return $this->_user_info['username'];
 	}
 	
-	function vmTemplateAdd(){
+	function ccmd_vmTemplateAdd(){
 		$form=$this->form;
 
 		$db=new Db('base','local');
@@ -2368,7 +2418,7 @@ class ClonOS {
 		return $this->messageError('sql error!',$res);
 	}
 
-	function vmTemplateEditInfo(){
+	function ccmd_vmTemplateEditInfo(){
 		$form=$this->form;
 		
 		if(!isset($form['template_id'])) return $this->messageError('incorrect data!');
@@ -2381,7 +2431,7 @@ class ClonOS {
 		return $this->messageSuccess(array('vars'=>$res,'template_id'=>(int)$tpl_id));
 	}
 
-	function vmTemplateEdit(){
+	function ccmd_vmTemplateEdit(){
 		$form=$this->form;
 		
 		$id=$form['template_id'];
@@ -2408,7 +2458,7 @@ class ClonOS {
 
 	}
 
-	function vmTemplateRemove(){
+	function ccmd_vmTemplateRemove(){
 		$form=$this->form;
 		
 		$id=$form['template_id'];
@@ -2451,7 +2501,7 @@ class ClonOS {
 		return $files;
 	}
 
-	function getImportedImageInfo(){
+	function ccmd_getImportedImageInfo(){
 		$form=$this->form;
 		$name=$form['id'];
 		$info=$this->getImageInfo($name);
@@ -2494,7 +2544,7 @@ class ClonOS {
 			$jail=$db->selectAssoc("SELECT jname FROM jails WHERE jname='{$db->escape($jname)}'");
 			
 			if($jname==$jail['jname']){
-				$jres=$this->getFreeJname(false,$type);
+				$jres=$this->ccmd_getFreeJname(false,$type);
 				if($jres['error']) return $this->messageError('Something wrong...');
 				$jname=$jres['freejname'];
 				$name_comment='* '.$this->translate('Since imported name already exist, we are change it');
@@ -2513,7 +2563,7 @@ class ClonOS {
 		return $val;
 	}
 	
-	function imageExport(){
+	function ccmd_imageExport(){
 		// cbsd jexport jname=XXX dstdir=<path_to_imported_dir>
 		$form=$this->form;
 		$jname=$form['id'];
@@ -2525,7 +2575,7 @@ class ClonOS {
 		return $res;
 	}
 	
-	function imageImport(){
+	function ccmd_imageImport(){
 		$form=$this->form;
 		
 		$file_id=$form['file_id'];
@@ -2551,7 +2601,7 @@ class ClonOS {
 		return $res;
 	}
 	
-	function imageRemove(){
+	function ccmd_imageRemove(){
 		$form=$this->form;
 		
 		$cmd='cbsd imgremove path='.$this->media_import.' img='.$form['jname'];
@@ -2561,7 +2611,7 @@ class ClonOS {
 		return $res;
 	}
 
-	function getSummaryInfo(){
+	function ccmd_getSummaryInfo(){
 		$form=$this->form;
 		if(!isset($form['mode'])) $form['mode']='';
 		$mode=$form['mode'];

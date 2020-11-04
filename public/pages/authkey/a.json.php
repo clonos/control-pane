@@ -29,11 +29,18 @@ if($res!==false)
 			$html.=$html_tmp;
 		}
 	}
-
+	/*
 	echo json_encode(array(
 		'tbody'=>$html,
 		'error'=>false,
 		'func'=>'fillTable',
 		'id'=>'authkeyslist',
 	));
+	*/
+	$included_result_array=array(
+		'tbody'=>$html,
+		'error'=>false,
+		'func'=>'fillTable',
+		'id'=>'authkeyslist',
+	);
 }

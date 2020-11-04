@@ -843,7 +843,8 @@ var clonos={
 	},
 	getFreeJname:function()
 	{
-		this.loadData('freejname',$.proxy(this.onGetFreeJname,this));
+		//this.loadData('freejname',$.proxy(this.onGetFreeJname,this));
+		this.loadData('getFreeJname',$.proxy(this.onGetFreeJname,this));
 	},
 	onGetFreeJname:function(data)
 	{
@@ -902,7 +903,7 @@ var clonos={
 		}
 		$.post(path,posts,
 			$.proxy(function(data){this.onLoadDataAuthorize(return_func,data);$('.spinner').hide();},this)	//return_func(data)
-		);
+		).fail($.proxy(function(data){this.onErrorLoadData(return_func,data)},this));
 	},
 	onLoadDataAuthorize:function(return_func,data)
 	{
@@ -916,7 +917,12 @@ var clonos={
 		{
 			this.authorized=false;
 			this.loginFadeIn();
+			this.clearPageInfo();
 			return;
+		}
+		if(typeof data['authorized']!='undefined')
+		{
+			this.authorized=data.authorized;
 		}
 
 		if(typeof data.error!='undefined')
@@ -937,6 +943,11 @@ var clonos={
 		}
 		
 		return_func(data);
+	},
+	onErrorLoadData:function(return_func,data)
+	{
+		var msg='Sorry, but the system detected an error:\n\n* '+data.status+' '+data.statusText+' *\n\nWe think You need to contact your system administrator. Check PHP log file.';
+		alert(msg);
 	},
 	
 /* 	loadData1:function()
@@ -1651,7 +1662,7 @@ var clonos={
 	bodyClick:function(event)
 	{
 		//debugger;
-		//if(!this.authorized) location.reload();
+		if(!this.authorized) {location.reload();return;}
 		var target=event.target;
 		if($(target).parents('form').length>0)
 		{
@@ -2135,6 +2146,13 @@ var clonos={
 		
 		$('#user-login').html('guest');
 		this.loginFadeIn();
+		this.dataReload();
+	},
+	clearPageInfo:function()
+	{
+		$('.tsimple tbody').empty();
+		//$('#cdown #cinfo .left').html('');
+		$('div.main').removeClass('asplit');
 	},
 	
 	ddmenu_interval:null,

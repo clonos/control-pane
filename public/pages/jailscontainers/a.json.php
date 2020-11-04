@@ -148,6 +148,7 @@ $protected=array(
 	)
 );
 
+/*
 echo json_encode(array(
 //	'thead'=>$thead,
 	'tbody'=>$html,
@@ -158,3 +159,13 @@ echo json_encode(array(
 	'template'=>$html_tpl_1,
 	'protected'=>$protected,
 ));
+*/
+$included_result_array=array(
+	'tbody'=>$html,
+	'error'=>false,
+	'func'=>'fillTable',
+	'id'=>'jailslist',
+	'tasks'=>$tasks,
+	'template'=>$html_tpl_1,
+	'protected'=>$protected,
+);

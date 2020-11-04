@@ -91,6 +91,7 @@ function replaceVars($tpl,$vars)
 	return $tpl;
 }
 
+/*
 echo json_encode(array(
 	'tbody'=>$html,
 	'error'=>false,
@@ -98,3 +99,12 @@ echo json_encode(array(
 	'id'=>'impslist',
 	'template'=>$html_tpl_1,
 ));
+*/
+
+$included_result_array=array(
+	'tbody'=>$html,
+	'error'=>false,
+	'func'=>'fillTable',
+	'id'=>'impslist',
+	'template'=>$html_tpl_1,
+);

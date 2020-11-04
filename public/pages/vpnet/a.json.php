@@ -30,10 +30,18 @@ if($res!==false)
 		}
 	}
 
+	/*
 	echo json_encode(array(
 		'tbody'=>$html,
 		'error'=>false,
 		'func'=>'fillTable',
 		'id'=>'vpnetslist',
 	));
+	*/
+	$included_result_array=array(
+		'tbody'=>$html,
+		'error'=>false,
+		'func'=>'fillTable',
+		'id'=>'vpnetslist',
+	);
 }

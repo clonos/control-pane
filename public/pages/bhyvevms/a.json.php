@@ -123,6 +123,7 @@ $protected=array(
 	)
 );
 
+/*
 echo json_encode(array(
 	'tbody'=>$html,
 	'error'=>false,
@@ -132,3 +133,14 @@ echo json_encode(array(
 	'template'=>$html_tpl_1,
 	'protected'=>$protected,
 ));
+*/
+
+$included_result_array=array(
+	'tbody'=>$html,
+	'error'=>false,
+	'func'=>'fillTable',
+	'id'=>'bhyveslist',
+	'tasks'=>$tasks,
+	'template'=>$html_tpl_1,
+	'protected'=>$protected,
+);

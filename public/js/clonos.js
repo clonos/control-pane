@@ -2152,8 +2152,10 @@ var clonos={
 	{
 		$('.tsimple tbody').empty();
 		//$('#cdown #cinfo .left').html('');
+		this.clearSummaryInfo();
 		$('div.main').removeClass('asplit');
 	},
+	
 	
 	ddmenu_interval:null,
 	cnt_mode:'new',
@@ -3227,6 +3229,7 @@ var clonos={
 	
 	getSummaryInfo:function(jname,mode)
 	{
+		this.clearSummaryInfo();
 		this.openedJailSummary=jname;
 		var posts=[{'name':'jname','value':jname},{'name':'mode','value':mode}];
 		this.loadData('getSummaryInfo',$.proxy(this.onGetSummaryInfo,this),posts);
@@ -3259,10 +3262,15 @@ var clonos={
 		var dl='';
 		for(n in data)
 		{
+			if(n=='authorized') continue;
 			dl+='<dt>'+this.translate(n)+'</dt><dd>'+data[n]+'<dd>';
 		}
 		$('dl#summaryInfo').html(dl);
-	}
+	},
+	clearSummaryInfo:function()
+	{
+		$('dl#summaryInfo').html('');
+	},
 
 }
 

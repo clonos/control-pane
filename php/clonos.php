@@ -1435,7 +1435,7 @@ class ClonOS {
 		//$nres=$db->selectAssoc('SELECT name FROM authkey WHERE idx='.$key_id); // Ok, casted as int above.
 		//if($nres['name']!==false) $key_name=$nres['name'];
 		$nres=$db->selectAssoc('SELECT authkey FROM authkey WHERE idx='.$key_id);
-		if($nres['authkey']!==false) $authkey=$nres['authkey'];
+		if($nres['authkey']!==false) $authkey=$nres['authkey']; else $authkey='';
 	//var_dump($nres);exit;
 		
 		$user_pw=(!empty($form['user_password']))?' ci_user_pw_user='.$form['user_password'].' ':'';

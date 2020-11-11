@@ -1,12 +1,5 @@
 <?php
 //include_once($_REALPATH.'/forms.php');
-// Sentry
-//if($clonos->environment=='development') {
-require ('../vendor/autoload.php');
-Sentry\init(['dsn' => 'https://MASK' ]);
-//}
-
-
 class ClonOS {
 	public $server_name='';
 	public $workdir='';
@@ -103,6 +96,11 @@ class ClonOS {
 			# /usr/home/web/cp/clonos/public/
 		
 		$this->media_import=$_REALPATH.'/media_import/';
+		
+		if($this->environment=='development')
+		{
+			include($this->realpath_php.'sentry.php');
+		}
 		
 		if(isset($_SERVER['SERVER_NAME']) && !empty(trim($_SERVER['SERVER_NAME'])))
 			$this->server_name=$_SERVER['SERVER_NAME'];
@@ -2218,6 +2216,29 @@ class ClonOS {
 		$last_name=$db->escape($form['last_name']);
 		$is_active=0;
 		if(isset($form['actuser']) && $form['actuser']=='on') $is_active=1;
+		
+		$authorized_user_id=0;
+		if(isset($_COOKIE['mhash']))
+		{
+			$mhash=$_COOKIE['mhash'];
+			$query1="select user_id from auth_list WHERE sess_id='${mhash}' limit 1";
+			$res1=$db->selectAssoc($query1);
+			{
+				if($res1['user_id']>0)
+				{
+					$authorized_user_id=$res1['user_id'];
+				}else{
+					return array('error'=>true,'error_message'=>'you are still not authorized');
+				}
+			}
+		}else{
+			return array('error'=>true,'error_message'=>'you must be authorized for this operation!');
+		}
+		
+		if($user_id==0 || $user_id!=$authorized_user_id)
+		{
+			return array('error'=>true,'error_message'=>'I think you\'re some kind of hacker');
+		}
 		
 		$pwd_sql='';
 		if(isset($form['password'])){

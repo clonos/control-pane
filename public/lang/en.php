@@ -121,7 +121,7 @@ $lang=array(
 	
 	'Updating'=>'Updating',
 	'Version'=>'Version',
-	'Version number'=>'Version number (e.g:: 11.1, 12)',
+	'Version number'=>'Version number (e.g:: 12.2, 13)',
 	
 	'Source'=>'Source',
 	

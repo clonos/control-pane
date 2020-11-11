@@ -1,5 +1,4 @@
 <?php
-//include_once($_REALPATH.'/forms.php');
 class ClonOS {
 	public $server_name='';
 	public $workdir='';
@@ -2220,7 +2219,7 @@ class ClonOS {
 		$authorized_user_id=0;
 		if(isset($_COOKIE['mhash']))
 		{
-			$mhash=$_COOKIE['mhash'];
+			$mhash=$db->escape($_COOKIE['mhash']);
 			$query1="select user_id from auth_list WHERE sess_id='${mhash}' limit 1";
 			$res1=$db->selectAssoc($query1);
 			{

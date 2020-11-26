@@ -60,6 +60,12 @@ class Config
 			'icon'=>'icon-cubes',
 		),
 		
+		'k8s'=>array(
+			'name'=>'K8S clusters',
+			'title'=>'Manage K8S clusters',
+			'icon'=>'icon-cubes',
+		),
+		
 		'vpnet'=>array(
 			'name'=>'Virtual Private Network',
 			'title'=>'Manage for virtual private networks',

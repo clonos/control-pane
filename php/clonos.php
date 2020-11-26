@@ -1,4 +1,5 @@
 <?php
+
 class ClonOS {
 	public $server_name='';
 	public $workdir='';
@@ -98,7 +99,8 @@ class ClonOS {
 		
 		if($this->environment=='development')
 		{
-			include($this->realpath_php.'sentry.php');
+			$sentry_file=$this->realpath_php.'sentry.php';
+			if(file_exists($sentry_file))include($sentry_file);
 		}
 		
 		if(isset($_SERVER['SERVER_NAME']) && !empty(trim($_SERVER['SERVER_NAME'])))
@@ -194,9 +196,9 @@ class ClonOS {
 				$ccmd_res=$this->$cfunc();
 				
 				if(is_array($ccmd_res))
-					$new_array=array_merge($this->sys_vars,$ccmd_res);
-				else
 				{
+					$new_array=array_merge($this->sys_vars,$ccmd_res);
+				}else{
 					echo json_encode($ccmd_res);
 					return;
 				}
@@ -311,7 +313,7 @@ class ClonOS {
 				exit;
 			}
 		}
-		echo '{}';
+		echo json_encode($this->sys_vars);
 		exit;
 	}
 	
@@ -2220,6 +2222,7 @@ class ClonOS {
 		if(isset($_COOKIE['mhash']))
 		{
 			$mhash=$db->escape($_COOKIE['mhash']);
+			if(!preg_match('#^[a-f0-9]{32}$#',$mhash)) return array('error'=>true,'error_message'=>'bad data, man...');
 			$query1="select user_id from auth_list WHERE sess_id='${mhash}' limit 1";
 			$res1=$db->selectAssoc($query1);
 			{

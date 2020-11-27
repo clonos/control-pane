@@ -1,33 +1,35 @@
 <?php
 
-$res=json_decode('{
-  "clusters": [
-    {
-    "name": "ole",
-    "cluster": "k8s.bhyve.io",
-    "masters": 3,
-    "workers": 3,
-    "bhyves": [
-        "master1",
-        "master2",
-        "master3",
-        "worker1",
-        "worker2", 
-        "worker3" 
-        ]
-    },
-    {
-    "name": "mon",
-    "cluster": "mon.bhyve.io",
-    "masters": 1,
-    "workers": 1,
-    "bhyves": [
-        "master1",
-        "worker1"
-        ]
-    }
-  ]
-}',true);
+function getSslPage($url) {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+    curl_setopt($ch, CURLOPT_HEADER, false);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_REFERER, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    $result = curl_exec($ch);
+    curl_close($ch);
+    return $result;
+}
+$file=$getSslPage('https://bitclouds.convectix.com:1443/clusters');
+
+
+/*
+$url='https://bitclouds.convectix.com:1443/clusters';
+$arrContextOptions=array(
+      "ssl"=>array(
+            "verify_peer"=>false,
+            "verify_peer_name"=>false,
+        ),
+    );  
+
+$response = file_get_contents($url, false, stream_context_create($arrContextOptions));
+echo $response;
+*/
+//$file=file_get_contents('https://bitclouds.convectix.com:1443/clusters');
+//echo $file;
+$res=json_decode($file,true);
 
 $nth=0;
 $hres=$this->getTableChunk('k8slist','tbody');

@@ -28,7 +28,8 @@ $clonos->useDialogs(array(
 <table class="tsimple" id="k8slist" width="100%">
 	<thead>
 		<tr>
-			<th class="elastic">Имя кластера</th>
+			<th class="wdt-70">ID кластера</th>
+			<th class="elastic txtleft wdt-150">Имя кластера</th>
 			<th class="txtcenter wdt-80">Кол-во master нод</th>
 			<th class="txtcenter wdt-80">Кол-во worker нод</th>
 			<th class="txtleft">Список виртуальных машин</th>

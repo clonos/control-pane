@@ -12,23 +12,8 @@ function getSslPage($url) {
     curl_close($ch);
     return $result;
 }
-$file=$getSslPage('https://bitclouds.convectix.com:1443/clusters');
+$file=getSslPage('https://bitclouds.convectix.com:1443/clusters');
 
-
-/*
-$url='https://bitclouds.convectix.com:1443/clusters';
-$arrContextOptions=array(
-      "ssl"=>array(
-            "verify_peer"=>false,
-            "verify_peer_name"=>false,
-        ),
-    );  
-
-$response = file_get_contents($url, false, stream_context_create($arrContextOptions));
-echo $response;
-*/
-//$file=file_get_contents('https://bitclouds.convectix.com:1443/clusters');
-//echo $file;
 $res=json_decode($file,true);
 
 $nth=0;

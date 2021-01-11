@@ -1,6 +1,7 @@
 	<tbody>
 		<tr class="#nth-num##desktop##maintenance#" id="#name#">
-			<td class="wordwreck node">#cluster#</td>
+			<td class="txtleft">#name#</td>
+			<td class="txtleft wordwreck node">#cluster#</td>
 			<td class="txtcenter">#masters#</td>
 			<td class="txtcenter">#workers#</td>
 			<td class="txtleft">#bhyves#</td>

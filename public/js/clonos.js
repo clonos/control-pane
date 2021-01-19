@@ -584,7 +584,14 @@ var clonos={
 				var posts=$('form#imageImportSettings').serializeArray();
 				this.loadData(fmode,$.proxy(this.onImageImportStart,this),posts);
 			}
-
+			
+			if(id=='k8s-new')
+			{
+				var fmode='k8sCreate';
+				var posts=$('form#k8sNewSettings').serializeArray();
+				this.loadData(fmode,$.proxy(this.onK8sCreate,this),posts);
+			}
+			
 		}
 	},
 	fillFormDataOnChange:function(data)
@@ -2154,6 +2161,11 @@ var clonos={
 		//$('#cdown #cinfo .left').html('');
 		this.clearSummaryInfo();
 		$('div.main').removeClass('asplit');
+	},
+	
+	onK8sCreate:function(data)
+	{
+		alert(JSON.stringify(data));
 	},
 	
 	

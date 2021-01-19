@@ -1,5 +1,9 @@
 <?php
 
+/* hardcode API ip. Change it later */
+//$api_ip='https://bitclouds.convectix.com:1443';
+$api_ip='http://144.76.225.238';
+
 function getSslPage($url) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -12,7 +16,9 @@ function getSslPage($url) {
     curl_close($ch);
     return $result;
 }
-$file=getSslPage('https://bitclouds.convectix.com:1443/clusters');
+$file=getSslPage($api_ip.'/clusters');
+
+$html='';
 
 $res=json_decode($file,true);
 

@@ -116,6 +116,14 @@ class ClonOS {
 			$this->uri_chunks=explode('/',$str);
 		}
 	
+		include('config.php');
+		$this->config=new Config();
+		
+		/* check langs start */
+		$larr=array_keys($this->config->languages);
+		if(!in_array($this->language,$larr)) $this->language='en';
+		/* check langs end */
+
 		$translate_filename=$this->realpath_public.'/lang/'.$this->language.'.php';
 		$translate_filename_alt=$this->realpath_public.'/lang/en.php';
 		if(file_exists($translate_filename)) $t_filename=$translate_filename; else $t_filename=$translate_filename_alt;
@@ -144,7 +152,6 @@ class ClonOS {
 //		$this->json_name=$this->realpath_php.'pages'
 //		$clonos->json_name=$file_path.'a.json.php';
 		
-		include('config.php');
 		include('db.php');
 		include('forms.php');
 		include('menu.php');
@@ -152,7 +159,6 @@ class ClonOS {
 		$this->_db_tasks=new Db('base','cbsdtaskd');
 		$this->_db_local=new Db('base','local');
 		
-		$this->config=new Config();
 		$this->menu=new Menu($this->config->menu,$this);
 		
 		if(isset($this->_vars['mode'])) $this->mode=$this->_vars['mode'];
@@ -2069,6 +2075,44 @@ class ClonOS {
 			$arr['freejname']=$res['message'];
 		}
 		return $arr;
+	}
+
+	function ccmd_k8sCreate()
+	{
+		$form=$this->form;
+		$res=array();
+		$ass_arr=array(
+			'master_nodes'=>'init_masters',
+			'worker_nodes'=>'init_workers',
+			'master_ram'=>'master_vm_ram',
+			'master_cpus'=>'master_vm_cpus',
+			'master_img'=>'master_vm_imgsize',
+			'worker_ram'=>'worker_vm_ram',
+			'worker_cpus'=>'worker_vm_cpus',
+			'worker_img'=>'worker_vm_imgsize',
+		);
+		
+		foreach($form as $key=>$value)
+		{
+			if(isset($ass_arr[$key]))
+			{
+				$res[$key]=$value;
+			}
+		}
+		
+		
+		$res['pv_enable']=0;
+		if(isset($form['pv_enable']))
+		{
+			if($form['pv_enable']=='on') $res['pv_enable']=1;
+		}
+		
+		$res['kubelet_master']=0;
+		if(isset($form['kubelet_master']))
+		{
+			if($form['kubelet_master']=='on') $res['kubelet_master']=1;
+		}
+		return $res;
 	}
 
 	function GhzConvert($Hz=0){

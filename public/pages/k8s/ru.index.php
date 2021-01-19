@@ -7,23 +7,13 @@ if(isset($clonos->uri_chunks[1]))
 }
 */
 
-/*
 $clonos->useDialogs(array(
-	'vnc',
-	'jail-settings',
-	'jail-settings-config-menu',
-	'jail-import',
-	'jail-clone',
-	'jail-rename',
+	'k8s-new',
 ));
-*/
 
 ?>
 <h1>K8S кластеры:</h1>
-<!--
-<p><span class="top-button icon-plus id:jail-settings">Создать контейнер</span>
-<span class="top-button icon-upload id:jail-import">Импортировать</span></p>
--->
+<p><span class="top-button icon-plus id:k8s-new">Создать Kubernetes</span></p>
 
 <table class="tsimple" id="k8slist" width="100%">
 	<thead>

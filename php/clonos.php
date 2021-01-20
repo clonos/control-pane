@@ -119,19 +119,12 @@ class ClonOS {
 		include('config.php');
 		$this->config=new Config();
 		
-		/* check langs start */
-		$larr=array_keys($this->config->languages);
-		if(!in_array($this->language,$larr)) $this->language='en';
-		/* check langs end */
-
-		$translate_filename=$this->realpath_public.'/lang/'.$this->language.'.php';
-		$translate_filename_alt=$this->realpath_public.'/lang/en.php';
-		if(file_exists($translate_filename)) $t_filename=$translate_filename; else $t_filename=$translate_filename_alt;
-		include($t_filename);
+		/* determine lang */
+		if(!array_key_exists($this->language, $this->config->languages)) $this->language='en';
+		include($this->realpath_public.'/lang/'.$this->language.'.php');
 		$this->translate_arr=$lang;
 		unset($lang);
-		unset($t_filename);
-		
+
 		$this->_client_ip=$_SERVER['REMOTE_ADDR'];
 		
 		if(isset($this->_vars['path'])){
@@ -1624,7 +1617,7 @@ class ClonOS {
 		$res=$db->selectAssoc('SELECT * FROM media WHERE idx='.(int)$form['media_id']);
 		if($res===false || empty($res)) return array('error'=>true,'res'=>print_r($res,true));
 		
-		//if($res['jname']=='-')	// если медиа отвязана, то про�
+		//if($res['jname']=='-')	// ÐµÑÐ»Ð¸ Ð¼ÐµÐ´Ð¸Ð° Ð¾ÑÐ²ÑÐ·Ð°Ð½Ð°, ÑÐ¾ Ð¿ÑÐ¾Ñ
 		//print_r($res);exit;
 		$cmd='media mode=remove name="'.$res['name'].'" path="'.$res['path'].'" jname="'.$res['jname'].'" type="'.$res['type'].'"';	//.$res['name']
 		//echo $cmd;exit;
@@ -1739,7 +1732,7 @@ class ClonOS {
 		$stable_arr=array('release','stable');
 		$stable_num=strlen(intval($ver))<strlen($ver)?0:1;
 		$stable=$stable_arr[$stable_num];
-		$bid=$base['ver'].'-amd64-'.$stable_num;	// !!! КОСТЫЛЬ
+		$bid=$base['ver'].'-amd64-'.$stable_num;	// !!! ÐÐÐ¡Ð¢Ð«ÐÐ¬
 		
 		$res=$this->fillRepoTr($id);
 		$html=$res['html'];
@@ -1769,12 +1762,12 @@ class ClonOS {
 		if($db->isConnected()){
 			if($bsdsrc){
 				$res=$db->selectAssoc("SELECT idx,platform,ver FROM bsdsrc WHERE idx=".(int)$id);
-				$res['name']='—';
-				$res['arch']='—';
-				$res['targetarch']='—';
+				$res['name']='â';
+				$res['arch']='â';
+				$res['targetarch']='â';
 				$res['stable']=strlen(intval($res['ver']))<strlen($res['ver'])?0:1;
-				$res['elf']='—';
-				$res['date']='—';
+				$res['elf']='â';
+				$res['date']='â';
 			}else{
 				$res=$db->selectAssoc("SELECT idx,platform,name,arch,targetarch,ver,stable,elf,date FROM bsdbase WHERE ver=".(int)$id);
 			}
@@ -1827,7 +1820,7 @@ class ClonOS {
 			$stable_num=strlen(intval($ver))<strlen($ver)?0:1;	//'release':'stable';
 			$stable=$stable_arr[$stable_num];
 			
-			$bid=$ver.'-amd64-'.$stable_num;	// !!! КОСТЫЛЬ
+			$bid=$ver.'-amd64-'.$stable_num;	// !!! ÐÐÐ¡Ð¢Ð«ÐÐ¬
 			
 			$vars=array(
 				'nth-num'=>'nth0',
@@ -1835,12 +1828,12 @@ class ClonOS {
 				'node'=>'local',
 				'ver'=>$ver,
 				'name'=>'base',
-				'platform'=>'—',
-				'arch'=>'—',
-				'targetarch'=>'—',
+				'platform'=>'â',
+				'arch'=>'â',
+				'targetarch'=>'â',
 				'stable'=>$stable,
-				'elf'=>'—',
-				'date'=>'—',
+				'elf'=>'â',
+				'date'=>'â',
 				'maintenance'=>' busy',
 				'protitle'=>$this->translate('Delete'),
 			);
@@ -2634,7 +2627,7 @@ class ClonOS {
 		// cbsd jexport jname=XXX dstdir=<path_to_imported_dir>
 		$form=$this->form;
 		$jname=$form['id'];
-		if(empty($jname)) $this->messageError('Jname is incorrect in export command! Is «'.$jname.'».');
+		if(empty($jname)) $this->messageError('Jname is incorrect in export command! Is Â«'.$jname.'Â».');
 		$cmd='cbsd jexport gensize=1 jname='.$jname.' dstdir='.$this->media_import;
 
 		// TODO: fix Shell injection

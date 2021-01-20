@@ -119,18 +119,11 @@ class ClonOS {
 		include('config.php');
 		$this->config=new Config();
 		
-		/* check langs start */
-		$larr=array_keys($this->config->languages);
-		if(!in_array($this->language,$larr)) $this->language='en';
-		/* check langs end */
-
-		$translate_filename=$this->realpath_public.'/lang/'.$this->language.'.php';
-		$translate_filename_alt=$this->realpath_public.'/lang/en.php';
-		if(file_exists($translate_filename)) $t_filename=$translate_filename; else $t_filename=$translate_filename_alt;
-		include($t_filename);
+		/* determine lang */
+		if(!array_key_exists($this->language, $this->config->languages)) $this->language='en';
+		include($this->realpath_public.'/lang/'.$this->language.'.php');
 		$this->translate_arr=$lang;
 		unset($lang);
-		unset($t_filename);
 		
 		$this->_client_ip=$_SERVER['REMOTE_ADDR'];
 		

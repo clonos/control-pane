@@ -11,7 +11,37 @@ class Db {
 		$place = base (This is a basic set of databases: local, nodes, etc)
 		$place = file (specify a specific database for the full pathth)
 	*/
-	function __construct($place='base',$database=''){
+	function __construct($place='base', $database='', $connect = null){
+
+		if (!is_null($connect)){
+			list($file_name, $connect) = $this->prep_connect($place, $database);
+
+			if(is_null($file_name) || !file_exists($file_name)){
+				$this->error=true;
+				$this->error_message='DB file name not set or not found!';
+				return;
+			} else {
+				$this->_filename=$file_name;
+			}
+
+			if(is_null($connect)) {
+				$this->error=true;
+				$this->error_message='DB file name not set or invalid';
+				return;
+			}
+		}
+
+		try {
+			$this->_pdo = new PDO($connect);
+			$this->_pdo->setAttribute(PDO::ATTR_TIMEOUT,5000);
+		}catch (PDOException $e){
+			$this->error=true;
+			$this->error_message=$e->getMessage();	//'DB Error';
+		}
+	}
+
+	private function prep_connect($place, $database){
+
 		$this->_workdir=getenv('WORKDIR');	// /usr/jails/
 		$connect = null;
 		$file_name = null;
@@ -95,67 +125,74 @@ class Db {
 		}
 		*/
 
-		if(is_null($file_name) || !file_exists($file_name)){
-			$this->error=true;
-			$this->error_message='DB file name not set or not found!';
-			return;
-		}
+		return [$file_name, $connect];
+	}
 
-		if(is_null($connect)) {
-			$this->error=true;
-			$this->error_message='DB file name not set or invalid';
-			return;
-		}
-
+	# TODO once tested $values can have a default value of an empty array
+	# TODO both selects were assoc
+	function select($sql, $values){
 		try {
-			$this->_pdo = new PDO($connect);
-			$this->_pdo->setAttribute(PDO::ATTR_TIMEOUT,5000);
-		}catch (PDOException $e){
-			$this->error=true;
-			$this->error_message=$e->getMessage();	//'DB Error';
-			return;
-		}
-
-		$this->_filename=$file_name;
-		//echo $file_name,PHP_EOL,PHP_EOL;
-	}
-
-	function select($query){
-		if($quer=$this->_pdo->query($query)){
-			$res=$quer->fetchAll(PDO::FETCH_ASSOC);
+			$query = $this->_pdo->prepare($sql);
+			$i = 1;
+			foreach($values as $v){
+				if (count($v) == 1){ # TODO: Make default type string
+					$query->bindParam($i, $v[0]);
+				} elseif (count($v) == 2){ # if type defined
+					$query->bindParam($i, $v[0], $v[1]);
+				}
+				$i++;
+			}
+			$query->execute();
+			$res = $query->fetchAll(PDO::FETCH_ASSOC);
 			return $res;
+		} catch(PDOException $e) {
+			# TODO: Handling ?
+			return array();
 		}
-		return array();
-	}
-	
-	function selectAssoc($query){
-		if($quer=$this->_pdo->query($query)){
-			$res=$quer->fetch(PDO::FETCH_ASSOC);
-			return $res;
-		}
-		return array();
 	}
 
-	function insert($query){
-		if($quer=$this->_pdo->query($query)){
-			$lastID=$this->_pdo->lastInsertId();
-			return array('error'=>false,'lastID'=>$lastID);
+	function insert($sql, $values){
+		try {
+			$query = $this->_pdo->prepare($sql);
+			$i = 1;
+			foreach($values as $v){
+				if (count($v) == 1){ # TODO: Make default type string
+					$query->bindParam($i, $v[0]);
+				} elseif (count($v) == 2){ # if type defined
+					$query->bindParam($i, $v[0], $v[1]);
+				}
+				$i++;
+			}
+			$query->execute();
+			$query->commit();
+		} catch(PDOException $e) {
+			return array('error'=>true,'info'=>$e->getMessage());
 		}
-		$error=array('error'=>true,'info'=>$this->_pdo->errorInfo());
-		return $error;
+		return array('error'=>false,'lastID'=>$query->lastInsertId());
 	}
 
-	function update($query) {
-		if($quer=$this->_pdo->query($query)){
-			$rowCount=$quer->rowCount();
-			return array('rowCount'=>$rowCount);
+	function update($sql, $values){
+		try {
+			$query = $this->_pdo->prepare($sql);
+			$i = 1;
+			foreach($values as $v){
+				if (count($v) == 1){ # TODO: Make default type string
+					$query->bindParam($i, $v[0]);
+				} elseif (count($v) == 2){ # if type defined
+					$query->bindParam($i, $v[0], $v[1]);
+				}
+				$i++;
+			}
+			$query->execute();
+			$rowCount=$query->rowCount();
+			$query->commit();
+		} catch(PDOException $e) {
+			return false//$e->getMessage();
 		}
-		$error=$this->_pdo->errorInfo();
-		return $error;
+		return array('rowCount'=>$rowCount);
 	}
 
-	function isConnected(){ return( !is_null($this->_pdo); }
+	function isConnected(){ return !is_null($this->_pdo; }
 	function getWorkdir(){  return $this->_workdir;    }
 	function getFileName(){ return $this->_filename;   }
-	function escape($str){  return SQLite3::escapeString($str); } // For now sqlite only!
 }

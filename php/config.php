@@ -263,7 +263,7 @@ class Config
 	function authkeys_list()
 	{
 		$db=new Db('base','authkey');
-		$res=$db->select('SELECT idx,name FROM authkey;');
+		$res=$db->select('SELECT idx,name FROM authkey;', array());
 		
 		$html='';
 		if(!empty($res))foreach($res as $item)
@@ -276,7 +276,7 @@ class Config
 	function vm_packages_list()
 	{
 		$db=new Db('base','local');
-		$res=$db->select('select id,name,description,pkg_vm_ram,pkg_vm_disk,pkg_vm_cpus,owner from vmpackages order by name asc;');
+		$res=$db->select('select id,name,description,pkg_vm_ram,pkg_vm_disk,pkg_vm_cpus,owner from vmpackages order by name asc;', array());
 		
 		$html='<option value="0"></option>';
 		$min=0;

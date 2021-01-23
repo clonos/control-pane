@@ -50,7 +50,7 @@ class Forms
 		if($this->db->error) return;
 		//$query="select * from forms order by group_id asc, order_id asc";
 		$query="select * from forms order by groupname asc, group_id asc, order_id asc";
-		$fields=$this->db->select($query);
+		$fields=$this->db->select($query, array());
 		//print_r($fields);exit;
 		//echo '<pre>';print_r($fields);
 		//$defaults=array();
@@ -197,8 +197,8 @@ class Forms
 		{
 			$id=$arr['link'];	//$arr['param'].'-'.
 			$tpl='<datalist id="'.$id.'">';
-			$query="select * from {$arr['link']} order by order_id asc";
-			$opts=$this->db->select($query);
+			$query="select * from ? order by order_id asc";
+			$opts=$this->db->select($query, array([$arr['link']]));
 			if(!empty($opts))foreach($opts as $key=>$opt)
 			{
 				$tpl.='<option>'.$opt['text'].'</option>';
@@ -213,8 +213,8 @@ class Forms
 		$tpl='<div class="form-field"><select name="${param}">';
 		if(isset($arr['link']))
 		{
-			$query="select * from {$arr['link']} order by order_id asc";
-			$opts=$this->db->select($query);
+			$query="select * from ? order by order_id asc";
+			$opts=$this->db->select($query, array([$arr['link']]));
 			// Пустое поле в списках оказалось ненужным!
 			//array_unshift($opts,array('id'=>0,'text'=>'','order_id'=>-1));
 			if(!empty($opts))foreach($opts as $key=>$opt)
@@ -232,8 +232,8 @@ class Forms
 		$tpl='<div class="form-field"><fieldset><legend>${desc}</legend>';
 		if(isset($arr['link']))
 		{
-			$query="select * from {$arr['link']} order by order_id asc";
-			$opts=$this->db->select($query);
+			$query="select * from ? order by order_id asc";
+			$opts=$this->db->select($query, array([$arr['link']]));
 			if(!empty($opts))foreach($opts as $key=>$opt)
 			{
 				$checked=($opt['id']==$arr['cur'])?' checked':'';

@@ -187,12 +187,12 @@ class Db {
 			$rowCount=$query->rowCount();
 			$query->commit();
 		} catch(PDOException $e) {
-			return false//$e->getMessage();
+			return false;//$e->getMessage();
 		}
 		return array('rowCount'=>$rowCount);
 	}
 
-	function isConnected(){ return !is_null($this->_pdo; }
+	function isConnected(){ return !is_null($this->_pdo); }
 	function getWorkdir(){  return $this->_workdir;    }
 	function getFileName(){ return $this->_filename;   }
 }

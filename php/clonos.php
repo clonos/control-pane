@@ -559,7 +559,7 @@ class ClonOS {
 		$ids=join(',',$tasks);
 		if(empty($ids)) return $obj;
 
-		$statuses=$this->_db_tasks->select("SELECT id,status,logfile,errcode FROM taskd WHERE id IN (?)", array([$ids]);
+		$statuses=$this->_db_tasks->select("SELECT id,status,logfile,errcode FROM taskd WHERE id IN (?)", array([$ids]));
 
 		//print_r($statuses);
 		foreach($obj as $key=>$task){

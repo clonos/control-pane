@@ -2035,27 +2035,83 @@ class ClonOS {
 			'worker_img'=>'worker_vm_imgsize',
 		);
 
+		$add_param=array(
+			'master_ram'=>'g',
+			'master_img'=>'g',
+			'worker_ram'=>'g',
+			'worker_img'=>'g',
+		);
+
 		foreach($form as $key=>$value)
 		{
 			if(isset($ass_arr[$key]))
 			{
-				$res[$key]=$value;
+				if(isset($add_param[$key]))
+				{
+					$value.=$add_param[$key];
+				}
+				$res[$ass_arr[$key]]=$value;
 			}
 		}
 
-		$res['pv_enable']=0;
+		$res['pv_enable']="0";
 		if(isset($form['pv_enable']))
 		{
-			if($form['pv_enable']=='on') $res['pv_enable']=1;
+			if($form['pv_enable']=='on') $res['pv_enable']="1";
 		}
 
-		$res['kubelet_master']=0;
+		$res['kubelet_master']="0";
 		if(isset($form['kubelet_master']))
 		{
-			if($form['kubelet_master']=='on') $res['kubelet_master']=1;
+			if($form['kubelet_master']=='on') $res['kubelet_master']="1";
 		}
 
-		return $res;
+		$url='http://144.76.225.238/api/v1/create/move';
+		$result=$this->postCurl($url,$res);
+
+		return $result;
+	}
+
+	function ccmd_k8sRemove()
+	{
+		$form=$this->form;
+		if(isset($form['k8sname']) && !empty($form['k8sname']))
+		{
+			$url='http://144.76.225.238/api/v1/destroy/'.$form['k8sname'];
+			return ($this->getCurl($url));
+		}else{
+			return array('error'=>'true','errorMessage'=>'something wrong...');
+		}
+	}
+
+	function postCurl($url,$vars=false)
+	{
+		if($vars===false) return array('error'=>true,'errorMessage'=>'something wrong...');
+
+		$txt_vars=json_encode($vars);
+		//$txt_vars=http_build_query($vars);
+
+
+		$ch = curl_init($url);
+//		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $txt_vars);
+		$result = curl_exec($ch);
+		curl_close($ch);
+		//echo print_r($result,true);exit;
+		return $result;
+	}
+
+	function getCurl($url)
+	{
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_POST, false);
+		$result = curl_exec($ch);
+		curl_close($ch);
+		return $result;
 	}
 
 	function GhzConvert($Hz=0){

@@ -417,7 +417,7 @@ class ClonOS {
 
 /*
 	function getTaskStatus($task_id){
-		$status=$this->_db_tasks->select("SELECT status,logfile,errcode 
+		$status=$this->_db_tasks->selectOne("SELECT status,logfile,errcode 
 					FROM taskd WHERE id=?", array([$task_id]);
 
 		if($status['errcode']>0) $status['errmsg']=file_get_contents($status['logfile']);
@@ -629,7 +629,7 @@ class ClonOS {
 		$html='';
 		$db=new Db('base','local');
 		if($db->isConnected()){
-			$jail=$db->select("SELECT jname,ip4_addr,status,protected FROM jails WHERE jname=?", array([$jname]));
+			$jail=$db->selectOne("SELECT jname,ip4_addr,status,protected FROM jails WHERE jname=?", array([$jname]));
 			$hres=$this->getTableChunk('jailslist','tbody');
 			if($hres!==false){
 				$html_tpl=$hres[1];
@@ -873,7 +873,7 @@ class ClonOS {
 		$db=new Db('base','local');
 		if($db->isConnected()){
 			$query="SELECT jname,host_hostname FROM jails WHERE jname=?;"; //ip4_addr
-			$res['vars']=$db->select($query, array([$form['jail_id']]));
+			$res['vars']=$db->selectOne($query, array([$form['jail_id']]));
 		} else {
 			$err=true;
 		}
@@ -906,7 +906,7 @@ class ClonOS {
 		$db=new Db('base','local');
 		if($db->isConnected()){
 			$query="SELECT jname,host_hostname FROM jails WHERE jname=?;";	//ip4_addr
-			$res['vars']=$db->select($query, array([$form['jail_id']]));
+			$res['vars']=$db->selectOne($query, array([$form['jail_id']]));
 		}else $err=true;
 
 		if(empty($res['vars'])) $err=true;
@@ -936,7 +936,7 @@ class ClonOS {
 		$db=new Db('base','local');
 		if($db->isConnected()){
 			$query="SELECT jname,host_hostname,ip4_addr,allow_mount,interface,mount_ports,astart,vnet FROM jails WHERE jname=?;";
-			$res['vars']=$db->select($query, array([$form['jail_id']]));
+			$res['vars']=$db->selectOne($query, array([$form['jail_id']]));
 		}else $err=true;
 		if(empty($res['vars']))	$err=true;
 
@@ -1061,7 +1061,7 @@ class ClonOS {
 		$html='';
 		$db=new Db('base','local');
 		if($db->isConnected())	{
-			$bhyve=$db->select("SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden FROM bhyve WHERE jname=?", array([$jname]));
+			$bhyve=$db->selectOne("SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden FROM bhyve WHERE jname=?", array([$jname]));
 			$hres=$this->getTableChunk('bhyveslist','tbody');
 			if($hres!==false){
 				$html_tpl=$hres[1];
@@ -1106,7 +1106,7 @@ class ClonOS {
 		$db=new Db('base','local');
 		if($db->isConnected())	{
 			$query="SELECT b.jname as vm_name,vm_cpus,vm_ram,vm_vnc_port,bhyve_vnc_tcp_bind,interface FROM bhyve AS b INNER JOIN jails AS j ON b.jname=j.jname AND b.jname=?;";
-			$res['vars']=$db->select($query, array([$form['jail_id']]));
+			$res['vars']=$db->selectOne($query, array([$form['jail_id']]));
 			$res['vars']['vm_ram']=$this->fileSizeConvert($res['vars']['vm_ram'],1024,false,true);
 		}else{
 			$err=true;
@@ -1156,7 +1156,7 @@ class ClonOS {
 		$db=new Db('base','local');
 		if($db->isConnected()){
 			$query="SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden FROM bhyve WHERE jname=?"; //ip4_addr
-			$res['vars']=$db->select($query, array([$jname]));
+			$res['vars']=$db->selectOne($query, array([$jname]));
 		}else $err=true;
 
 		if(empty($res['vars'])) $err=true;
@@ -1204,13 +1204,13 @@ class ClonOS {
 		$db=new Db('base','storage_media');
 		if(!$db->isConnected()) return(false); // TODO: Fix return
 
-		$res=$db->select('SELECT * FROM media WHERE jname=? AND type="iso"', array([$jname]));
+		$res=$db->selectOne('SELECT * FROM media WHERE jname=? AND type="iso"', array([$jname]));
 		if($res!==false && !empty($res)){
 			CBSD::run(
 				'cbsd media mode=unregister name="%s" path="%s" jname=%s type=%s',
 				array($res['name'], $res['path'], $jname, $res['type'])
 			);
-			$res=$db->select(
+			$res=$db->selectOne(
 				'SELECT * FROM media WHERE idx=?',
 				array([(int)$form['vm_iso_image']])
 			); 
@@ -1274,7 +1274,7 @@ class ClonOS {
 			if($iso_id>0){
 				$db=new Db('base','storage_media');
 				if(!$db->isConnected()) return(false); // TODO: return error
-				$res=$db->select('SELECT name,path FROM media WHERE idx= ?', array([$iso_id])); // OK, $iso_id is casted as int above.
+				$res=$db->selectOne('SELECT name,path FROM media WHERE idx= ?', array([$iso_id])); // OK, $iso_id is casted as int above.
 				if($res===false || empty($res)) $iso=false;
 			}
 			
@@ -1378,7 +1378,7 @@ class ClonOS {
 		if(!$db->isConnected())  return array('error'=>true,'errorMessage'=>'Database error!');
 
 		//if($nres['name']!==false) $key_name=$nres['name'];
-		$nres=$db->select('SELECT authkey FROM authkey WHERE idx=?', array([$key_id, PDO::PARAM_INT]));
+		$nres=$db->selectOne('SELECT authkey FROM authkey WHERE idx=?', array([$key_id, PDO::PARAM_INT]));
 		if($nres['authkey']!==false) $authkey=$nres['authkey']; else $authkey='';
 		//var_dump($nres);exit;
 
@@ -1561,7 +1561,7 @@ class ClonOS {
 		if(!$db->isConnected()) return array('error'=>true,'res'=>'Database error');
 
 		//$res=$db->update('DELETE FROM media WHERE idx=?', array([$this->form['media_id']]));
-		$res=$db->select('SELECT * FROM media WHERE idx=?', array([(int)$this->form['media_id'], PDO::PARAM_INT]));
+		$res=$db->selectOne('SELECT * FROM media WHERE idx=?', array([(int)$this->form['media_id'], PDO::PARAM_INT]));
 		if($res===false || empty($res)) return array('error'=>true,'res'=>print_r($res,true));
 
 		//if($res['jname']=='-')	// если медиа отвязана, то про�
@@ -1607,7 +1607,7 @@ class ClonOS {
 		$id=str_replace('src','',$id);
 		$db=new Db('base','local');
 		if(!$db->isConnected()) return array('error'=>true,'errorMessage'=>'Database error');
-		$res=$db->select("SELECT idx,name,platform,ver,rev,date FROM bsdsrc WHERE ver=?", array([(int)$id, PDO::PARAM_INT]));
+		$res=$db->selectOne("SELECT idx,name,platform,ver,rev,date FROM bsdsrc WHERE ver=?", array([(int)$id, PDO::PARAM_INT]));
 
 		$hres=$this->getTableChunk('srcslist','tbody');
 		if($hres!==false){
@@ -1659,7 +1659,7 @@ class ClonOS {
 		$db=new Db('base','local');
 		if(!$db->isConnected()) return array('error'=>true,'errorMessage'=>'Database connect error!');
 
-		$base=$db->select("SELECT idx,platform,ver FROM bsdsrc WHERE idx=?", array([$id, PDO::PARAM_INT])); // Casted above as 
+		$base=$db->selectOne("SELECT idx,platform,ver FROM bsdsrc WHERE idx=?", array([$id, PDO::PARAM_INT])); // Casted above as 
 		$ver=$base['ver'];
 		$stable_arr=array('release','stable');
 		$stable_num=strlen(intval($ver))<strlen($ver)?0:1;
@@ -1695,7 +1695,7 @@ class ClonOS {
 		$db=new Db('base','local');
 		if($db->isConnected()){
 			if($bsdsrc){
-				$res=$db->select("SELECT idx,platform,ver FROM bsdsrc WHERE idx=?", array([(int)$id, PDO::PARAM_INT]));
+				$res=$db->selectOne("SELECT idx,platform,ver FROM bsdsrc WHERE idx=?", array([(int)$id, PDO::PARAM_INT]));
 				$res['name']='—';
 				$res['arch']='—';
 				$res['targetarch']='—';
@@ -1703,7 +1703,7 @@ class ClonOS {
 				$res['elf']='—';
 				$res['date']='—';
 			}else{
-				$res=$db->select("SELECT idx,platform,name,arch,targetarch,ver,stable,elf,date FROM bsdbase WHERE ver=?", array([(int)$id, PDO::PARAM_INT]));
+				$res=$db->selectOne("SELECT idx,platform,name,arch,targetarch,ver,stable,elf,date FROM bsdbase WHERE ver=?", array([(int)$id, PDO::PARAM_INT]));
 			}
 			$hres=$this->getTableChunk('baseslist','tbody');
 			if($hres!==false){
@@ -1979,13 +1979,13 @@ class ClonOS {
 
 	function runVNC($jname){
 		$query="SELECT vnc_password FROM bhyve WHERE jname=?";
-		$res=$this->_db_local->select($query, array([$jname]));
+		$res=$this->_db_local->selectOne($query, array([$jname]));
 
 		$pass='cbsd';
 		if($res!==false) $pass=$res['vnc_password'];
 		
 		$resCBSD::run("vm_vncwss jname=%s permit=%s", array($jname, $this->_client_ip));
-		//$res=$this->_db_local->select("SELECT nodeip FROM local", array());
+		//$res=$this->_db_local->selectOne("SELECT nodeip FROM local", array());
 		//$nodeip=$res['nodeip'];
 		// need for IPv4/IPv6 regex here, instead of strlen
 		//if(strlen($nodeip)<7) $nodeip='127.0.0.1';
@@ -2216,7 +2216,7 @@ class ClonOS {
 			$mhash=$_COOKIE['mhash'];
 			if(!preg_match('#^[a-f0-9]{32}$#',$mhash)) return array('error'=>true,'error_message'=>'Bad data');
 			$query1="select user_id from auth_list WHERE sess_id=? limit 1";
-			$res1=$db->select($query1, array([$mhash]));
+			$res1=$db->selectOne($query1, array([$mhash]));
 			{
 				if($res1['user_id']>0)
 				{
@@ -2273,7 +2273,7 @@ class ClonOS {
 		if(isset($user_info['username']) && isset($user_info['password'])){
 			$db=new Db('clonos');
 			if($db->isConnected()) {
-				$res=$db->select("SELECT username FROM auth_user WHERE username=?", array([$user_info['username']]));
+				$res=$db->selectOne("SELECT username FROM auth_user WHERE username=?", array([$user_info['username']]));
 				if(!empty($res)){
 					$res['user_exsts']=true;
 					return $res;
@@ -2318,7 +2318,7 @@ class ClonOS {
 			$db=new Db('clonos');
 			if($db->isConnected()){
 				$pass=$this->getPasswordHash($user_info['password']);
-				$res=$db->select("SELECT id,username,password FROM auth_user WHERE username=? AND is_active=1", array([$user_info['login']]));
+				$res=$db->selectOne("SELECT id,username,password FROM auth_user WHERE username=? AND is_active=1", array([$user_info['login']]));
 				if(empty($res) || $res['password'] != $pass){
 					sleep(3);
 					return array('errorCode'=>1,'message'=>'user not found!');
@@ -2375,7 +2375,7 @@ class ClonOS {
 			if($db->isConnected()){
 				$query="SELECT au.id,au.username FROM auth_user au, auth_list al WHERE al.secure_sess_id=? AND au.id=al.user_id AND au.is_active=1";
 				//echo $query;
-				$res=$db->select($query, array([$secure_memory_hash]));
+				$res=$db->selectOne($query, array([$secure_memory_hash]));
 				//print_r($res);
 				if(!empty($res)){
 					$res['error']=false;
@@ -2405,7 +2405,7 @@ class ClonOS {
 		if(!$db->isConnected()) return array('error'=>true,'error_message'=>'DB connection error!');
 		$user_id=(int)$this->form['user_id'];
 
-		$res=$db->select("SELECT username,first_name,last_name,is_active AS actuser FROM auth_user WHERE id=?", array([$user_id]));
+		$res=$db->selectOne("SELECT username,first_name,last_name,is_active AS actuser FROM auth_user WHERE id=?", array([$user_id]));
 		return array(
 			'dialog'=>$this->form['dialog'],
 			'vars'=>$res,
@@ -2419,7 +2419,7 @@ class ClonOS {
 		$db=new Db('clonos');
 		if(!$db->isConnected()) return array('DB connection error!');
 
-		$res=$db->select("SELECT * FROM auth_user LIMIT 1", array()); // TODO: What?!
+		$res=$db->selectOne("SELECT * FROM auth_user", array()); // TODO: What?!
 		return $res;
 	}
 
@@ -2455,7 +2455,7 @@ class ClonOS {
 		$db=new Db('base','local');
 		if(!$db->isConnected()) return $this->messageError('DB connection error!');
 
-		$res=$db->select(
+		$res=$db->selectOne(
 			"select name,description,pkg_vm_ram,pkg_vm_disk,pkg_vm_cpus from vmpackages where id=?",
 			array([$tpl_id, PDO::PARAM_INT])
 		);
@@ -2567,7 +2567,7 @@ class ClonOS {
 		$name_comment='';
 		$db=new Db('base','local');
 		if($db->isConnected()){
-			$jail=$db->select("SELECT jname FROM jails WHERE jname=?", array([$jname]));
+			$jail=$db->selectOne("SELECT jname FROM jails WHERE jname=?", array([$jname]));
 
 			if($jname==$jail['jname']){
 				$jres=$this->ccmd_getFreeJname(false,$type);
@@ -2670,7 +2670,7 @@ class ClonOS {
 			  FROM jails WHERE jname=?";
 		$db=new Db('base','local');
 		if($db->isConnected()){
-			$quer=$db->select($sql, array([$jail_name]));
+			$quer=$db->selectOne($sql, array([$jail_name]));
 			$html='<table class="summary_table">';
 
 			foreach($quer as $q=>$k){
@@ -2711,7 +2711,7 @@ class ClonOS {
 				bhyve_wire_memory, bhyve_rts_keeps_utc, bhyve_force_msi_irq, bhyve_x2apic_mode,
 				bhyve_mptable_gen, bhyve_ignore_msr_acc, bhyve_vnc_vgaconf text, media_auto_eject,
 				vm_cpu_topology, debug_engine, xhci, cd_boot_firmware, jailed FROM settings";
-			$quer=$db->select($sql, array());
+			$quer=$db->selectOne($sql, array());
 			$html='<table class="summary_table">';
 
 			foreach($quer as $q=>$k){

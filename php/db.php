@@ -130,7 +130,7 @@ class Db {
 
 	# TODO once tested $values can have a default value of an empty array
 	# TODO both selects were assoc
-	function select($sql, $values){
+	function select($sql, $values, $single = false){
 		try {
 			$query = $this->_pdo->prepare($sql);
 			$i = 1;
@@ -143,12 +143,20 @@ class Db {
 				$i++;
 			}
 			$query->execute();
-			$res = $query->fetchAll(PDO::FETCH_ASSOC);
+			if ($single){
+				$res = $query->fetch(PDO::FETCH_ASSOC);
+			} else {
+				$res = $query->fetchAll(PDO::FETCH_ASSOC);
+			}
 			return $res;
 		} catch(PDOException $e) {
 			# TODO: Handling ?
 			return array();
 		}
+	}
+
+	function selectOne($sql, $values){
+		return $this->select($sql, $values, true);
 	}
 
 	function insert($sql, $values){

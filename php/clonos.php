@@ -2021,15 +2021,12 @@ class ClonOS {
 		return $arr;
 	}
 
-	function ccmd_k8sCreate()
-	{
+function ccmd_k8sCreate()
+{
 		$form=$this->form;
 		$res=array();
 		$ass_arr=array(
-			'
-      
-      
-      _nodes'=>'init_masters',
+			'master_nodes'=>'init_masters',
 			'worker_nodes'=>'init_workers',
 			'master_ram'=>'master_vm_ram',
 			'master_cpus'=>'master_vm_cpus',
@@ -2063,7 +2060,6 @@ class ClonOS {
 		{
 			if($form['pv_enable']=='on') $res['pv_enable']="1";
 		}
-
 		$res['kubelet_master']="0";
 		if(isset($form['kubelet_master']))
 		{

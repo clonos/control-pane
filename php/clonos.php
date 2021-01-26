@@ -2021,8 +2021,8 @@ class ClonOS {
 		return $arr;
 	}
 
-function ccmd_k8sCreate()
-{
+	function ccmd_k8sCreate()
+	{
 		$form=$this->form;
 		$res=array();
 		$ass_arr=array(

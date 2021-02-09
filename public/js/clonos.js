@@ -227,6 +227,11 @@ var clonos={
 				if(typeof this.vm_packages_obtain_min_id!='undefined')
 					$('#bhyveObtSettings select[name="vm_packages"]').val(this.vm_packages_obtain_min_id).change();
 			}
+			if(id=='k8s-new')
+			{
+				this.getFreeCname();	// Берём с сервера свободное имя kubernetes
+				//this.trids=this.getTrIdsForCheck('jailslist');
+			}
 			this.dialogShow1(id);
 		}
 	},
@@ -857,6 +862,15 @@ var clonos={
 	{
 		$('dialog#jail-settings input[name="jname"]').val(data.freejname);
 		$('dialog#jail-settings input[name="host_hostname"]').val(data.freejname+'.my.domain');
+	},
+	getFreeCname:function()
+	{
+		this.loadData('getFreeCname',$.proxy(this.onGetFreeCname,this));
+	},
+	onGetFreeCname:function(data)
+	{
+		$('dialog#k8s-new input[name="cname"]').val(data.freejname);
+		//$('dialog#jail-settings input[name="host_hostname"]').val(data.freecname+'.my.domain');
 	},
 	
 	onUsersAdd:function(data)
@@ -1835,6 +1849,11 @@ var clonos={
 					this.imageRemove(trid);
 					return;
 				}
+				if(tblid=='k8slist')
+				{
+					this.ks8Remove(trid);
+					return;
+				}
 				alert(tblid);
 				return;break;
 			case 'icon-arrows-cw':
@@ -2163,9 +2182,36 @@ var clonos={
 		$('div.main').removeClass('asplit');
 	},
 	
-	onK8sCreate:function(data)
+	onK8sCreate:function(tdata)
 	{
-		alert(JSON.stringify(data));
+		var data=JSON.parse(tdata);
+		this.dialogClose();
+		if(typeof data!='undefined')
+		{
+			if(typeof data['Message']!='undefined')
+			{
+				this.notify(data.Message,'success');
+			}
+		}
+	},
+	ks8Remove:function(id)
+	{
+		var c=confirm(this.translate('You want to delete kubernetes «'+id+'»! Are you sure?'));
+		if(!c) return;
+		
+		var posts=[{'name':'k8sname','value':id}];
+		this.loadData('k8sRemove',$.proxy(this.onKs8Remove,this),posts,false);
+	},
+	onKs8Remove:function(tdata)
+	{
+		var data=JSON.parse(tdata);
+		if(typeof data!='undefined')
+		{
+			if(typeof data['Message']!='undefined')
+			{
+				this.notify(data.Message,'success');
+			}
+		}
 	},
 	
 	

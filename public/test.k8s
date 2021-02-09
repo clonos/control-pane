@@ -1,0 +1,1 @@
+{"master_nodes":"1","master_ram":"1","master_cpus":"1","master_img":"10","worker_nodes":"1","worker_ram":"1","worker_cpus":"1","worker_img":"10","pv_enable":0,"kubelet_master":0}

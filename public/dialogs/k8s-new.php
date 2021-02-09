@@ -11,6 +11,10 @@ err_messages.add({
 	<form class="win" method="post" id="k8sNewSettings" onsubmit="return false;">
 		<div class="window-content">
 			<p>
+				<span class="field-name"><?php echo $this->translate('Cluster name');?>:</span>
+				<input type="text" name="cname" value="" pattern="[^0-9]{1}[a-zA-Z0-9]{2,}" required="required" class="edit-disable" />
+			</p>
+			<p>
 				<span class="field-name"><?php echo $this->translate('Master Nodes count');?>:</span>
 				<span class="range">
 					<input type="range" name="master_nodes" class="vHorizon" min="1" max="7" value="1" style="margin:6px 0;" id="rngMNodes" oninput="rngMNodesShow.value=rngMNodes.value">
@@ -42,8 +46,8 @@ err_messages.add({
 			<p>
 				<span class="field-name"><?php echo $this->translate('Worker Nodes count');?>:</span>
 				<span class="range">
-					<input type="range" name="worker_nodes" class="vHorizon" min="1" max="8" value="1" style="margin:6px 0;" id="rngWNodes" oninput="rngWNodesShow.value=rngWNodes.value">
-					<input type="text" disabled="disabled" id="rngWNodesShow" value="1" name="worker_nodes_count">
+					<input type="range" name="worker_nodes" class="vHorizon" min="0" max="8" value="0" style="margin:6px 0;" id="rngWNodes" oninput="rngWNodesShow.value=rngWNodes.value">
+					<input type="text" disabled="disabled" id="rngWNodesShow" value="0" name="worker_nodes_count">
 				</span>
 			</p>
 			<p>

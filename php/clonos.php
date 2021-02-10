@@ -2021,6 +2021,21 @@ class ClonOS {
 		return $arr;
 	}
 
+	function ccmd_getFreeCname()
+	{
+		$arr=array();
+		$add_cmd=' default_jailname=kube';
+		$res=$this->cbsd_cmd("freejname".$add_cmd);
+		if($res['error']){
+			$arr['error']=true;
+			$arr['error_message']=$err['error_message'];
+		}else{
+			$arr['error']=false;
+			$arr['freejname']=$res['message'];
+		}
+		return $arr;
+	}
+
 	function ccmd_k8sCreate()
 	{
 		$form=$this->form;
@@ -2066,7 +2081,9 @@ class ClonOS {
 			if($form['kubelet_master']=='on') $res['kubelet_master']="1";
 		}
 
-		$url='http://144.76.225.238/api/v1/create/move';
+		$cname=$form['cname'];
+
+		$url='http://144.76.225.238/api/v1/create/'.$cname;
 		$result=$this->postCurl($url,$res);
 
 		return $result;

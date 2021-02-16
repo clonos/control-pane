@@ -15,7 +15,7 @@ if($db!==false)
 	$query="select module from sys_helpers_list";
 	if(!$db->error)
 	{
-		$res=$db->select($query);
+		$res=$db->select($query, []);
 		if(!empty($res))
 		{
 			foreach($res as $r)	$sys_helpers[]=$r['module'];
@@ -53,7 +53,7 @@ if($res['retval']==0)
 						}
 					}
 				}
-				if($db!==false && !$db->error) $res=$db->selectOne("select longdesc from system");
+				if($db!==false && !$db->error) $res=$db->selectOne("select longdesc from system", []);
 				
 				if(isset($res['longdesc'])) $description=$res['longdesc']; else $description=$this->translate('no data').'&hellip; ('.$file_name.')';
 			}else{

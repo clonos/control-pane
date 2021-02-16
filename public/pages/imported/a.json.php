@@ -57,7 +57,7 @@ if(!empty($images)) foreach($images as $item)
 		$filesize=$this->fileSizeConvert($size,1024,true);
 		
 		$query="select count(*) as busy from taskd where status<2 and jname='${item['jname']}'";
-		$busy=$this->_db_tasks->selectOne($query);
+		$busy=$this->_db_tasks->selectOne($query, []);
 		$jstatus='';
 		$jbusy='';
 		if($busy['busy']==1)

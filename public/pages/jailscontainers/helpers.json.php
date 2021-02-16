@@ -10,7 +10,7 @@ if(empty($hash))
 		$query="select module from jails_helpers_list";
 		if(!$db->error)
 		{
-			$res=$db->select($query);
+			$res=$db->select($query, []);
 			if(!empty($res))
 			{
 				foreach($res as $r)	$jails_helpers[]=$r['module'];
@@ -24,7 +24,7 @@ if(empty($hash))
 		$db=new Db('helper',array('jname'=>$jail_name,'helper'=>$helper));
 		if(!$db->error)	// !error — значит хелпер установлен
 		{
-			$res=$db->selectOne("select longdesc from system");
+			$res=$db->selectOne("select longdesc from system", []);
 			if(isset($res['longdesc'])) $description=$res['longdesc']; else $description=$this->translate('no data').'&hellip; ('.$file_name.')';
 			$lst[]=array('helper'=>$helper,'description'=>$description);
 		}else{

@@ -1521,7 +1521,7 @@ class ClonOS {
 		if(!$db->isConnected()) return array('error'=>'Database error');
 
 		$res=$db->insert("INSERT INTO vpnet (name,vpnet) VALUES (?, ?)", array([$form['netname']],[$form['network']]));
-		if($res['error']) return array('error'=>$res);
+		if($res['error'] == true) return array('error'=>$res);
 
 		$html='';
 		$hres=$this->getTableChunk('vpnetslist','tbody');
@@ -2513,10 +2513,12 @@ class ClonOS {
 			[$this->form['pkg_vm_cpus']],
 			[$owner]
 		));
-		if($res===false) return $this->messageError('sql error!');
-		if(!$res['error']) return $this->messageSuccess($res); 
 
-		return $this->messageError('sql error!',$res);
+		if($res['error'] == false){
+			return $this->messageSuccess($res); 
+		} else {
+			return $this->messageError('sql error!',$res);
+		}
 	}
 
 	function ccmd_vmTemplateEditInfo(){

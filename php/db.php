@@ -130,7 +130,6 @@ class Db {
 	}
 
 	# TODO once tested $values can have a default value of an empty array
-	# TODO both selects were assoc
 	function select($sql, $values, $single = false){
 		try {
 			$query = $this->_pdo->prepare($sql);
@@ -162,6 +161,7 @@ class Db {
 
 	function insert($sql, $values){
 		try {
+			$this->_pdo->beginTransaction();
 			$query = $this->_pdo->prepare($sql);
 			$i = 1;
 			foreach($values as $v){
@@ -176,6 +176,8 @@ class Db {
 			$lastId = $this->_pdo->lastInsertId();
 			$this->_pdo->commit();
 		} catch(PDOException $e) {
+			$this->_pdo->rollBack();
+			#throw new Exception($e->getMessage());
 			return array('error'=>true,'info'=>$e->getMessage());
 		}
 		return array('error'=>false,'lastID'=>$lastId);
@@ -183,6 +185,7 @@ class Db {
 
 	function update($sql, $values){
 		try {
+			$this->_pdo->beginTransaction();
 			$query = $this->_pdo->prepare($sql);
 			$i = 1;
 			foreach($values as $v){
@@ -197,7 +200,9 @@ class Db {
 			$rowCount=$query->rowCount();
 			$this->_pdo->commit();
 		} catch(PDOException $e) {
-			return false;//$e->getMessage();
+			$this->_pdo->rollBack();
+			#return false;
+			throw new Exception($e->getMessage());
 		}
 		return array('rowCount'=>$rowCount);
 	}

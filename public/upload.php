@@ -1,6 +1,8 @@
 <?php
 header('Content-Type: application/json');
 
+require_once("cbsd.php");
+
 $cmd='';
 
 if($_SERVER['REQUEST_METHOD'] === 'POST')
@@ -41,9 +43,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST')
 			$status = 'ok';	//'Successfully uploaded!';
 			if($cmd=='import')
 			{
-				$username=$clonos->getUserName();
-				$command='task owner='.$username.' mode=new /usr/local/bin/cbsd jimport jname='.$filename.' inter=0';
-				$res=$clonos->cbsd_cmd($command);
+				$res=CBSD::run('task owner=%s mode=new /usr/local/bin/cbsd jimport jname=%s' inter=0', [$clonos->getUserName(), $filename]);
 			}
 		}else{
 			$status = 'Upload Fail: Unknown error occurred!';

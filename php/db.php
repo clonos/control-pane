@@ -173,7 +173,7 @@ class Db {
 				$i++;
 			}
 			$query->execute();
-			$query->commit();
+			$this->_pdo->commit();
 		} catch(PDOException $e) {
 			return array('error'=>true,'info'=>$e->getMessage());
 		}
@@ -194,7 +194,7 @@ class Db {
 			}
 			$query->execute();
 			$rowCount=$query->rowCount();
-			$query->commit();
+			$this->_pdo->commit();
 		} catch(PDOException $e) {
 			return false;//$e->getMessage();
 		}

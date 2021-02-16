@@ -173,11 +173,12 @@ class Db {
 				$i++;
 			}
 			$query->execute();
+			$lastId = $this->_pdo->lastInsertId();
 			$this->_pdo->commit();
 		} catch(PDOException $e) {
 			return array('error'=>true,'info'=>$e->getMessage());
 		}
-		return array('error'=>false,'lastID'=>$query->lastInsertId());
+		return array('error'=>false,'lastID'=>$lastId);
 	}
 
 	function update($sql, $values){

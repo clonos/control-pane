@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-require_once("cbsd.php");
+require_once("../php/cbsd.php");
 
 $cmd='';
 

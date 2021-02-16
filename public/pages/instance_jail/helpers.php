@@ -1,6 +1,6 @@
 <?php
 
-require_once("cbsd.php");
+require_once("../php/cbsd.php");
 
 $hash=$this->url_hash;	//=preg_replace('/^#/','',$this->_vars['hash']);
  

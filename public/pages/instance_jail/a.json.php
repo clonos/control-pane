@@ -5,7 +5,7 @@ if(!empty($this->_vars['hash']))
 	return;
 }
 
-require_once("cbsd.php");
+require_once("../php/cbsd.php");
 
 $sys_helpers=array();
 //	'network','cbsd','bhyvenet','general','zfsinstall','userspw','natcfg','jconstruct',

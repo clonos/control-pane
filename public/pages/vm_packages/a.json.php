@@ -4,7 +4,7 @@ $html='';
 $db=new Db('base','local');
 if($db!==false)
 {
-	$res=$db->select("select id,name,description,pkg_vm_ram,pkg_vm_disk,pkg_vm_cpus,owner from vmpackages order by name asc");
+	$res=$db->select("select id,name,description,pkg_vm_ram,pkg_vm_disk,pkg_vm_cpus,owner from vmpackages order by name asc", []);
 }
 
 $nth=0;

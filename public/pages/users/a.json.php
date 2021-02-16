@@ -16,7 +16,7 @@ $html='';
 $db=new Db('clonos');
 if($db!==false)
 {
-	$res=$db->select("select id,username,first_name,last_name,date_joined,last_login,is_active from auth_user order by date_joined desc");
+	$res=$db->select("select id,username,first_name,last_name,date_joined,last_login,is_active from auth_user order by date_joined desc", []);
 }
 
 $nth=0;

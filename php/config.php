@@ -1,5 +1,7 @@
 <?php
 
+require_once("cbsd.php");
+
 class Config
 {
 	/* Список языков, используемых в проекте */

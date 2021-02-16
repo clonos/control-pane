@@ -1,7 +1,7 @@
 <?php
 
 $db=new Db('base','authkey');
-$res=$db->select('SELECT idx,name,authkey FROM authkey;');
+$res=$db->select('SELECT idx,name,authkey FROM authkey;', []);
 
 $html='';
 if($res!==false)

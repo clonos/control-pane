@@ -91,7 +91,7 @@ class ClonOS {
 		}
 
 		$this->config=new Config();
-   
+
 		/* determine lang */
 		if(!array_key_exists($this->language, $this->config->languages)) $this->language='en';
 		include($this->realpath_public.'/lang/'.$this->language.'.php');
@@ -1564,7 +1564,7 @@ class ClonOS {
 		$res=$db->selectOne('SELECT * FROM media WHERE idx=?', array([(int)$this->form['media_id'], PDO::PARAM_INT]));
 		if($res===false || empty($res)) return array('error'=>true,'res'=>print_r($res,true));
 
-		//if($res['jname']=='-')	// ÐµÑÐ»Ð¸ Ð¼ÐµÐ´Ð¸Ð° Ð¾ÑÐ²ÑÐ·Ð°Ð½Ð°, ÑÐ¾ Ð¿ÑÐ¾Ñ
+		//if($res['jname']=='-')	// если медиа отвязана, то про�
 
 		$res=CBSD::run(
 			'media mode=remove name="%s" path="%s" jname="%s" type="%s"', //.$res['name']
@@ -1664,7 +1664,7 @@ class ClonOS {
 		$stable_arr=array('release','stable');
 		$stable_num=strlen(intval($ver))<strlen($ver)?0:1;
 		$stable=$stable_arr[$stable_num];
-		$bid=$ver.'-amd64-'.$stable_num;	// !!! ÐÐÐ¡Ð¢Ð«ÐÐ¬
+		$bid=$ver.'-amd64-'.$stable_num;	// !!! КОСТЫЛЬ
 
 		$res=$this->fillRepoTr($id);
 		$html=$res['html'];
@@ -1696,12 +1696,12 @@ class ClonOS {
 		if($db->isConnected()){
 			if($bsdsrc){
 				$res=$db->selectOne("SELECT idx,platform,ver FROM bsdsrc WHERE idx=?", array([(int)$id, PDO::PARAM_INT]));
-				$res['name']='â';
-				$res['arch']='â';
-				$res['targetarch']='â';
+				$res['name']='—';
+				$res['arch']='—';
+				$res['targetarch']='—';
 				$res['stable']=strlen(intval($res['ver']))<strlen($res['ver'])?0:1;
-				$res['elf']='â';
-				$res['date']='â';
+				$res['elf']='—';
+				$res['date']='—';
 			}else{
 				$res=$db->selectOne("SELECT idx,platform,name,arch,targetarch,ver,stable,elf,date FROM bsdbase WHERE ver=?", array([(int)$id, PDO::PARAM_INT]));
 			}
@@ -1753,7 +1753,7 @@ class ClonOS {
 			$stable_num=strlen(intval($ver))<strlen($ver)?0:1;	//'release':'stable';
 			$stable=$stable_arr[$stable_num];
 
-			$bid=$ver.'-amd64-'.$stable_num;	// !!! ÐÐÐ¡Ð¢Ð«ÐÐ¬
+			$bid=$ver.'-amd64-'.$stable_num;	// !!! КОСТЫЛЬ
 
 			$vars=array(
 				'nth-num'=>'nth0',
@@ -1761,12 +1761,12 @@ class ClonOS {
 				'node'=>'local',
 				'ver'=>$ver,
 				'name'=>'base',
-				'platform'=>'â',
-				'arch'=>'â',
-				'targetarch'=>'â',
+				'platform'=>'—',
+				'arch'=>'—',
+				'targetarch'=>'—',
 				'stable'=>$stable,
-				'elf'=>'â',
-				'date'=>'â',
+				'elf'=>'—',
+				'date'=>'—',
 				'maintenance'=>' busy',
 				'protitle'=>$this->translate('Delete'),
 			);
@@ -2021,11 +2021,9 @@ class ClonOS {
 		return $arr;
 	}
 
-	function ccmd_getFreeCname()
-	{
+	function ccmd_getFreeCname(){
 		$arr=array();
-		$add_cmd=' default_jailname=kube';
-		$res=$this->cbsd_cmd("freejname".$add_cmd);
+		$res=$this->CBSD::run("freejname default_jailname=kube", []);
 		if($res['error']){
 			$arr['error']=true;
 			$arr['error_message']=$err['error_message'];
@@ -2036,8 +2034,7 @@ class ClonOS {
 		return $arr;
 	}
 
-	function ccmd_k8sCreate()
-	{
+	function ccmd_k8sCreate(){
 		$form=$this->form;
 		$res=array();
 		$ass_arr=array(
@@ -2075,6 +2072,7 @@ class ClonOS {
 		{
 			if($form['pv_enable']=='on') $res['pv_enable']="1";
 		}
+
 		$res['kubelet_master']="0";
 		if(isset($form['kubelet_master']))
 		{
@@ -2100,13 +2098,14 @@ class ClonOS {
 			return array('error'=>'true','errorMessage'=>'something wrong...');
 		}
 	}
-	
+
 	function postCurl($url,$vars=false)
 	{
 		if($vars===false) return array('error'=>true,'errorMessage'=>'something wrong...');
-		
+
 		$txt_vars=json_encode($vars);
 		//$txt_vars=http_build_query($vars);
+
 
 		$ch = curl_init($url);
 //		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -2664,7 +2663,7 @@ class ClonOS {
 	function ccmd_imageExport(){
 		// cbsd jexport jname=XXX dstdir=<path_to_imported_dir>
 		$jname=$this->form['id'];
-		if(empty($jname)) $this->messageError('Jname is incorrect in export command! Is Â«'.$jname.'Â».');
+		if(empty($jname)) $this->messageError('Jname is incorrect in export command! Is «'.$jname.'».');
 
 		return CBSD::run(
 			'task owner=%s mode=new {cbsd_loc} jexport gensize=1 jname=%s dstdir=%s',

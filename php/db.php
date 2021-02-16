@@ -13,7 +13,7 @@ class Db {
 	*/
 	function __construct($place='base', $database='', $connect = null){
 
-		if (!is_null($connect)){
+		if (is_null($connect)){
 			list($file_name, $connect) = $this->prep_connect($place, $database);
 
 			if(is_null($file_name) || !file_exists($file_name)){
@@ -38,6 +38,7 @@ class Db {
 			$this->error=true;
 			$this->error_message=$e->getMessage();	//'DB Error';
 		}
+
 	}
 
 	private function prep_connect($place, $database){

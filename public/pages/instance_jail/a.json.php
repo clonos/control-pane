@@ -53,7 +53,7 @@ if($res['retval']==0)
 						}
 					}
 				}
-				if($db!==false && !$db->error) $res=$db->selectAssoc("select longdesc from system limit 1");
+				if($db!==false && !$db->error) $res=$db->selectOne("select longdesc from system");
 				
 				if(isset($res['longdesc'])) $description=$res['longdesc']; else $description=$this->translate('no data').'&hellip; ('.$file_name.')';
 			}else{

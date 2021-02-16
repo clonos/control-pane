@@ -24,7 +24,7 @@ if(empty($hash))
 		$db=new Db('helper',array('jname'=>$jail_name,'helper'=>$helper));
 		if(!$db->error)	// !error — значит хелпер установлен
 		{
-			$res=$db->selectAssoc("select longdesc from system limit 1");
+			$res=$db->selectOne("select longdesc from system");
 			if(isset($res['longdesc'])) $description=$res['longdesc']; else $description=$this->translate('no data').'&hellip; ('.$file_name.')';
 			$lst[]=array('helper'=>$helper,'description'=>$description);
 		}else{

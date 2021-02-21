@@ -14,7 +14,7 @@ $res_array=array(
 
 $nodenames=array('local');
 $db=new Db('base','nodes');
-$nodes=$db->select('select nodename,ip from nodelist');
+$nodes=$db->select('select nodename,ip from nodelist', []);
 if(!empty($nodes))foreach($nodes as $node)
 {
 	$idle=$this->check_locktime($node['ip']);
@@ -39,10 +39,10 @@ if(!empty($nodenames))foreach($nodenames as $name)
 		exit;
 	}
 	
-	$jcounts=$ndb->selectAssoc('SELECT COUNT(*) as count FROM jails;');
+	$jcounts=$ndb->selectOne('SELECT COUNT(*) as count FROM jails;', []);
 	$res_array['num-jails']+=$jcounts['count'];
 	
-	$counts=$ndb->select('SELECT ncpu,physmem,cpufreq FROM local;');
+	$counts=$ndb->select('SELECT ncpu,physmem,cpufreq FROM local;', []);
 	if(!empty($counts))foreach($counts as $cel)
 	{
 		$res_array['num-cores']+=$cel['ncpu'];

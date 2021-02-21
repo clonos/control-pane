@@ -2,7 +2,7 @@
 $html='';
 
 $db=new Db('base','nodes');
-$nodes=$db->select('select nodename,ip from nodelist order by nodename desc');
+$nodes=$db->select('select nodename,ip from nodelist order by nodename desc', []);
 $nodes[]=array('nodename'=>'local');
 $nodes=array_reverse($nodes);
 
@@ -14,7 +14,7 @@ if(!empty($nodes))foreach($nodes as $node)
 	$db1=new Db('base',$node['nodename']);
 	if($db1!==false)
 	{
-		$bases=$db1->select("SELECT idx,name,platform,ver,rev,date FROM bsdsrc ORDER BY CAST(ver AS int)");
+		$bases=$db1->select("SELECT idx,name,platform,ver,rev,date FROM bsdsrc ORDER BY CAST(ver AS int)", []);
 		
 		$num=$nth & 1;
 		if(!empty($bases)) foreach($bases as $base)

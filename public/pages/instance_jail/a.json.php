@@ -5,6 +5,8 @@ if(!empty($this->_vars['hash']))
 	return;
 }
 
+require_once("../php/cbsd.php");
+
 $sys_helpers=array();
 //	'network','cbsd','bhyvenet','general','zfsinstall','userspw','natcfg','jconstruct',
 //);
@@ -15,7 +17,7 @@ if($db!==false)
 	$query="select module from sys_helpers_list";
 	if(!$db->error)
 	{
-		$res=$db->select($query);
+		$res=$db->select($query, []);
 		if(!empty($res))
 		{
 			foreach($res as $r)	$sys_helpers[]=$r['module'];
@@ -26,7 +28,7 @@ if($db!==false)
 
 $html='';
 $arr=array();
-$res=$this->cbsd_cmd('forms header=0');
+$res=CBSD::run('forms header=0', []);
 if($res['retval']==0)
 {
 	$empty_logo='/images/logo/empty.png';
@@ -46,14 +48,14 @@ if($res['retval']==0)
 					$file_name=$db->getFileName();
 					if(!file_exists($file_name))
 					{
-						$res=$this->cbsd_cmd('forms module='.$item.' inter=0');
+						$res=CBSD::run('forms module=%s inter=0',[$item]);
 						if($res['retval']==0)
 						{
 							$db=new Db('helper',$item);
 						}
 					}
 				}
-				if($db!==false && !$db->error) $res=$db->selectAssoc("select longdesc from system limit 1");
+				if($db!==false && !$db->error) $res=$db->selectOne("select longdesc from system", []);
 				
 				if(isset($res['longdesc'])) $description=$res['longdesc']; else $description=$this->translate('no data').'&hellip; ('.$file_name.')';
 			}else{

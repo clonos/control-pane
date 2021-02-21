@@ -4,7 +4,7 @@ $html='';
 //if($hres!==false) $thead=$hres[1];
 
 $db=new Db('base','nodes');
-$res=$db->select('select nodename from nodelist');
+$res=$db->select('select nodename from nodelist', []);
 $nodes=array('local');
 if(!empty($res))foreach($res as $val) $nodes[]=$val['nodename'];
 
@@ -19,7 +19,7 @@ if(!empty($nodes))foreach($nodes as $node)
 	$db1=new Db('base',$node);
 	if($db1!==false)
 	{
-		$bhyves=$db1->select("SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden,protected,bhyve_vnc_tcp_bind FROM bhyve where hidden!=1 order by jname asc;");
+		$bhyves=$db1->select("SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden,protected,bhyve_vnc_tcp_bind FROM bhyve where hidden!=1 order by jname asc;", []);
 		//$allnodes[$node]=$bhyves;
 		
 		$num=$nth & 1;

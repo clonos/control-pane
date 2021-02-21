@@ -3,7 +3,7 @@
 $username=$this->_user_info['username'];
 
 $db=new Db('base','cbsdtaskd');
-$res=$db->select("SELECT id,st_time,end_time,cmd,status,errcode,logfile FROM taskd WHERE owner='${username}' ORDER BY id DESC");
+$res=$db->select("SELECT id,st_time,end_time,cmd,status,errcode,logfile FROM taskd WHERE owner='?' ORDER BY id DESC", array([$username]));
 
 $html='';
 if($res!==false)

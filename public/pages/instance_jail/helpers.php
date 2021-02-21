@@ -1,12 +1,14 @@
 <?php
 
+require_once("../php/cbsd.php");
+
 $hash=$this->url_hash;	//=preg_replace('/^#/','',$this->_vars['hash']);
  
 $db_path=false;
 if(!isset($this->_vars['db_path']))
 {
 	//$db_path=$this->_vars['db_path'];
-	$res=$this->cbsd_cmd('make_tmp_helper module='.$hash);
+	$res=CBSD::run('make_tmp_helper module=%s', [$hash]);
 	if($res['retval']==0)
 	{
 		$db_path=$res['message'];

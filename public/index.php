@@ -8,7 +8,11 @@ if(preg_match('/(?i)msie [5-9]/',$_SERVER['HTTP_USER_AGENT']))
 $_REALPATH=realpath('../');
 $uri=trim($_SERVER['REQUEST_URI'],'/');
 include($_REALPATH.'/php/clonos.php');
+include($_REALPATH.'/php/menu.php');
 $clonos=new ClonOS($_REALPATH,$uri);
+$menu=new Menu($this, $uri);
+$realpath_public=$_REALPATH.'/public/'; # /usr/home/web/cp/clonos/public/
+$locale = new Locale($realpath_public);
 //echo json_encode($clonos->config->os_types);exit;
 if(isset($_GET['upload']))
 {
@@ -23,7 +27,7 @@ if(isset($_GET['download']))
 	exit;
 }
 
-$lang=$clonos->getLang();
+$lang=$locale->get_lang();
 $root=trim($_SERVER['DOCUMENT_ROOT'],DIRECTORY_SEPARATOR);
 $_ds=DIRECTORY_SEPARATOR;
 
@@ -38,8 +42,7 @@ $json_name=$file_path.'a.json.php';
 
 if(empty($uri))
 {
-	$key=$clonos->menu->first_key;
-	header('Location: /'.$key.'/',true);
+	header('Location: /'.$menu->first_key.'/',true);
 	exit;
 }
 
@@ -57,7 +60,7 @@ if(!$user_info['error'])
 <!DOCTYPE html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>ClonOS — <?php echo $clonos->menu->title; ?></title>
+	<title>ClonOS — <?php echo $menu->title; ?></title>
 	<link href="/images/favicon.ico?" rel="shortcut icon" type="image/x-icon" />
 	<script src="/js/jquery.js" type="text/javascript"></script>
 	<script src="/js/clonos.js" type="text/javascript"></script>
@@ -98,7 +101,7 @@ if(!$user_info['error'])
 <?php
 if(file_exists($file_name)) include($file_name); else
 {
-	echo '<h1>'.$clonos->translate('Not implemented yet').'!</h1>';
+	echo '<h1>'.$locale->translate('Not implemented yet').'!</h1>';
 }
 $clonos->placeDialogs();
 ?>
@@ -110,16 +113,16 @@ $clonos->placeDialogs();
 			</dl>
 		</div>
 		<div class="right">
-			<h2><?php echo $clonos->translate('CPU usage');?>, %:</h2>
+			<h2><?php echo $locale->translate('CPU usage');?>, %:</h2>
 			<div class="graph v-black g--summary-cpu l-cpu"></div>
 			<br />
-			<h2><?php echo $clonos->translate('Memory usage');?>, %:</h2>
+			<h2><?php echo $locale->translate('Memory usage');?>, %:</h2>
 			<div class="graph v-black g--summary-mem l-mem"></div>
 			<br />
-			<h2><?php echo $clonos->translate('I/O storage');?>, iops:</h2>
+			<h2><?php echo $locale->translate('I/O storage');?>, iops:</h2>
 			<div class="graph v-black g--summary-iops l-read,write pr-no te-iops"></div>
 			<br />
-			<h2><?php echo $clonos->translate('I/O storage');?>, bit per seconds:</h2>
+			<h2><?php echo $locale->translate('I/O storage');?>, bit per seconds:</h2>
 			<div class="graph v-black g--summary-bps l-read,write pr-no te-bps"></div>
 		</div>
 </div></div></div></div></main>
@@ -127,40 +130,40 @@ $clonos->placeDialogs();
 <div class="menu"><div id="menu">
 	<div class="closer"></div>
 <?php
-echo $clonos->menu->html;
+echo $menu->html;
 ?><div id="console"></div>
 </div></div>
 
 <header>
 	<div class="top-right">
 		<span class="txt">
-			<a href="https://www.bsdstore.ru/ru/donate.html" target="_blank"><?php echo $clonos->translate('DONATE'); ?></a>
+			<a href="https://www.bsdstore.ru/ru/donate.html" target="_blank"><?php echo $locale->translate('DONATE'); ?></a>
 			<span class="space"></span>
-			<?php echo $clonos->translate('VERSION'),': ',file_get_contents($clonos->realpath.'version'); ?>
+			<?php echo $locale->translate('VERSION'),': ',file_get_contents($clonos->realpath.'version'); ?>
 			<span class="space"></span>
-			<?php echo $clonos->translate('THEMES'); ?>:
+			<?php echo $locale->translate('THEMES'); ?>:
 		</span>
 		<span class="ch_theme">
 			 <span class="light"></span><span class="dark"></span>
 		</span>
 	</div>
 	<div class="header">
-	<span id="title"><?php echo $clonos->menu->title; ?></span>
+	<span id="title"><?php echo $menu->title; ?></span>
 	<ul>
 		<li class="mhome"><a href="/">Home</a></li>
 <?php if($clonos->environment=='development') { ?>
-		<li><a href="/settings/"><?php echo $clonos->translate('Settings'); ?></a></li>
+		<li><a href="/settings/"><?php echo $locale->translate('Settings'); ?></a></li>
 <?php } ?>
-		<li><a href="/users/"><?php echo $clonos->translate('Users'); ?></a></li>
+		<li><a href="/users/"><?php echo $locale->translate('Users'); ?></a></li>
 <!--
-		<li><a href="/profile/"><?php echo $clonos->translate('Profile'); ?></a></li>
-		<li><a href="/support/"><?php echo $clonos->translate('Support'); ?></a></li>
+		<li><a href="/profile/"><?php echo $locale->translate('Profile'); ?></a></li>
+		<li><a href="/support/"><?php echo $locale->translate('Support'); ?></a></li>
 -->
 		<li><a name="">
 			<select id="lng-sel">
 <?php
-$_languages=$clonos->config->languages;
-if(isset($_languages))foreach($_languages as $lng=>$lngname)
+$_languages=$locale->get_available_languages();
+foreach($_languages as $lng=>$lngname)
 {
 	if($lang==$lng) $sel=' selected="selected"'; else $sel='';
 	echo '				<option value="'.$lng.'"'.$sel.'>'.$lngname.'</option>'.PHP_EOL;

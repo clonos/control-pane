@@ -27,9 +27,7 @@
 class Menu
 {
 	public $html=array();
-	public $name='';
 	public $title='Error';
-	public $path='';
 	public $first_key=array();
 
 	function __construct($_REALPATH,$uri)
@@ -37,10 +35,7 @@ class Menu
 		$realpath_public=$_REALPATH.'/public/'; # /usr/home/web/cp/clonos/public/
 		$lang = new Locale($realpath_public);
 		$menu_config = Config::$menu;
-		if(!empty($menu_config)){
-			reset($menu_config);
-			$this->first_key=key($menu_config);
-		}
+		$this->first_key = array_key_first($menu_config);
 
 		if(getenv('APPLICATION_ENV') != 'development'){
 			unset($menu_config['sqlite']);
@@ -51,19 +46,16 @@ class Menu
 		//$qstr=trim($_SERVER['REQUEST_URI'],'/');
 		$qstr='';
 		$uri_chunks=Utils::gen_uri_chunks($uri);
-		if(isset($uri_chunks[0]))
+		if(isset($uri_chunks[0])){
 			$qstr=trim($uri_chunks[0],'/');
-		$this->path=$qstr;	//$_MENU_PATH
-		if(!empty($menu_config))foreach($menu_config as $key=>$val){
+		}
+		if(!empty($menu_config))foreach($menu_config as $link=>$val){
 			$mname=$lang->translate($val['name']);
 			$mtitle=$lang->translate($val['title']);
-
-			$link=$key;
 			$sel='';
-			if($qstr==$key){
+			if($qstr==$link){
 				$sel=' class="sel"';
 				$this->title=$mtitle;	//$_TITLE
-				$this->name=$mname;		//$_MENU_NAME
 			}
 
 			$icon='empty';
@@ -72,8 +64,7 @@ class Menu
 			$this->html.='	<li><a href="/'.$link.'/" title="'.$mtitle.'"'.$sel.'>'.$span.'<span class="mtxt">'.$mname.'</span></a>';
 			if(!empty($val['submenu'])){
 				$this->html.= PHP_EOL.'		<ul class="submenu">'.PHP_EOL;
-				foreach($val['submenu'] as $k=>$s)
-				{
+				foreach($val['submenu'] as $k=>$s){
 					$sname=$lang->translate($s['name']);
 					$stitle=$lang->translate($s['title']);
 
@@ -83,7 +74,6 @@ class Menu
 					if($qstr==$sl){
 						$ssel=' class="sel"';
 						$this->title=$stitle;
-						$this->name=$sname;
 					}
 					$this->html.= '			<li><a href="/'.$slink.'/" title="'.$stitle.'"'.$ssel.'>'.$sname.'</a></li>'.PHP_EOL;
 				}
@@ -96,8 +86,9 @@ class Menu
 
 		if($this->title=='Error'){
 			$other_titles = Config::$other_titles;
-			if(isset($other_titles[$qstr]))
+			if(isset($other_titles[$qstr])){
 				$this->title=$lang->translate($other_titles[$qstr]);
+			}
 		}
 	}
 }

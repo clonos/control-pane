@@ -11,18 +11,17 @@ require_once($_real_path.'/php/clonos.php');
 require_once($_real_path.'/php/menu.php');
 $chunks=Utils::gen_uri_chunks($uri);
 $clonos=new ClonOS($_real_path, $chunks);
-$cbsd = new CBSD();
 $locale = new Locale($_real_path.'/public/'); # /usr/home/web/cp/clonos/public/
 $menu=new Menu($locale, $chunks);
 
 if(isset($_GET['upload'])){
 	include('upload.php');
-	$cbsd->register_media($path,$file,$ext);
+	CBSD::register_media($path,$file,$ext);
 	exit;
 }
 if(isset($_GET['download'])){
 	include('download.php');
-	$cbsd->register_media($path,$file,$ext);
+	CBSD::register_media($path,$file,$ext);
 	exit;
 }
 
@@ -69,7 +68,7 @@ if(!$user_info['error']){
 	<meta name="keywords" content="" />
 	<meta name="description" content="" />
 	<script type="text/javascript">
-		_server_name='<?php echo $clonos->server_name; ?>';_first_start=true;
+		_first_start=true;
 		err_messages={add:function(arr){for(n in arr){err_messages[n]=arr[n];}}};
 		<?php if(isset($user_info_txt)) echo $user_info_txt; ?>
 	</script>

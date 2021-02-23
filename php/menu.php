@@ -30,10 +30,8 @@ class Menu
 	public $title='Error';
 	public $first_key=array();
 
-	function __construct($_REALPATH,$uri)
+	function __construct(Locale $lang,$uri)
 	{
-		$realpath_public=$_REALPATH.'/public/'; # /usr/home/web/cp/clonos/public/
-		$lang = new Locale($realpath_public);
 		$menu_config = Config::$menu;
 		$this->first_key = array_key_first($menu_config);
 
@@ -49,7 +47,7 @@ class Menu
 		if(isset($uri_chunks[0])){
 			$qstr=trim($uri_chunks[0],'/');
 		}
-		if(!empty($menu_config))foreach($menu_config as $link=>$val){
+		foreach($menu_config as $link=>$val){
 			$mname=$lang->translate($val['name']);
 			$mtitle=$lang->translate($val['title']);
 			$sel='';

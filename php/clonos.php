@@ -1858,10 +1858,10 @@ class ClonOS {
 			'forms inter=0 module=%s formfile=%s group=add',
 			array($helper, $db_path)
 		);
-		$form=new Forms('',$helper,$db_path);
-		$res=$form->generate();
 
-		return array('html'=>$res['html']);
+		$html=(new Forms('', $helper, $db_path))->generate();
+
+		return array('html'=>$html);
 	}
 
 	function addHelperGroup($mode){
@@ -1878,10 +1878,9 @@ class ClonOS {
 			if($res['retval']==0) $db_path=$res['message'];
 		}
 		CBSD::run('forms inter=0 module=%s formfile=%s group=add', array($module, $db_path));
-		$form=new Forms('',$module,$db_path);
-		$res=$form->generate();
+		$html=(new Forms('',$module,$db_path))->generate();
 
-		return array('db_path'=>$db_path,'html'=>$res['html']);
+		return array('db_path'=>$db_path,'html'=>$html);
 	}
 
 	function deleteHelperGroup($mode){
@@ -1899,10 +1898,9 @@ class ClonOS {
 			'forms inter=0 module=%s formfile=%s group=del index=%s',
 			array($module, $db_path, $index)
 		);
-		$form=new Forms('',$module,$db_path);
-		$res=$form->generate();
+		$html=(new Forms('',$module,$db_path))->generate();
 
-		return array('db_path'=>$db_path,'html'=>$res['html']);
+		return array('db_path'=>$db_path,'html'=>$html);
 	}
 
 	//function deleteJailHelperGroup(){
@@ -1923,10 +1921,8 @@ class ClonOS {
 			'forms inter=0 module=%s formfile=%s group=del index=%s',
 			array($helper, $db_path, $index)
 		);
-		$form=new Forms('',$helper,$db_path);
-		$res=$form->generate();
-
-		return array('html'=>$res['html']);
+		$html=(new Forms('',$helper,$db_path))->generate();
+		return array('html'=>$html);
 	}
 
 	function useDialogs($arr=array()){

@@ -20,8 +20,7 @@ if(!isset($this->_vars['db_path']))
 	$db_path=$this->_vars['db_path'];
 }
 
-$form=new Forms('',$hash,$db_path);
-$res=$form->generate();
+$res_html=(new Forms('',$hash,$db_path))->generate();
 
 $freejname='';
 $jres=$this->getFreeJname(true);
@@ -48,6 +47,6 @@ $html=<<<EOT
 EOT;
 	
 
-$html.='<h1>Helper: '.$hash.'</h1>'.$res['html'];
+$html.='<h1>Helper: '.$hash.'</h1>'.$res_html;
 
-echo json_encode(array('html'=>$html,'func'=>'fillTab'));	//,'currents'=>$res['currents']
+echo json_encode(array('html'=>$html,'func'=>'fillTab'));

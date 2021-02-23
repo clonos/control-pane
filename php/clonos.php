@@ -2492,10 +2492,12 @@ class ClonOS {
 			[$this->form['pkg_vm_cpus']],
 			[$owner]
 		));
-		if($res===false) return $this->messageError('sql error!');
-		if(!$res['error']) return $this->messageSuccess($res); 
 
-		return $this->messageError('sql error!',$res);
+		if($res['error'] == false){
+			return $this->messageSuccess($res); 
+		} else {
+			return $this->messageError('sql error!',$res);
+		}
 	}
 
 	function ccmd_vmTemplateEditInfo(){

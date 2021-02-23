@@ -56,21 +56,21 @@ class ClonOS {
 	private $_db_jails=null;
 */
 
-	function __construct($_REALPATH,$uri=''){	# /usr/home/web/cp/clonos
+	function __construct($_real_path,$uri_chunks = null){	# /usr/home/web/cp/clonos
 
 		$this->_post=($_SERVER['REQUEST_METHOD']=='POST');
 		$this->_vars=$_POST;
 
 		$this->workdir=getenv('WORKDIR'); # // /usr/jails
 		$this->environment=getenv('APPLICATION_ENV');
-		$this->realpath=$_REALPATH.'/'; # /usr/home/web/cp/clonos/
-		$this->realpath_php=$_REALPATH.'/php/'; # /usr/home/web/cp/clonos/php/
-		$this->realpath_public=$_REALPATH.'/public/'; # /usr/home/web/cp/clonos/public/
-		$this->media_import=$_REALPATH.'/media_import/';
+		$this->realpath=$_real_path.'/'; # /usr/home/web/cp/clonos/
+		$this->realpath_php=$_real_path.'/php/'; # /usr/home/web/cp/clonos/php/
+		$this->realpath_public=$_real_path.'/public/'; # /usr/home/web/cp/clonos/public/
+		$this->media_import=$_real_path.'/media_import/';
 
 		if($this->environment=='development'){
 			$sentry_file=$this->realpath_php.'sentry.php';
-			if(file_exists($sentry_file))include($sentry_file);
+			if(file_exists($sentry_file)) include($sentry_file);
 		}
 
 		if(isset($_SERVER['SERVER_NAME']) && !empty(trim($_SERVER['SERVER_NAME']))){
@@ -79,7 +79,11 @@ class ClonOS {
 			$this->server_name=$_SERVER['SERVER_ADDR'];
 		}
 
-		$this->uri_chunks=Utils::gen_uri_chunks($uri);
+		if (is_null($uri_chunks) {
+			$this->uri_chunks=Utils::gen_uri_chunks($uri);
+		} else {
+			$this->uri_chunks=$uri_chunks;
+		}
 
 		$this->config=new Config();
 

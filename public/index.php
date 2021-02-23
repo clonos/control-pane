@@ -9,9 +9,10 @@ $_real_path=realpath('../');
 $uri=trim($_SERVER['REQUEST_URI'],'/');
 require_once($_real_path.'/php/clonos.php');
 require_once($_real_path.'/php/menu.php');
+$chunks=Utils::gen_uri_chunks($uri);
 $clonos=new ClonOS($_real_path,$uri);
 $locale = new Locale($_real_path.'/public/'); # /usr/home/web/cp/clonos/public/
-$menu=new Menu($locale, $uri);
+$menu=new Menu($locale, $chunks);
 
 if(isset($_GET['upload'])){
 	include('upload.php');
@@ -28,7 +29,6 @@ $lang=$locale->get_lang();
 $_ds=DIRECTORY_SEPARATOR;
 $root=trim($_SERVER['DOCUMENT_ROOT'], $_ds);
 
-$chunks=$clonos->uri_chunks;
 if(!empty($chunks)) $uri=$chunks[0];
 
 $file_path=$_ds.$root.$_ds.'pages'.$_ds.$uri.$_ds;

@@ -30,7 +30,7 @@ class Menu
 	public $title='Error';
 	public $first_key=array();
 
-	function __construct(Locale $lang,$uri)
+	function __construct(Locale $lang, $uri_chunks)
 	{
 		$menu_config = Config::$menu;
 		$this->first_key = array_key_first($menu_config);
@@ -43,7 +43,6 @@ class Menu
 
 		//$qstr=trim($_SERVER['REQUEST_URI'],'/');
 		$qstr='';
-		$uri_chunks=Utils::gen_uri_chunks($uri);
 		if(isset($uri_chunks[0])){
 			$qstr=trim($uri_chunks[0],'/');
 		}

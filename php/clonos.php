@@ -108,8 +108,6 @@ class ClonOS {
 //		$this->json_name=$this->realpath_php.'pages'
 //		$clonos->json_name=$file_path.'a.json.php';
 
-		$this->_db_tasks=new Db('base','cbsdtaskd');
-
 		if(isset($this->_vars['mode'])) $this->mode=$this->_vars['mode'];
 		if(isset($this->_vars['form_data'])) $this->form=$this->_vars['form_data'];
 
@@ -376,7 +374,7 @@ class ClonOS {
 			$query="SELECT id,cmd,status,jname FROM taskd WHERE status<2 AND jname IN (?)";
 			$cmd='';
 			$txt_status='';
-			$tasks=$this->_db_tasks->select($query, array([$tid]));
+			$tasks=(new Db('base','cbsdtaskd'))->select($query, array([$tid]));
 			if(!empty($tasks)) foreach($tasks as $task){
 				$rid=preg_replace('/^#/','',$task['jname']);
 				foreach($check_arr as $key=>$val){
@@ -406,7 +404,7 @@ class ClonOS {
 
 /*
 	function getTaskStatus($task_id){
-		$status=$this->_db_tasks->selectOne("SELECT status,logfile,errcode 
+		$status=(new Db('base','cbsdtaskd'))->selectOne("SELECT status,logfile,errcode 
 					FROM taskd WHERE id=?", array([$task_id]);
 
 		if($status['errcode']>0) $status['errmsg']=file_get_contents($status['logfile']);
@@ -510,7 +508,7 @@ class ClonOS {
 		$ids=join(',',$tasks);
 		if(empty($ids)) return $obj;
 
-		$statuses=$this->_db_tasks->select("SELECT id,status,logfile,errcode FROM taskd WHERE id IN (?)", array([$ids]));
+		$statuses=(new Db('base','cbsdtaskd'))->select("SELECT id,status,logfile,errcode FROM taskd WHERE id IN (?)", array([$ids]));
 
 		//print_r($statuses);
 		foreach($obj as $key=>$task){

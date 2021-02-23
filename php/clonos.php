@@ -79,7 +79,7 @@ class ClonOS {
 			$this->server_name=$_SERVER['SERVER_ADDR'];
 		}
 
-		if (is_null($uri_chunks) {
+		if (is_null($uri_chunks) { # TODO Do we need this ?
 			$this->uri_chunks=Utils::gen_uri_chunks($uri);
 		} else {
 			$this->uri_chunks=$uri_chunks;

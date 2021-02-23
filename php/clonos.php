@@ -109,7 +109,6 @@ class ClonOS {
 //		$clonos->json_name=$file_path.'a.json.php';
 
 		$this->_db_tasks=new Db('base','cbsdtaskd');
-		$this->_db_local=new Db('base','local');
 
 		if(isset($this->_vars['mode'])) $this->mode=$this->_vars['mode'];
 		if(isset($this->_vars['form_data'])) $this->form=$this->_vars['form_data'];
@@ -2028,25 +2027,6 @@ class ClonOS {
 			include($file_name);
 			echo PHP_EOL,PHP_EOL;
 		}
-	}
-
-	function runVNC($jname){
-		$query="SELECT vnc_password FROM bhyve WHERE jname=?";
-		$res=$this->_db_local->selectOne($query, array([$jname]));
-
-		$pass='cbsd';
-		if($res!==false) $pass=$res['vnc_password'];
-		
-		$resCBSD::run("vm_vncwss jname=%s permit=%s", array($jname, $this->_client_ip));
-		//$res=$this->_db_local->selectOne("SELECT nodeip FROM local", array());
-		//$nodeip=$res['nodeip'];
-		// need for IPv4/IPv6 regex here, instead of strlen
-		//if(strlen($nodeip)<7) $nodeip='127.0.0.1';
-		//if(strlen($nodeip)<7) $nodeip=$this->server_name;
-		$nodeip=$this->server_name;
-
-		header('Location: http://'.$nodeip.':6081/vnc_auto.html?host='.$nodeip.'&port=6081?password='.$pass);
-		exit;
 	}
 
 	//function getFreeJname($in_helper=false,$type='jail'){

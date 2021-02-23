@@ -2,8 +2,8 @@
 
 class Locale
 {
-	public $language='en';
-	public $translate_arr=array();
+	private $language='en';
+	private $translate_arr=array();
 
 	function __construct($realpath_public)
 	{
@@ -18,14 +18,8 @@ class Locale
 		return $this->language;
 	}
 
-	public function get_available_languages()
-	{
-		return Config::$languages;
-	}
-
 	public function translate($phrase)
 	{
-		if(isset($this->translate_arr[$phrase])) return $this->translate_arr[$phrase];
-		return $phrase;
+		return (isset($this->translate_arr[$phrase])) ? $this->translate_arr[$phrase] : $phrase;
 	}
 }

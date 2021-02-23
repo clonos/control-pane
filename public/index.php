@@ -165,8 +165,7 @@ echo $menu->html;
 		<li><a name="">
 			<select id="lng-sel">
 <?php
-$_languages=$locale->get_available_languages();
-foreach($_languages as $lng=>$lngname){
+foreach(Config::$languages as $lng=>$lngname){
 	$sel = ($lang==$lng) ? ' selected="selected"' : '';
 	echo '				<option value="'.$lng.'"'.$sel.'>'.$lngname.'</option>'.PHP_EOL;
 }

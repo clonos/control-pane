@@ -94,8 +94,9 @@ class ClonOS {
 			//echo $this->realpath_page;
 		}else if($_SERVER['REQUEST_URI']){
 			//$this->realpath_page=$this->realpath_public.'pages/'.trim($_SERVER['REQUEST_URI'],'/').'/';
-			if(isset($this->uri_chunks[0]))
+			if(isset($this->uri_chunks[0])){
 				$this->realpath_page=$this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
+			}
 		}
 
 		if(isset($this->_vars['hash'])) $this->url_hash=preg_replace('/^#/','',$this->_vars['hash']);

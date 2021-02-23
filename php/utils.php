@@ -2,7 +2,7 @@
 
 class Utils
 {
-	public static gen_uri_chunks($uri)
+	public static function gen_uri_chunks($uri)
 	{
 		$uri_chunks = [];
 		if(!empty($uri)){

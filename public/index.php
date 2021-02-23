@@ -10,7 +10,7 @@ $uri=trim($_SERVER['REQUEST_URI'],'/');
 include($_REALPATH.'/php/clonos.php');
 include($_REALPATH.'/php/menu.php');
 $clonos=new ClonOS($_REALPATH,$uri);
-$menu=new Menu($this, $uri);
+$menu=new Menu($_REALPATH, $uri);
 $realpath_public=$_REALPATH.'/public/'; # /usr/home/web/cp/clonos/public/
 $locale = new Locale($realpath_public);
 //echo json_encode($clonos->config->os_types);exit;

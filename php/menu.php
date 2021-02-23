@@ -36,7 +36,7 @@ class Menu
 	{
 		$realpath_public=$_REALPATH.'/public/'; # /usr/home/web/cp/clonos/public/
 		$lang = new Locale($realpath_public);
-		$menu_config = Config::menu;
+		$menu_config = Config::$menu;
 		if(!empty($menu_config)){
 			reset($menu_config);
 			$this->first_key=key($menu_config);
@@ -95,7 +95,7 @@ class Menu
 		$this->html.='</ul>';
 
 		if($this->title=='Error'){
-			$other_titles = Config::other_titles;
+			$other_titles = Config::$other_titles;
 			if(isset($other_titles[$qstr]))
 				$this->title=$lang->translate($other_titles[$qstr]);
 		}

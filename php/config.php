@@ -5,7 +5,7 @@ require_once("cbsd.php");
 class Config
 {
 	/* Список языков, используемых в проекте */
-	public $languages=array(
+	public static $languages=array(
 		'en'=>'English',
 		'ru'=>'Russian',
 	);
@@ -20,14 +20,14 @@ class Config
 		'windows'=>'Windows',
 	);
 
-	public $other_titles=array(
+	public static $other_titles=array(
 		'settings'=>'CBSD Settings',
 		'users'=>'CBSD Users',
 	);
 
 	/* Меню проекта */
 	/* Так же можно использовать подменю (в menu.php есть пример) */
-	public $menu=array(
+	public static $menu=array(
 		'overview'=>array(
 			'name'=>'Overview',
 			'title'=>'Summary Overview',	// заголовки лучше делать более полными, чем просто повторение пункта меню

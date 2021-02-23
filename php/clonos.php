@@ -2,9 +2,10 @@
 
 require_once("cbsd.php");
 require_once('config.php');
+require_once('locale.php');
 require_once('db.php');
 require_once('forms.php');
-require_once('menu.php');
+require_once('utils.php');
 
 class ClonOS {
 	public $server_name='';
@@ -16,15 +17,12 @@ class ClonOS {
 	public $realpath_page='';
 	public $uri_chunks=array();
 	public $json_name='';
-	public $language='en';
-	public $language_file_loaded=false;
-	public $translate_arr=array();
 	public $table_templates=array();
 	public $url_hash='';
 	public $media_import='';
 	public $json_req=false;
 	public $sys_vars=array();
-
+	private $_locale;
 	private $_post=false;
 	private $_db=null;
 	private $_client_ip='';
@@ -62,7 +60,6 @@ class ClonOS {
 
 		$this->_post=($_SERVER['REQUEST_METHOD']=='POST');
 		$this->_vars=$_POST;
-		if(isset($_COOKIE['lang'])) $this->language=$_COOKIE['lang'];
 
 		$this->workdir=getenv('WORKDIR'); # // /usr/jails
 		$this->environment=getenv('APPLICATION_ENV');
@@ -82,21 +79,11 @@ class ClonOS {
 			$this->server_name=$_SERVER['SERVER_ADDR'];
 		}
 
-		if(!empty($uri)){
-			$str=str_replace('/index.php','',$uri);
-			$this->uri_chunks=explode('/',$str);
-		}else if(isset($this->_vars['path'])){
-			$str=trim($this->_vars['path'],'/');
-			$this->uri_chunks=explode('/',$str);
-		}
+		$this->uri_chunks=Utils::gen_uri_chunks($uri);
 
 		$this->config=new Config();
 
-		/* determine lang */
-		if(!array_key_exists($this->language, $this->config->languages)) $this->language='en';
-		include($this->realpath_public.'/lang/'.$this->language.'.php');
-		$this->translate_arr=$lang;
-		unset($lang);
+		$this->_locale = new Locale($this->realpath_public);
 
 		$this->_client_ip=$_SERVER['REMOTE_ADDR'];
 
@@ -120,8 +107,6 @@ class ClonOS {
 
 		$this->_db_tasks=new Db('base','cbsdtaskd');
 		$this->_db_local=new Db('base','local');
-
-		$this->menu=new Menu($this->config->menu,$this);
 
 		if(isset($this->_vars['mode'])) $this->mode=$this->_vars['mode'];
 		if(isset($this->_vars['form_data'])) $this->form=$this->_vars['form_data'];
@@ -151,8 +136,6 @@ class ClonOS {
 				echo json_encode(array('error'=>true,'unregistered_user'=>true));
 				exit;
 			}
-
-			unset($_POST);
 
 			// functions, running without parameters
 			$new_array=array();
@@ -264,6 +247,11 @@ class ClonOS {
 		}
 	}
 
+	function translate($phrase)
+	{
+		return $this->_locale->translate($phrase);
+	}
+
 	function ccmd_getJsonPage(){
 		$included_result_array=false;
 		if(file_exists($this->json_name)){
@@ -289,15 +277,6 @@ class ClonOS {
 		$redis=new Redis();
 		$redis->connect('10.0.0.3',6379);
 		$res=$redis->publish($key,$message);
-	}
-
-	function getLang(){
-		return $this->language;
-	}
-
-	function translate($phrase){
-		if(isset($this->translate_arr[$phrase])) return $this->translate_arr[$phrase];
-		return $phrase;
 	}
 
 	function getTableChunk($table_name='',$tag){
@@ -466,23 +445,23 @@ class ClonOS {
 
 		$ops_array=$this->_cmd_array;
 		$stat_array=array(
-			'jcreate'=>array($this->translate('Creating'),$this->translate('Created')),
-			'jstart'=>array($this->translate('Starting'),$this->translate('Launched')),
-			'jstop'=>array($this->translate('Stopping'),$this->translate('Stopped')),
-			'jrestart'=>array($this->translate('Restarting'),$this->translate('Restarted')),
-			'jedit'=>array($this->translate('Saving'),$this->translate('Saved')),
-			'jremove'=>array($this->translate('Removing'),$this->translate('Removed')),
-			'jexport'=>array($this->translate('Exporting'),$this->translate('Exported')),
-			'jimport'=>array($this->translate('Importing'),$this->translate('Imported')),
-			'jclone'=>array($this->translate('Cloning'),$this->translate('Cloned')),
-			'madd'=>array($this->translate('Installing'),$this->translate('Installed')),
+			'jcreate'=>array($this->_locale->translate('Creating'),$this->_locale->translate('Created')),
+			'jstart'=>array($this->_locale->translate('Starting'),$this->_locale->translate('Launched')),
+			'jstop'=>array($this->_locale->translate('Stopping'),$this->_locale->translate('Stopped')),
+			'jrestart'=>array($this->_locale->translate('Restarting'),$this->_locale->translate('Restarted')),
+			'jedit'=>array($this->_locale->translate('Saving'),$this->_locale->translate('Saved')),
+			'jremove'=>array($this->_locale->translate('Removing'),$this->_locale->translate('Removed')),
+			'jexport'=>array($this->_locale->translate('Exporting'),$this->_locale->translate('Exported')),
+			'jimport'=>array($this->_locale->translate('Importing'),$this->_locale->translate('Imported')),
+			'jclone'=>array($this->_locale->translate('Cloning'),$this->_locale->translate('Cloned')),
+			'madd'=>array($this->_locale->translate('Installing'),$this->_locale->translate('Installed')),
 			//'mremove'=>array('Removing','Removed'),
-			'sstart'=>array($this->translate('Starting'),$this->translate('Started')),
-			'sstop'=>array($this->translate('Stopping'),$this->translate('Stopped')),
-			'vm_obtain'=>array($this->translate('Creating'),$this->translate('Created')),
-			'srcup'=>array($this->translate('Updating'),$this->translate('Updated')),
-			'world'=>array($this->translate('Compiling'),$this->translate('Compiled')),
-			'repo'=>array($this->translate('Fetching'),$this->translate('Fetched')),
+			'sstart'=>array($this->_locale->translate('Starting'),$this->_locale->translate('Started')),
+			'sstop'=>array($this->_locale->translate('Stopping'),$this->_locale->translate('Stopped')),
+			'vm_obtain'=>array($this->_locale->translate('Creating'),$this->_locale->translate('Created')),
+			'srcup'=>array($this->_locale->translate('Updating'),$this->_locale->translate('Updated')),
+			'world'=>array($this->_locale->translate('Compiling'),$this->_locale->translate('Compiled')),
+			'repo'=>array($this->_locale->translate('Fetching'),$this->_locale->translate('Fetched')),
 			//'projremove'=>array('Removing','Removed'),
 		);
 		$stat_array['bcreate']=&$stat_array['jcreate'];
@@ -531,7 +510,7 @@ class ClonOS {
 				$obj[$key]['txt_status']=$stat_array[$obj[$key]['operation']][$num];
 				if($stat['errcode']>0){
 					$obj[$key]['errmsg']=file_get_contents($stat['logfile']);
-					$obj[$key]['txt_status']=$this->translate('Error');
+					$obj[$key]['txt_status']=$this->_locale->translate('Error');
 				}
 
 				//Return the IP of the cloned jail if it was assigned by DHCP
@@ -605,14 +584,14 @@ class ClonOS {
 				'node'=>'local',				// TODO: actual data
 				'ip4_addr'=>str_replace(',',',<wbr />',$form['ip4_addr']),
 				'jname'=>$form['jname'],
-				'jstatus'=>$this->translate('Cloning'),
+				'jstatus'=>$this->_locale->translate('Cloning'),
 				'icon'=>'spin6 animate-spin',
 				'desktop'=>' s-on',
 				'maintenance'=>' maintenance',
 				'protected'=>'icon-cancel',
-				'protitle'=>$this->translate('Delete'),
-				'vnc_title'=>$this->translate('Open VNC'),
-				'reboot_title'=>$this->translate('Restart jail'),
+				'protitle'=>$this->_locale->translate('Delete'),
+				'vnc_title'=>$this->_locale->translate('Open VNC'),
+				'reboot_title'=>$this->_locale->translate('Restart jail'),
 			);
 
 			foreach($vars as $var=>$val)
@@ -639,14 +618,14 @@ class ClonOS {
 					'node'=>'local',
 					'ip4_addr'=>str_replace(',',',<wbr />',$jail['ip4_addr']),
 					'jname'=>$jail['jname'],
-					'jstatus'=>$this->translate($stats[$op]),
+					'jstatus'=>$this->_locale->translate($stats[$op]),
 					'icon'=>'spin6 animate-spin',
 					'desktop'=>' s-on',
 					'maintenance'=>' maintenance',
 					'protected'=>($jail['protected']==1)?'icon-lock':'icon-cancel',
-					'protitle'=>($jail['protected']==1)?' title="'.$this->translate('Protected jail').'"':' title="'.$this->translate('Delete').'"',
-					'vnc_title'=>$this->translate('Open VNC'),
-					'reboot_title'=>$this->translate('Restart jail'),
+					'protitle'=>($jail['protected']==1)?' title="'.$this->_locale->translate('Protected jail').'"':' title="'.$this->_locale->translate('Delete').'"',
+					'vnc_title'=>$this->_locale->translate('Open VNC'),
+					'reboot_title'=>$this->_locale->translate('Restart jail'),
 				);
 
 				foreach($vars as $var=>$val)
@@ -829,14 +808,14 @@ class ClonOS {
 				'node'=>'local',		// TODO: fix actual data!
 				'ip4_addr'=>str_replace(',',',<wbr />',$form['ip4_addr']),
 				'jname'=>$arr['jname'],
-				'jstatus'=>$this->translate('Creating'),
+				'jstatus'=>$this->_locale->translate('Creating'),
 				'icon'=>'spin6 animate-spin',
 				'desktop'=>' s-off',
 				'maintenance'=>' busy maintenance',
 				'protected'=>'icon-cancel',
-				'protitle'=>$this->translate('Delete'),
-				'vnc_title'=>$this->translate('Open VNC'),
-				'reboot_title'=>$this->translate('Restart jail'),
+				'protitle'=>$this->_locale->translate('Delete'),
+				'vnc_title'=>$this->_locale->translate('Open VNC'),
+				'reboot_title'=>$this->_locale->translate('Restart jail'),
 			);
 
 			foreach($vars as $var=>$val)
@@ -882,7 +861,7 @@ class ClonOS {
 
 		if($err){
 			$res['error']=true;
-			$res['error_message']=$this->translate('Jail '.$form['jail_id'].' is not present.');
+			$res['error_message']=$this->_locale->translate('Jail '.$form['jail_id'].' is not present.');
 			$res['jail_id']=$form['jail_id'];
 			$res['reload']=true;
 			return $res;
@@ -912,7 +891,7 @@ class ClonOS {
 		if(empty($res['vars'])) $err=true;
 		if($err){
 			$res['error']=true;
-			$res['error_message']=$this->translate('Jail '.$form['jail_id'].' is not present.');
+			$res['error_message']=$this->_locale->translate('Jail '.$form['jail_id'].' is not present.');
 			$res['jail_id']=$form['jail_id'];
 			$res['reload']=true;
 			return $res;
@@ -942,7 +921,7 @@ class ClonOS {
 
 		if($err){
 			$res['error']=true;
-			$res['error_message']=$this->translate('Jail '.$form['jail_id'].' is not present.');
+			$res['error_message']=$this->_locale->translate('Jail '.$form['jail_id'].' is not present.');
 			$res['jail_id']=$form['jail_id'];
 			$res['reload']=true;
 			return $res;
@@ -1037,14 +1016,14 @@ class ClonOS {
 				'vm_ram'=>$form['vm_ram'],
 				'vm_cpus'=>$form['vm_cpus'],
 				'vm_os_type'=>$form['vm_os_type'],
-				'jstatus'=>$this->translate('Cloning'),
+				'jstatus'=>$this->_locale->translate('Cloning'),
 				'icon'=>'spin6 animate-spin',
 				'desktop'=>' s-on',
 				'maintenance'=>' maintenance',
 				'protected'=>'icon-cancel',
-				'protitle'=>$this->translate('Delete'),
-				'vnc_title'=>$this->translate('Open VNC'),
-				'reboot_title'=>$this->translate('Restart VM'),
+				'protitle'=>$this->_locale->translate('Delete'),
+				'vnc_title'=>$this->_locale->translate('Open VNC'),
+				'reboot_title'=>$this->_locale->translate('Restart VM'),
 			);
 
 			foreach($vars as $var=>$val)
@@ -1076,13 +1055,13 @@ class ClonOS {
 					'vm_ram'=>$this->fileSizeConvert($bhyve['vm_ram']),
 					'vm_cpus'=>$bhyve['vm_cpus'],
 					'vm_os_type'=>$bhyve['vm_os_type'],
-					'vm_status'=>$this->translate($statuses[$status]),
+					'vm_status'=>$this->_locale->translate($statuses[$status]),
 					'desktop'=>($status==0)?' s-off':' s-on',
 					'icon'=>($status==0)?'play':'stop',
 					'protected'=>'icon-cancel',
-					'protitle'=>' title="'.$this->translate('Delete').'"',
-					'vnc_title'=>$this->translate('Open VNC'),
-					'reboot_title'=>$this->translate('Restart bhyve'),
+					'protitle'=>' title="'.$this->_locale->translate('Delete').'"',
+					'vnc_title'=>$this->_locale->translate('Open VNC'),
+					'reboot_title'=>$this->_locale->translate('Restart bhyve'),
 				);
 
 				foreach($vars as $var=>$val)
@@ -1115,7 +1094,7 @@ class ClonOS {
 
 		if($err){
 			$res['error']=true;
-			$res['error_message']=$this->translate('Jail '.$form['jail_id'].' is not present.');
+			$res['error_message']=$this->_locale->translate('Jail '.$form['jail_id'].' is not present.');
 			$res['jail_id']=$form['jail_id'];
 			$res['reload']=true;
 			return $res;
@@ -1163,7 +1142,7 @@ class ClonOS {
 
 		if($err){
 			$res['error']=true;
-			$res['error_message']=$this->translate('Jail '.$form['jail_id'].' is not present.'); // XSS 
+			$res['error_message']=$this->_locale->translate('Jail '.$form['jail_id'].' is not present.'); // XSS 
 			$res['jail_id']=$form['jail_id']; // Possible XSS
 //			$res['reload']=true;
 			return $res;
@@ -1321,7 +1300,7 @@ class ClonOS {
 				'nth-num'=>'nth0',				// TODO: actual data
 				'node'=>'local',				// TODO: actual data
 				'jname'=>$arr['jname'],
-				'vm_status'=>$this->translate('Creating'),
+				'vm_status'=>$this->_locale->translate('Creating'),
 				'vm_cpus'=>$form['vm_cpus'],
 				'vm_ram'=>$vm_ram,
 				'vm_os_type'=>$os_items['type'],	//$os_name,
@@ -1331,9 +1310,9 @@ class ClonOS {
 				'desktop'=>' s-off',
 				'maintenance'=>' maintenance',
 				'protected'=>'icon-cancel',
-				'protitle'=>$this->translate('Delete'),
-				'vnc_title'=>$this->translate('Open VNC'),
-				'reboot_title'=>$this->translate('Restart VM'),
+				'protitle'=>$this->_locale->translate('Delete'),
+				'vnc_title'=>$this->_locale->translate('Open VNC'),
+				'reboot_title'=>$this->_locale->translate('Restart VM'),
 			);
 			
 			foreach($vars as $var=>$val)
@@ -1424,7 +1403,7 @@ class ClonOS {
 				'nth-num'=>'nth0',				// TODO: actual data
 				'node'=>'local',				// TODO: actual data
 				'jname'=>$form['vm_name'],
-				'vm_status'=>$this->translate('Creating'),
+				'vm_status'=>$this->_locale->translate('Creating'),
 				'vm_cpus'=>$form['vm_cpus'],
 				'vm_ram'=>$vm_ram,
 				'vm_os_type'=>$os_type,
@@ -1432,9 +1411,9 @@ class ClonOS {
 				'desktop'=>' s-off',
 				'maintenance'=>' maintenance',
 				'protected'=>'icon-cancel',
-				'protitle'=>$this->translate('Delete'),
-				'vnc_title'=>$this->translate('Open VNC'),
-				'reboot_title'=>$this->translate('Restart VM'),
+				'protitle'=>$this->_locale->translate('Delete'),
+				'vnc_title'=>$this->_locale->translate('Open VNC'),
+				'reboot_title'=>$this->_locale->translate('Restart VM'),
 			);
 
 			foreach($vars as $var=>$val)
@@ -1490,7 +1469,7 @@ class ClonOS {
 				'keyid'=>$res['lastID'],
 				'keyname'=>$this->form['keyname'],
 				'keysrc'=>$this->form['keysrc'],
-				'deltitle'=>$this->translate('Delete'),
+				'deltitle'=>$this->_locale->translate('Delete'),
 			);
 
 			foreach($vars as $var=>$val)
@@ -1531,7 +1510,7 @@ class ClonOS {
 				'netid'=>$res['lastID'],
 				'netname'=>$form['netname'],
 				'network'=>$form['network'],
-				'deltitle'=>$this->translate('Delete'),
+				'deltitle'=>$this->_locale->translate('Delete'),
 			);
 
 			foreach($vars as $var=>$val)
@@ -1621,8 +1600,8 @@ class ClonOS {
 				'ver1'=>strlen(intval($res['ver']))<strlen($res['ver'])?'release':'stable',
 				'rev'=>$res['rev'],
 				'date'=>$res['date'],
-				'protitle'=>$this->translate('Update'),
-				'protitle'=>$this->translate('Delete'),
+				'protitle'=>$this->_locale->translate('Update'),
+				'protitle'=>$this->_locale->translate('Delete'),
 			);
 
 			foreach($vars as $var=>$val) $html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
@@ -1683,7 +1662,7 @@ class ClonOS {
 			$taskId=$res['message'];
 		}
 
-		return array('errorMessage'=>'','jail_id'=>'base'.$bid,'taskId'=>$taskId,'html'=>$html,'mode'=>$this->mode,'txt_status'=>$this->translate('Compiling'));
+		return array('errorMessage'=>'','jail_id'=>'base'.$bid,'taskId'=>$taskId,'html'=>$html,'mode'=>$this->mode,'txt_status'=>$this->_locale->translate('Compiling'));
 	}
 
 	function fillRepoTr($id,$only_td=false,$bsdsrc=true){
@@ -1722,7 +1701,7 @@ class ClonOS {
 					'elf'=>$res['elf'],
 					'date'=>$res['date'],
 					'maintenance'=>' busy',
-					'protitle'=>$this->translate('Delete'),
+					'protitle'=>$this->_locale->translate('Delete'),
 				);
 
 				foreach($vars as $var=>$val)
@@ -1768,7 +1747,7 @@ class ClonOS {
 				'elf'=>'—',
 				'date'=>'—',
 				'maintenance'=>' busy',
-				'protitle'=>$this->translate('Delete'),
+				'protitle'=>$this->_locale->translate('Delete'),
 			);
 
 			foreach($vars as $var=>$val)
@@ -1791,7 +1770,7 @@ class ClonOS {
 			$taskId=$res['message'];
 		}
 
-		return array('errorMessage'=>'','jail_id'=>'base'.$bid,'taskId'=>$taskId,'html'=>$html,'mode'=>$this->mode,'txt_status'=>$this->translate('Fetching'));
+		return array('errorMessage'=>'','jail_id'=>'base'.$bid,'taskId'=>$taskId,'html'=>$html,'mode'=>$this->mode,'txt_status'=>$this->_locale->translate('Fetching'));
 	}
 
 	function ccmd_logLoad(){
@@ -2513,10 +2492,12 @@ class ClonOS {
 			[$this->form['pkg_vm_cpus']],
 			[$owner]
 		));
-		if($res===false) return $this->messageError('sql error!');
-		if(!$res['error']) return $this->messageSuccess($res); 
 
-		return $this->messageError('sql error!',$res);
+		if($res['error'] == false){
+			return $this->messageSuccess($res); 
+		} else {
+			return $this->messageError('sql error!',$res);
+		}
 	}
 
 	function ccmd_vmTemplateEditInfo(){
@@ -2644,7 +2625,7 @@ class ClonOS {
 				$jres=$this->ccmd_getFreeJname(false,$type);
 				if($jres['error']) return $this->messageError('Something wrong...');
 				$jname=$jres['freejname'];
-				$name_comment='* '.$this->translate('Since imported name already exist, we are change it');
+				$name_comment='* '.$this->_locale->translate('Since imported name already exist, we are change it');
 			}
 		}
 
@@ -2746,7 +2727,7 @@ class ClonOS {
 
 			foreach($quer as $q=>$k){
 				if(is_numeric($k) && ($k==0 || $k==1)) $k=($k==0)?'no':'yes';
-				$html.='<tr><td>'.$this->translate($q).'</td><td>'.$this->translate($k).'</td></tr>';
+				$html.='<tr><td>'.$this->_locale->translate($q).'</td><td>'.$this->_locale->translate($k).'</td></tr>';
 			}
 
 			$html.='</table>';
@@ -2792,7 +2773,7 @@ class ClonOS {
 				if($q=='vm_ram') $k=$this->fileSizeConvert($k);
 				if($q=='state_time') $k=date('d.m.Y H:i:s',$k);
 
-				$html.='<tr><td>'.$this->translate($q).'</td><td>'.$this->translate($k).'</td></tr>';
+				$html.='<tr><td>'.$this->_locale->translate($q).'</td><td>'.$this->_locale->translate($k).'</td></tr>';
 			}
 
 			$html.='</table>';

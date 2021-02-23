@@ -24,7 +24,6 @@
 	),
 */
 
-
 class Menu
 {
 	public $html=array();
@@ -32,30 +31,33 @@ class Menu
 	public $title='Error';
 	public $path='';
 	public $first_key=array();
-	
-	function __construct($menu_config=array(),$parent)
+
+	function __construct($_REALPATH,$uri)
 	{
-		if(!empty($menu_config))
-		{
+		$realpath_public=$_REALPATH.'/public/'; # /usr/home/web/cp/clonos/public/
+		$lang = new Locale($realpath_public);
+		$menu_config = Config::$menu;
+		if(!empty($menu_config)){
 			reset($menu_config);
 			$this->first_key=key($menu_config);
 		}
-		
-		if($parent->environment!='development')
+
+		if(getenv('APPLICATION_ENV') != 'development'){
 			unset($menu_config['sqlite']);
-		
+		}
+
 		$this->html='<ul class="menu">'.PHP_EOL;
 
 		//$qstr=trim($_SERVER['REQUEST_URI'],'/');
 		$qstr='';
-		if(isset($parent->uri_chunks[0]))
-			$qstr=trim($parent->uri_chunks[0],'/');
+		$uri_chunks=Utils::gen_uri_chunks($uri);
+		if(isset($uri_chunks[0]))
+			$qstr=trim($uri_chunks[0],'/');
 		$this->path=$qstr;	//$_MENU_PATH
-		if(!empty($menu_config))foreach($menu_config as $key=>$val)
-		{
-			$mname=$parent->translate($val['name']);
-			$mtitle=$parent->translate($val['title']);
-			
+		if(!empty($menu_config))foreach($menu_config as $key=>$val){
+			$mname=$lang->translate($val['name']);
+			$mtitle=$lang->translate($val['title']);
+
 			$link=$key;
 			$sel='';
 			if($qstr==$key){
@@ -63,19 +65,18 @@ class Menu
 				$this->title=$mtitle;	//$_TITLE
 				$this->name=$mname;		//$_MENU_NAME
 			}
-			
+
 			$icon='empty';
 			if(isset($val['icon']) && !empty($val['icon'])) $icon=$val['icon'];
 			$span='<span class="'.$icon.'"></span>';
 			$this->html.='	<li><a href="/'.$link.'/" title="'.$mtitle.'"'.$sel.'>'.$span.'<span class="mtxt">'.$mname.'</span></a>';
-			if(!empty($val['submenu']))
-			{
+			if(!empty($val['submenu'])){
 				$this->html.= PHP_EOL.'		<ul class="submenu">'.PHP_EOL;
 				foreach($val['submenu'] as $k=>$s)
 				{
-					$sname=$parent->translate($s['name']);
-					$stitle=$parent->translate($s['title']);
-					
+					$sname=$lang->translate($s['name']);
+					$stitle=$lang->translate($s['title']);
+
 					$slink=$link.'/'.$k;
 					$sl=$link.'_'.$k;
 					$ssel='';
@@ -92,11 +93,11 @@ class Menu
 		}
 
 		$this->html.='</ul>';
-		
-		if($this->title=='Error')
-		{
-			if(isset($parent->config->other_titles[$qstr]))
-				$this->title=$parent->translate($parent->config->other_titles[$qstr]);
+
+		if($this->title=='Error'){
+			$other_titles = Config::$other_titles;
+			if(isset($other_titles[$qstr]))
+				$this->title=$lang->translate($other_titles[$qstr]);
 		}
 	}
 }

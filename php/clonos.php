@@ -277,9 +277,11 @@ class ClonOS {
 		$res=$redis->publish($key,$message);
 	}
 
-	function getTableChunk($table_name='',$tag){
-		if(empty($table_name)) return false;
-		if(isset($this->table_templates[$table_name][$tag])) return $this->table_templates[$table_name][$tag];
+	function getTableChunk($table_name, $tag)
+	{
+		if(isset($this->table_templates[$table_name][$tag])){
+			return $this->table_templates[$table_name][$tag];
+		}
 
 		$file_name=$this->realpath_page.$table_name.'.table';
 		if(!file_exists($file_name)) return false;
@@ -289,32 +291,38 @@ class ClonOS {
 			$this->table_templates[$table_name][$tag]=$res;
 			return $res;
 		}
-		return '';
+		return ''; # TODO ???
 	}
 
-	function check_locktime($nodeip){
+	function check_locktime($nodeip)
+	{
 		$lockfile=$this->workdir."/ftmp/shmux_${nodeip}.lock";
-		if (!file_exists($lockfile)) return 0;
+		if (file_exists($lockfile)){
+			$cur_time = time();
+			$difftime=(($cur_time - filemtime($lockfile)) / 60);
+			if ($difftime > 1){ 
+				return round($difftime);
+			}
+		}
 
-		$cur_time = time();
-		$st_time=filemtime($lockfile);
-
-		$difftime=(( $cur_time - $st_time ) / 60 );
-		if ( $difftime > 1 ) return round($difftime);
-		return 0; //lock exist but too fresh
+		return 0; //too fresh or does not exist
 	}
 
-	function check_vmonline($vm){
+	function check_vmonline($vm)
+	{
 		$vmmdir="/dev/vmm";
 
-		if(!file_exists($vmmdir)) return 0;
-
-		if($handle=opendir($vmmdir)){
-			while(false!==($entry=readdir($handle))){
-				if($entry[0]==".") continue;
-				if($vm==$entry) return 1;
+		if(file_exists($vmmdir)){
+			if($handle=opendir($vmmdir)){
+				while(false!==($entry=readdir($handle))){
+					if($entry[0]==".") continue;
+					if($vm==$entry) {
+						closedir($handle);
+						return 1;
+					}
+				}
+				closedir($handle);
 			}
-			closedir($handle);
 		}
 
 		return 0;
@@ -404,7 +412,7 @@ class ClonOS {
 */
 
 	private function doTask($key, $task){
-		if($task['status'] != -1) return(false);
+		if($task['status'] != -1) return false;
 
 		switch($task['operation']){
 			case 'jstart':		$res=$this->jailStart($key);break;
@@ -436,7 +444,8 @@ class ClonOS {
 		//return $jsonObj;
 		$tasks=array();
 		$obj=json_decode($jsonObj,true);
-		if(empty($ids)) return $obj; // TODO: error? this return NULL..
+		# TODO $ids not defined
+		#if(empty($ids)) return $obj; // TODO: error? this return NULL..
 
 		if(isset($obj['proj_ops'])) return $this->GetProjectTasksStatus($obj);
 		if(isset($obj['mod_ops'])) return $this->GetModulesTasksStatus($obj);
@@ -473,7 +482,6 @@ class ClonOS {
 		$stat_array['imgremove']=&$stat_array['jremove'];
 
 		foreach($obj as $key=>$task){
-			$status=$task['status'];
 			if(in_array($task['operation'],$ops_array)){
 				if(false !== ($res=$this->runTask($key,$task))){
 					if($res['error']) $obj[$key]['retval']=$res['retval'];
@@ -487,10 +495,12 @@ class ClonOS {
 							//$obj[$key]['txt_log']=file_get_contents('/tmp/taskd.'.$task_id.'.log');
 						}
 					}
-				}else $tasks[]=$task['task_id'];
+				} else {
+					$tasks[]=$task['task_id'];
+				}
 			}
 
-			if($status==-1) $obj[$key]['status']=0;
+			($task['status']==-1) AND $obj[$key]['status']=0;
 		}
 
 		$ids=join(',',$tasks);
@@ -638,9 +648,9 @@ class ClonOS {
 					'reboot_title'=>$this->_locale->translate('Restart jail'),
 				);
 
-				foreach($vars as $var=>$val)
+				foreach($vars as $var=>$val){
 					$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
-
+				}
 				$html.=$html_tpl;
 			}
 		}
@@ -704,11 +714,15 @@ class ClonOS {
 
 			if(!isset($this->_vars['db_path'])){
 				$res=CBSD::run('make_tmp_helper module=%s', array($helper));
-				if($res['retval']==0) $db_path=$res['message']; else{
+				if($res['retval']==0){
+					$db_path=$res['message'];
+				} else {
 					echo json_encode(array('error'=>true,'errorMessage'=>'Error opening temporary form database!'));
 					return;
 				}
-			}else $db_path=$this->_vars['db_path'];
+			} else { 
+				$db_path=$this->_vars['db_path'];
+			}
 
 			
 			/*
@@ -1757,16 +1771,19 @@ class ClonOS {
 		return array('html'=>$html,'arr'=>$res);
 	}
 
-	function ccmd_repoCompile(){
-		$form=$this->form;
-		if(!isset($form['version']) || !is_numeric($form['version'])) return array('error'=>true,'errorMessage'=>'Wrong OS type input!');
+	function ccmd_repoCompile()
+	{
+		if(!isset($this->form['version']) || !is_numeric($this->form['version'])) {
+			return array('error'=>true,'errorMessage'=>'Wrong OS type input!');
+		}
 
+		$ver=$this->form['version'];
 		$stable_arr=array('release','stable');
 		$html='';
 		$hres=$this->getTableChunk('baseslist','tbody');
 		if($hres!==false){
 			$html_tpl=$hres[1];
-			$ver=$form['version'];
+			# TODO: This next line is weird
 			$stable_num=strlen(intval($ver))<strlen($ver)?0:1;	//'release':'stable';
 			$stable=$stable_arr[$stable_num];
 
@@ -1811,9 +1828,9 @@ class ClonOS {
 		return array('errorMessage'=>'','jail_id'=>'base'.$bid,'taskId'=>$taskId,'html'=>$html,'mode'=>$this->mode,'txt_status'=>$this->_locale->translate('Fetching'));
 	}
 
-	function ccmd_logLoad(){
-		$form=$this->_vars['form_data'];
-		$log_id=$form['log_id'];
+	function ccmd_logLoad()
+	{
+		$log_id=$this->_vars['form_data']['log_id'];
 		if(!is_numeric($log_id)) return array('error'=>'Log ID must be a number');
 
 		$html='';
@@ -1834,8 +1851,10 @@ class ClonOS {
 			}
 			$buf=htmlentities(trim($buf));
 			$arr=preg_split('#\n#iSu',trim($buf));
-			if(!empty($arr)) foreach($arr as $txt){
-				$html.='<p class="log-p">'.$txt.'</p>';
+			if ($arr != false){
+				foreach($arr as $txt){
+					$html.='<p class="log-p">'.$txt.'</p>';
+				}
 			}
 			return array('html'=>'<div style="font-weight:bold;">Log ID: '.$log_id.'</div><br />'.$html);
 		}
@@ -1958,15 +1977,14 @@ class ClonOS {
 	}
 
 	//function deleteJailHelperGroup(){
-	function ccmd_deleteJailHelperGroup(){
-		$form=$this->form;
+	function ccmd_deleteJailHelperGroup()
+	{
 		if(!isset($this->uri_chunks[1]) || !isset($this->url_hash)){
 			return array('error'=>true,'errorMessage'=>'Bad url!');
 		}
 		$jail_id=$this->uri_chunks[1];
 		$helper=$this->url_hash;
-		$index=$form['index'];
-		$index=str_replace('ind-','',$index);
+		$index=str_replace('ind-','',$this->form['index']);
 
 		$db=new Db('helper',array('jname'=>$jail_id,'helper'=>$helper));
 		if($db->error) return array('error'=>true,'errorMessage'=>'No helper database!');
@@ -2309,26 +2327,21 @@ class ClonOS {
 		if(isset($form['actuser']) && $form['actuser']=='on') $is_active=1;
 
 		$authorized_user_id=0;
-		if(isset($_COOKIE['mhash']))
-		{
+		if(isset($_COOKIE['mhash'])){
 			$mhash=$_COOKIE['mhash'];
 			if(!preg_match('#^[a-f0-9]{32}$#',$mhash)) return array('error'=>true,'error_message'=>'Bad data');
 			$query1="select user_id from auth_list WHERE sess_id=? limit 1";
 			$res1=$db->selectOne($query1, array([$mhash]));
-			{
-				if($res1['user_id']>0)
-				{
-					$authorized_user_id=$res1['user_id'];
-				}else{
-					return array('error'=>true,'error_message'=>'you are still not authorized');
-				}
+			if($res1['user_id']>0){
+				$authorized_user_id=$res1['user_id'];
+			} else {
+				return array('error'=>true,'error_message'=>'you are still not authorized');
 			}
-		}else{
+		} else {
 			return array('error'=>true,'error_message'=>'you must be authorized for this operation!');
 		}
 
-		if($user_id==0 || $user_id!=$authorized_user_id)
-		{
+		if($user_id==0 || $user_id!=$authorized_user_id){
 			return array('error'=>true,'error_message'=>'I think you\'re some kind of hacker');
 		}
 
@@ -2598,14 +2611,14 @@ class ClonOS {
 		return $this->messageSuccess($res);
 	}
 
-	function messageError($message,$vars=array()){
-		$rarr=array('error'=>true, 'error_message'=>$message);
-		return array_merge($rarr,$vars);
+	function messageError($message,$vars=[])
+	{
+		return array_merge(['error'=>true, 'error_message'=>$message], $vars);
 	}
 
-	function messageSuccess($vars=array()){
-		$rarr=array('error'=>false);
-		return array_merge($rarr,$vars);
+	function messageSuccess($vars=[])
+	{
+		return array_merge(['error'=>false], $vars);
 	}
 
 	function getImportedImages(){
@@ -2627,23 +2640,18 @@ class ClonOS {
 		return $files;
 	}
 
-	function ccmd_getImportedImageInfo(){
-		$form=$this->form;
-		$name=$form['id'];
-		$info=$this->getImageInfo($name);
-		return $info;
+	function ccmd_getImportedImageInfo()
+	{
+		return $this->getImageInfo($this->form['id']);
 	}
 
 	function getImagesList($path){
-		$files=array();
-		foreach (glob($path."*.img") as $filename)
-		{
-			$info=pathinfo($filename);
-			$arr=array(
-				'name'=>$info['basename'],
-				'fullname'=>$filename,
-			);
-			$files[]=$arr;
+		$files=[];
+		foreach (glob($path."*.img") as $filename){
+			$files[] = [
+				'name'=>pathinfo($filename)['basename'],
+				'fullname'=>$filename
+			];
 		}
 		return $files;
 	}
@@ -2677,8 +2685,15 @@ class ClonOS {
 			}
 		}
 
-		return array('orig_jname'=>$orig_jname,'jname'=>$jname,'host_hostname'=>$hostname,'ip4_addr'=>$ip,'file_id'=>$imgname,
-					'type'=>$type,'name_comment'=>$name_comment);
+		return [
+			'orig_jname'=>$orig_jname,
+			'jname'=>$jname,
+			'host_hostname'=>$hostname,
+			'ip4_addr'=>$ip,
+			'file_id'=>$imgname,
+			'type'=>$type,
+			'name_comment'=>$name_comment
+		];
 	}
 
 	function getImageVar($name,$buf){
@@ -2750,9 +2765,9 @@ class ClonOS {
 
 		$db=new Db('racct',array('jname'=>$jail_name));
 		if($db->isConnected()){
-			$quer=$db->select("SELECT ? as name,idx as time,memoryuse,pcpu,pmem,maxproc,openfiles,readbps, writebps,readiops,writeiops 
+			$query=$db->select("SELECT ? as name,idx as time,memoryuse,pcpu,pmem,maxproc,openfiles,readbps, writebps,readiops,writeiops 
 								FROM racct ORDER BY idx DESC LIMIT 25;", array([$jail_name]));	// where idx%5=0
-			$res['__all']=$quer;
+			$res['__all']=$query;
 		}
 
 		if($this->form['mode'] == 'bhyveslist'){
@@ -2770,11 +2785,13 @@ class ClonOS {
 			  FROM jails WHERE jname=?";
 		$db=new Db('base','local');
 		if($db->isConnected()){
-			$quer=$db->selectOne($sql, array([$jail_name]));
+			$query=$db->selectOne($sql, array([$jail_name]));
 			$html='<table class="summary_table">';
 
-			foreach($quer as $q=>$k){
-				if(is_numeric($k) && ($k==0 || $k==1)) $k=($k==0)?'no':'yes';
+			foreach($query as $q=>$k){
+				if(is_numeric($k) && ($k==0 || $k==1)){
+					$k = ($k==0) ? 'no':'yes';
+				}
 				$html.='<tr><td>'.$this->_locale->translate($q).'</td><td>'.$this->_locale->translate($k).'</td></tr>';
 			}
 
@@ -2787,7 +2804,7 @@ class ClonOS {
 
 	function getSummaryInfoBhyves(){
 
-		$res='';
+		$html='';
 
 		/*
 		$bool=array(
@@ -2811,12 +2828,16 @@ class ClonOS {
 				bhyve_wire_memory, bhyve_rts_keeps_utc, bhyve_force_msi_irq, bhyve_x2apic_mode,
 				bhyve_mptable_gen, bhyve_ignore_msr_acc, bhyve_vnc_vgaconf text, media_auto_eject,
 				vm_cpu_topology, debug_engine, xhci, cd_boot_firmware, jailed FROM settings";
-			$quer=$db->selectOne($sql, array());
+			$query=$db->selectOne($sql, array());
 			$html='<table class="summary_table">';
 
-			foreach($quer as $q=>$k){
-				if(in_array($q,$bool)) $k=($k==0)?'no':'yes';
-				if(in_array($q,$chck)) $k=($k==0)?'no':'yes';
+			foreach($query as $q=>$k){
+				if(in_array($q,$bool)){
+					$k=($k==0)?'no':'yes';
+				}
+				if(in_array($q,$chck)){
+					$k=($k==0)?'no':'yes';
+				}
 
 				if($q=='vm_ram') $k=$this->fileSizeConvert($k);
 				if($q=='state_time') $k=date('d.m.Y H:i:s',$k);
@@ -2825,10 +2846,8 @@ class ClonOS {
 			}
 
 			$html.='</table>';
-			$res=$html;
-
 		}
 
-		return $res;
+		return $html;
 	}
 }

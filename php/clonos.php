@@ -2239,19 +2239,6 @@ class ClonOS {
 		return '<span class="cbsd-str">'.$cmd_string.'</span>';
 	}
 
-	function register_media($path,$file,$ext){
-		$cmd='cbsd media mode=register name=%s path=%s type=%s';
-		$res=CBSD::run($cmd, array($file, $path.$file, $ext));
-		if($res['error']){
-			$arr['error']=true;
-			$arr['error_message']='File image not registered!';
-		} else {
-			$arr['error']=false;
-		}
-
-		echo json_encode($arr);
-	}
-
 	function media_iso_list_html(){
 //		$form=$this->form;
 		$db=new Db('base','storage_media');

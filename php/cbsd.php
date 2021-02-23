@@ -54,5 +54,18 @@ class CBSD {
 		}
 	}
 
+	function register_media($path,$file,$ext)
+	{
+		$cmd='cbsd media mode=register name=%s path=%s type=%s';
+		$res=self::run($cmd, array($file, $path.$file, $ext));
+		if($res['error']){
+			$arr['error']=true;
+			$arr['error_message']='File image not registered!';
+		} else {
+			$arr['error']=false;
+		}
+
+		echo json_encode($arr);
+	}
 }
 

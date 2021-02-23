@@ -1,6 +1,5 @@
 <?php
-if(isset($_GET['file']))
-{
+if(isset($_GET['file'])){
 	$file=$_GET['file'];
 	$filename=$file;
 }else{
@@ -9,8 +8,9 @@ if(isset($_GET['file']))
 }
 
 $res=$clonos->userAutologin();
-if(isset($res['id']) && $res['id']>0)
-{
+
+if(isset($res['id']) && $res['id']>0){
+
 	$file=$clonos->media_import.$file;
 
 	header('Content-disposition: attachment; filename='.$filename);
@@ -20,19 +20,19 @@ if(isset($res['id']) && $res['id']>0)
 	header('Content-Length: '.filesize($file));
 	header("Pragma: no-cache");
 	header("Expires: 0");
-	
+
 	$chunkSize = 1024 * 1024;
-    $handle = fopen($file, 'rb');
-    while (!feof($handle))
-    {
+	$handle = fopen($file, 'rb');
+	while (!feof($handle))
+	{
 		$buffer = fread($handle, $chunkSize);
 		echo $buffer;
 		ob_flush();
 		flush();
-    }
-    fclose($handle);
-	
-	exit;	
+	}
+	fclose($handle);
+
+	exit;
 }
 
 header('HTTP/1.1 401 Unauthorized');

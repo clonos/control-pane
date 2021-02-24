@@ -1,4 +1,5 @@
 <?php
+
 if(!isset($_GET['jname'])){
 	echo 'You forgot to specify a name of jail!';
 	exit;
@@ -6,8 +7,7 @@ if(!isset($_GET['jname'])){
 
 function runVNC($jname)
 {
-	$db=new Db('base','local');
-	$res=db->selectOne("SELECT vnc_password FROM bhyve WHERE jname=?", array([$jname]));
+	$res=(new Db('base','local'))->selectOne("SELECT vnc_password FROM bhyve WHERE jname=?", array([$jname]));
 
 	$pass='cbsd';
 	if($res!==false) $pass=$res['vnc_password'];

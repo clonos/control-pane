@@ -9,8 +9,7 @@ if(!isset($this->_vars['db_path']))
 {
 	//$db_path=$this->_vars['db_path'];
 	$res=CBSD::run('make_tmp_helper module=%s', [$hash]);
-	if($res['retval']==0)
-	{
+	if($res['retval']==0){
 		$db_path=$res['message'];
 	}else{
 		echo json_encode(array('error'=>true,'errorMessage'=>'Error on open temporary form database!'));
@@ -19,9 +18,6 @@ if(!isset($this->_vars['db_path']))
 }else{
 	$db_path=$this->_vars['db_path'];
 }
-
-$form=new Forms('',$hash,$db_path);
-$res=$form->generate();
 
 $freejname='';
 $jres=$this->getFreeJname(true);
@@ -46,8 +42,8 @@ $html=<<<EOT
 		</div>
 	</form>
 EOT;
-	
 
-$html.='<h1>Helper: '.$hash.'</h1>'.$res['html'];
+$res_html=(new Forms('',$hash,$db_path))->generate();
+$html.='<h1>Helper: '.$hash.'</h1>'.$res_html;
 
-echo json_encode(array('html'=>$html,'func'=>'fillTab'));	//,'currents'=>$res['currents']
+echo json_encode(array('html'=>$html,'func'=>'fillTab'));

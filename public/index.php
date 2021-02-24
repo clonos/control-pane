@@ -5,53 +5,45 @@ if(preg_match('/(?i)msie [5-9]/',$_SERVER['HTTP_USER_AGENT']))
 	exit;
 }
 
-$_REALPATH=realpath('../');
+$_real_path=realpath('../');
 $uri=trim($_SERVER['REQUEST_URI'],'/');
-include($_REALPATH.'/php/clonos.php');
-include($_REALPATH.'/php/menu.php');
-$clonos=new ClonOS($_REALPATH,$uri);
-$menu=new Menu($_REALPATH, $uri);
-$realpath_public=$_REALPATH.'/public/'; # /usr/home/web/cp/clonos/public/
-$locale = new Locale($realpath_public);
-//echo json_encode($clonos->config->os_types);exit;
-if(isset($_GET['upload']))
-{
+require_once($_real_path.'/php/clonos.php');
+require_once($_real_path.'/php/menu.php');
+$chunks=Utils::gen_uri_chunks($uri);
+$clonos=new ClonOS($_real_path, $chunks);
+$locale = new Locale($_real_path.'/public/'); # /usr/home/web/cp/clonos/public/
+$menu=new Menu($locale, $chunks);
+
+if(isset($_GET['upload'])){
 	include('upload.php');
-	$clonos->register_media($path,$file,$ext);
+	CBSD::register_media($path,$file,$ext);
 	exit;
 }
-if(isset($_GET['download']))
-{
+if(isset($_GET['download'])){
 	include('download.php');
-	$clonos->register_media($path,$file,$ext);
+	CBSD::register_media($path,$file,$ext);
 	exit;
 }
 
 $lang=$locale->get_lang();
-$root=trim($_SERVER['DOCUMENT_ROOT'],DIRECTORY_SEPARATOR);
 $_ds=DIRECTORY_SEPARATOR;
+$root=trim($_SERVER['DOCUMENT_ROOT'], $_ds);
 
-
-$chunks=$clonos->uri_chunks;
-if(!empty($chunks) && count($chunks)>1) $uri=$chunks[0];
-
+if(!empty($chunks)) $uri=$chunks[0];
 
 $file_path=$_ds.$root.$_ds.'pages'.$_ds.$uri.$_ds;
 $file_name=$file_path.$lang.'.index.php';
 $json_name=$file_path.'a.json.php';
 
-if(empty($uri))
-{
+if(empty($uri)){
 	header('Location: /'.$menu->first_key.'/',true);
 	exit;
 }
 
-
 error_reporting(E_ALL);
 
 $user_info=$clonos->userAutologin();
-if(!$user_info['error'])
-{
+if(!$user_info['error']){
 	$user_info_txt="user_id='${user_info['id']}';user_login='${user_info['username']}';";
 }else{
 	$user_info['username']='guest';
@@ -76,36 +68,41 @@ if(!$user_info['error'])
 	<meta name="keywords" content="" />
 	<meta name="description" content="" />
 	<script type="text/javascript">
-		_server_name='<?php echo $clonos->server_name; ?>';_first_start=true;
+		_first_start=true;
 		err_messages={add:function(arr){for(n in arr){err_messages[n]=arr[n];}}};
 		<?php if(isset($user_info_txt)) echo $user_info_txt; ?>
 	</script>
 </head>
 <script type="text/javascript">
-		try{
-			var theme=localStorage.getItem('Theme') || 'light';
-			var cs=['light','dark'];
-			for(c=0,cl=cs.length;c<cl;c++)
-			{
-				var css=cs[c];
-				var disabled=(theme==css)?'':' disabled="disabled"';
-				var hcss=$('<link rel="stylesheet" href="/css/themes/'+css+'.css" id="'+css+'" class="alternate"'+disabled+'>');
-				$('head').append(hcss);
-				$('#'+css).get(0).disabled=(theme!=css);
-			}
-		}catch(e){}
+	try{
+		var theme=localStorage.getItem('Theme') || 'light';
+		var cs=['light','dark'];
+		for(c=0,cl=cs.length;c<cl;c++)
+		{
+			var css=cs[c];
+			var disabled=(theme==css)?'':' disabled="disabled"';
+			var hcss=$('<link rel="stylesheet" href="/css/themes/'+css+'.css" id="'+css+'" class="alternate"'+disabled+'>');
+			$('head').append(hcss);
+			$('#'+css).get(0).disabled=(theme!=css);
+		}
+	}catch(e){}
 </script>
 <body class="gadget1 login <?php echo $uri;?>">
 
-<main><div class="main"><div id="content"><div id="ctop">
+<main>
+<div class="main"><div id="content">
+<div id="ctop">
 <?php
-if(file_exists($file_name)) include($file_name); else
-{
+if(file_exists($file_name)){
+	include($file_name);
+} else {
 	echo '<h1>'.$locale->translate('Not implemented yet').'!</h1>';
 }
 $clonos->placeDialogs();
 ?>
-</div><div id="cdown"><span class="split-close"></span><div id="cinfo">
+</div>
+<div id="cdown"><span class="split-close"></span>
+<div id="cinfo">
 		<div class="left">
 			<dl id="summaryInfo">
 				<dt>Имя клетки:</dt>
@@ -125,14 +122,20 @@ $clonos->placeDialogs();
 			<h2><?php echo $locale->translate('I/O storage');?>, bit per seconds:</h2>
 			<div class="graph v-black g--summary-bps l-read,write pr-no te-bps"></div>
 		</div>
-</div></div></div></div></main>
+</div>
+</div>
+</div></div>
+</main>
 
-<div class="menu"><div id="menu">
+<div class="menu">
+<div id="menu">
 	<div class="closer"></div>
 <?php
 echo $menu->html;
-?><div id="console"></div>
-</div></div>
+?>
+	<div id="console"></div>
+</div>
+</div>
 
 <header>
 	<div class="top-right">
@@ -162,10 +165,8 @@ echo $menu->html;
 		<li><a name="">
 			<select id="lng-sel">
 <?php
-$_languages=$locale->get_available_languages();
-foreach($_languages as $lng=>$lngname)
-{
-	if($lang==$lng) $sel=' selected="selected"'; else $sel='';
+foreach(Config::$languages as $lng=>$lngname){
+	$sel = ($lang==$lng) ? ' selected="selected"' : '';
 	echo '				<option value="'.$lng.'"'.$sel.'>'.$lngname.'</option>'.PHP_EOL;
 }
 ?>
@@ -173,16 +174,15 @@ foreach($_languages as $lng=>$lngname)
 		</a></li>
 		<li><a onclick="clonos.logout();" class="link" id="user-login"><?php echo $user_info['username']; ?></a></li>
 	</ul>
-</div></header>
+	</div>
+</header>
 
 <div class="login-area<?php if(!$user_info['error']) echo ' hide'; ?>"><?php echo $clonos->placeDialogByName('system-login'); ?>
-<div class="ccopy">ClonOS — is a powerfull system for&hellip;</div>
-<div class="ccopy">Cloud computing, Lightweight containerization, Virtualization, etc&hellip;</div>
+	<div class="ccopy">ClonOS — is a powerfull system for&hellip;</div>
+	<div class="ccopy">Cloud computing, Lightweight containerization, Virtualization, etc&hellip;</div>
 </div>
 
 <div class="spinner"></div>
 <div class="online icon-online" id="net-stat" onclick="ws_debug();"></div>
 </body>
 </html>
-<?php //print_r($clonos->userGetInfo()); ?>
-<?php //print_r($_SERVER); ?>

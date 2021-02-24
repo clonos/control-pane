@@ -19,20 +19,19 @@
 */
 class Forms
 {
-	private $name='';
 	private $db='';
-	private $html='';
 
-	function __construct($jname,$helper='',$db_path=false){
-		$this->name=$jname;
+	function __construct($jname,$helper='',$db_path=false)
+	{
 		if($jname==''){
-			$database=$helper;
-		}else if($jname=='cbsd-settings'){
-			$this->db=new Db('cbsd-settings');
+			$database=$helper; 
 		}else{
 			$database=array('jname'=>$jname,'helper'=>$helper);
 		}
-		if($helper!=''){
+
+		if($jname=='cbsd-settings'){
+			$this->db=new Db('cbsd-settings');
+		} else if($helper!=''){
 			if($db_path!==false){
 				$this->db=new Db('file',$db_path);
 			}else{
@@ -41,20 +40,18 @@ class Forms
 		}
 	}
 
+	private function fetch_from_db($link)
+	{
+		return $this->db->select("select * from ? order by order_id asc", array([$link]));
+	}
+
 	function generate(){
 		if($this->db->error) return;
-		//$query="select * from forms order by group_id asc, order_id asc";
-		$query="select * from forms order by groupname asc, group_id asc, order_id asc";
-		$fields=$this->db->select($query, array());
-		//print_r($fields);exit;
-		//echo '<pre>';print_r($fields);
-		//$defaults=array();
-		//$currents=array();
+		$fields=$this->db->select("select * from forms order by groupname asc, group_id asc, order_id asc", array());
 
 		// Строим карту формы с группами элементов
 		$groups=array();
-		foreach($fields as $key=>$field)
-		{
+		foreach($fields as $key=>$field){
 			$group=$field['groupname'];
 			if(!empty($group)){
 				if($field['type']=='group_add'){	// Expand
@@ -75,23 +72,20 @@ class Forms
 
 		$arr=array();
 		$last_type='';
-		foreach($fields as $key=>$field)
-		{
+		foreach($fields as $key=>$field){
 			/*
 			if($last_type=='delimer' && $field['type']!='delimer')
-				$this->html.='<div class="pad-head"></div>';
+				$html.='<div class="pad-head"></div>';
 			*/
 			$last_type=$field['type'];
 
-			if(isset($field['cur']) && isset($field['def']))
-			{
+			if(isset($field['cur']) && isset($field['def'])){
 				if(empty($field['cur'])) $field['cur']=$field['def'];
 			}
 
 			$tpl=$this->getElement($field['type'],$field);
 			$params=array('param','desc','attr','cur');
-			foreach($params as $param)
-			{
+			foreach($params as $param){
 				if(isset($field[$param]))
 					$tpl=str_replace('${'.$param.'}',$field[$param],$tpl);
 			}
@@ -113,42 +107,42 @@ class Forms
 		}
 
 		// Выстраиваем форму по карте
-		$this->html='<form class="helper" name="" onsubmit="return false;"><div class="form-fields">';
-		foreach($groups as $key=>$txt)
-		{
+		$html='<form class="helper" name="" onsubmit="return false;"><div class="form-fields">';
+		foreach($groups as $key=>$txt){
 			if(is_numeric($key)){
-				$this->html.=$arr[$key];
+				$html.=$arr[$key];
 			}else if(is_array($txt)){
 				$group_name=key($txt);
 				$group_title=$txt['_title'];
 				unset($txt['_title']);
-				foreach($txt as $key1=>$val1)
-				{
+				foreach($txt as $key1=>$val1){
 					$group_id=$val1['_group_id'];
 					unset($val1['_group_id']);
 					if(is_array($val1)){
-						$this->html.='<div class="form-field"><fieldset id="ind-'.$group_id.'"><legend>'.$group_title.'</legend>';
-						foreach($val1 as $key2=>$val2)
-							$this->html.=$arr[$val2];
-						$this->html.='<div><input type="button" value="delete group" class="fgroup-del-butt" /></div></fieldset></div>';
+						$html.='<div class="form-field"><fieldset id="ind-'.$group_id.'"><legend>'.$group_title.'</legend>';
+						foreach($val1 as $key2=>$val2){
+							$html.=$arr[$val2];
+						}
+						$html.='<div><input type="button" value="delete group" class="fgroup-del-butt" /></div></fieldset></div>';
 					}else{
-						$this->html.=$arr[$key1];
+						$html.=$arr[$key1];
 					}
 				}
-				$this->html.='<div class="form-field"><input type="button" value="add group" class="fgroup-add-butt" /></div>';
+				$html.='<div class="form-field"><input type="button" value="add group" class="fgroup-add-butt" /></div>';
 			}
 		}
-		$this->html.='</div>';
 
-		$this->setButtons();
-		$this->html.='</form>';
-		return array('html'=>$this->html);	//	,'currents'=>$currents	//,'defaults'=>$defaults
+		$html.='</div>';
+		$html.='<div class="buttons"><input type="button" value="Apply" class="save-helper-values" title="Save and apply params" /> &nbsp; <input type="button" value="Clear" class="clear-helper" title="Restore loaded params" /></div>';
+		$html.='</form>';
+
+		return $html;
 	}
 
-	function getElement($el,$arr=array()){
+	function getElement($el,$arr=array())
+	{
 		$tpl='';
-		switch(trim($el))
-		{
+		switch(trim($el)){
 			case 'inputbox':
 				$res=$this->getInputAutofill($arr);
 				if($res===false){
@@ -180,13 +174,13 @@ class Forms
 		return $tpl;
 	}
 
-	function getInputAutofill($arr){
+	function getInputAutofill($arr)
+	{
 		if(isset($arr['link'])){
 			$id=$arr['link'];	//$arr['param'].'-'.
 			$tpl='<datalist id="'.$id.'">';
-			$query="select * from ? order by order_id asc";
-			$opts=$this->db->select($query, array([$arr['link']]));
-			if(!empty($opts))foreach($opts as $key=>$opt){
+			$opts = $this->fetch_from_db($arr['link']);
+			foreach($opts as $key=>$opt){
 				$tpl.='<option>'.$opt['text'].'</option>';
 			}
 			$tpl.='</datalist>';
@@ -196,15 +190,14 @@ class Forms
 		}
 	}
 
-	function getSelect($el,$arr){
+	function getSelect($el,$arr)
+	{
 		$tpl='<div class="form-field"><select name="${param}">';
 		if(isset($arr['link'])){
-			$query="select * from ? order by order_id asc";
-			$opts=$this->db->select($query, array([$arr['link']]));
+			$opts = $this->fetch_from_db($arr['link']);
 			// Пустое поле в списках оказалось ненужным!
 			//array_unshift($opts,array('id'=>0,'text'=>'','order_id'=>-1));
-			if(!empty($opts))foreach($opts as $key=>$opt)
-			{
+			foreach($opts as $key=>$opt){
 				$selected=($opt['id']==$arr['cur'])?' selected':'';
 				$tpl.='<option value="'.$opt['id'].'"'.$selected.'>'.$opt['text'].'</option>';
 			}
@@ -213,12 +206,12 @@ class Forms
 		return $tpl;
 	}
 
-	function getRadio($el,$arr){
+	function getRadio($el,$arr)
+	{
 		$tpl='<div class="form-field"><fieldset><legend>${desc}</legend>';
 		if(isset($arr['link'])){
-			$query="select * from ? order by order_id asc";
-			$opts=$this->db->select($query, array([$arr['link']]));
-			if(!empty($opts))foreach($opts as $key=>$opt){
+			$opts = $this->fetch_from_db($arr['link']);
+			foreach($opts as $key=>$opt){
 				$checked=($opt['id']==$arr['cur'])?' checked':'';
 				$tpl.='<label for="${param}-'.$opt['id'].'">'.$opt['text'].':</label><input type="radio" name="${param}" value="'.$opt['id'].'" id="${param}-'.$opt['id'].'"'.$checked.' />';
 			}
@@ -227,28 +220,4 @@ class Forms
 		return $tpl;
 	}
 
-	function setButtons($arr=array()){
-		$this->html.='<div class="buttons"><input type="button" value="Apply" class="save-helper-values" title="Save and apply params" /> &nbsp; <input type="button" value="Clear" class="clear-helper" title="Restore loaded params" /></div>';
-	}
 }
-
-/*
-
-$form=new Forms('php');
-?>
-<html>
-<style>
-body {font-size:100%;font-family:Tahoma,'Sans-Serif',Arial;}
-h1 {color:white;background:silver;margin:0;padding:10px;}
-.small {font-size:x-small;}
-.form-field {padding:4px 10px 0 10px;margin:0 4px; background:#fafafa;}
-.form-field span {margin-left:10px;}
-.form-field input {width:300px;}
-form {border:1px solid gray;padding:0;margin-bottom:10px;width:500px;border-radius:8px;overflow:hidden;box-shadow:4px 4px 6px rgba(0,0,0,0.2);}
-.buttons {padding:20px 10px;text-align:center;}
-</style>
-<?php
-$form->generate();
-//$form->setButtons(array('save','cancel'));
-
-*/

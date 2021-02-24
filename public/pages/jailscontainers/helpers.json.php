@@ -93,7 +93,6 @@ if(empty($hash))
 	return;
 }else{
 #	Открываем настройки хелпера
-	
 	$db=new Db('helper',array('jname'=>$jail_name,'helper'=>$hash));
 	if($db->error)
 	{
@@ -103,14 +102,12 @@ if(empty($hash))
 	}
 
 	$db_path=$db->getFileName();
-	$form=new Forms($jail_name,$hash,$db_path);
-	$res=$form->generate();
-	$res['html']='<h1>'.$this->translate('Helper settings: '.$hash).'</h1>'.$res['html'];
+	$res_html=(new Forms($jail_name,$hash,$db_path))->generate();
+	$res_html='<h1>'.$this->translate('Helper settings: '.$hash).'</h1>'.$res_html;
 }
 
-
-//echo json_encode(array('html'=>$res['html'],'func'=>'fillTab'));	//,'currents'=>$res['currents']
+//echo json_encode(array('html'=>$res_html,'func'=>'fillTab'));
 $included_result_array=array(
-	'html'=>$res['html'],
+	'html'=>$res_html,
 	'func'=>'fillTab'
 );

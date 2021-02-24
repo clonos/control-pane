@@ -56,21 +56,21 @@ class ClonOS {
 	private $_db_jails=null;
 */
 
-	function __construct($_REALPATH,$uri=''){	# /usr/home/web/cp/clonos
+	function __construct($_real_path,$uri_chunks = null){	# /usr/home/web/cp/clonos
 
 		$this->_post=($_SERVER['REQUEST_METHOD']=='POST');
 		$this->_vars=$_POST;
 
 		$this->workdir=getenv('WORKDIR'); # // /usr/jails
 		$this->environment=getenv('APPLICATION_ENV');
-		$this->realpath=$_REALPATH.'/'; # /usr/home/web/cp/clonos/
-		$this->realpath_php=$_REALPATH.'/php/'; # /usr/home/web/cp/clonos/php/
-		$this->realpath_public=$_REALPATH.'/public/'; # /usr/home/web/cp/clonos/public/
-		$this->media_import=$_REALPATH.'/media_import/';
+		$this->realpath=$_real_path.'/'; # /usr/home/web/cp/clonos/
+		$this->realpath_php=$_real_path.'/php/'; # /usr/home/web/cp/clonos/php/
+		$this->realpath_public=$_real_path.'/public/'; # /usr/home/web/cp/clonos/public/
+		$this->media_import=$_real_path.'/media_import/';
 
 		if($this->environment=='development'){
 			$sentry_file=$this->realpath_php.'sentry.php';
-			if(file_exists($sentry_file))include($sentry_file);
+			if(file_exists($sentry_file)) include($sentry_file);
 		}
 
 		if(isset($_SERVER['SERVER_NAME']) && !empty(trim($_SERVER['SERVER_NAME']))){
@@ -79,7 +79,11 @@ class ClonOS {
 			$this->server_name=$_SERVER['SERVER_ADDR'];
 		}
 
-		$this->uri_chunks=Utils::gen_uri_chunks($uri);
+		if (is_null($uri_chunks)) { # TODO Do we need this ?
+			$this->uri_chunks=Utils::gen_uri_chunks($uri);
+		} else {
+			$this->uri_chunks=$uri_chunks;
+		}
 
 		$this->config=new Config();
 
@@ -89,24 +93,20 @@ class ClonOS {
 
 		if(isset($this->_vars['path'])){
 			//$this->realpath_page=$this->realpath_public.'pages/'.trim($this->_vars['path'],'/').'/';
-			//echo $this->_vars['path'];
-			//print_r($this->uri_chunks);
 			$this->realpath_page=$this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
 			$this->json_name=$this->realpath_page.'a.json.php';
 			//echo $this->realpath_page;
 		}else if($_SERVER['REQUEST_URI']){
 			//$this->realpath_page=$this->realpath_public.'pages/'.trim($_SERVER['REQUEST_URI'],'/').'/';
-			if(isset($this->uri_chunks[0]))
+			if(isset($this->uri_chunks[0])){
 				$this->realpath_page=$this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
+			}
 		}
 
 		if(isset($this->_vars['hash'])) $this->url_hash=preg_replace('/^#/','',$this->_vars['hash']);
 
 //		$this->json_name=$this->realpath_php.'pages'
 //		$clonos->json_name=$file_path.'a.json.php';
-
-		$this->_db_tasks=new Db('base','cbsdtaskd');
-		$this->_db_local=new Db('base','local');
 
 		if(isset($this->_vars['mode'])) $this->mode=$this->_vars['mode'];
 		if(isset($this->_vars['form_data'])) $this->form=$this->_vars['form_data'];
@@ -279,9 +279,11 @@ class ClonOS {
 		$res=$redis->publish($key,$message);
 	}
 
-	function getTableChunk($table_name='',$tag){
-		if(empty($table_name)) return false;
-		if(isset($this->table_templates[$table_name][$tag])) return $this->table_templates[$table_name][$tag];
+	function getTableChunk($table_name, $tag)
+	{
+		if(isset($this->table_templates[$table_name][$tag])){
+			return $this->table_templates[$table_name][$tag];
+		}
 
 		$file_name=$this->realpath_page.$table_name.'.table';
 		if(!file_exists($file_name)) return false;
@@ -291,32 +293,38 @@ class ClonOS {
 			$this->table_templates[$table_name][$tag]=$res;
 			return $res;
 		}
-		return '';
+		return ''; # TODO ???
 	}
 
-	function check_locktime($nodeip){
+	function check_locktime($nodeip)
+	{
 		$lockfile=$this->workdir."/ftmp/shmux_${nodeip}.lock";
-		if (!file_exists($lockfile)) return 0;
+		if (file_exists($lockfile)){
+			$cur_time = time();
+			$difftime=(($cur_time - filemtime($lockfile)) / 60);
+			if ($difftime > 1){ 
+				return round($difftime);
+			}
+		}
 
-		$cur_time = time();
-		$st_time=filemtime($lockfile);
-
-		$difftime=(( $cur_time - $st_time ) / 60 );
-		if ( $difftime > 1 ) return round($difftime);
-		return 0; //lock exist but too fresh
+		return 0; //too fresh or does not exist
 	}
 
-	function check_vmonline($vm){
+	function check_vmonline($vm)
+	{
 		$vmmdir="/dev/vmm";
 
-		if(!file_exists($vmmdir)) return 0;
-
-		if($handle=opendir($vmmdir)){
-			while(false!==($entry=readdir($handle))){
-				if($entry[0]==".") continue;
-				if($vm==$entry) return 1;
+		if(file_exists($vmmdir)){
+			if($handle=opendir($vmmdir)){
+				while(false!==($entry=readdir($handle))){
+					if($entry[0]==".") continue;
+					if($vm==$entry) {
+						closedir($handle);
+						return 1;
+					}
+				}
+				closedir($handle);
 			}
-			closedir($handle);
 		}
 
 		return 0;
@@ -366,7 +374,7 @@ class ClonOS {
 			$query="SELECT id,cmd,status,jname FROM taskd WHERE status<2 AND jname IN (?)";
 			$cmd='';
 			$txt_status='';
-			$tasks=$this->_db_tasks->select($query, array([$tid]));
+			$tasks=(new Db('base','cbsdtaskd'))->select($query, array([$tid]));
 			if(!empty($tasks)) foreach($tasks as $task){
 				$rid=preg_replace('/^#/','',$task['jname']);
 				foreach($check_arr as $key=>$val){
@@ -396,7 +404,7 @@ class ClonOS {
 
 /*
 	function getTaskStatus($task_id){
-		$status=$this->_db_tasks->selectOne("SELECT status,logfile,errcode 
+		$status=(new Db('base','cbsdtaskd'))->selectOne("SELECT status,logfile,errcode 
 					FROM taskd WHERE id=?", array([$task_id]);
 
 		if($status['errcode']>0) $status['errmsg']=file_get_contents($status['logfile']);
@@ -406,7 +414,7 @@ class ClonOS {
 */
 
 	private function doTask($key, $task){
-		if($task['status'] != -1) return(false);
+		if($task['status'] != -1) return false;
 
 		switch($task['operation']){
 			case 'jstart':		$res=$this->jailStart($key);break;
@@ -438,7 +446,8 @@ class ClonOS {
 		//return $jsonObj;
 		$tasks=array();
 		$obj=json_decode($jsonObj,true);
-		if(empty($ids)) return $obj; // TODO: error? this return NULL..
+		# TODO $ids not defined
+		#if(empty($ids)) return $obj; // TODO: error? this return NULL..
 
 		if(isset($obj['proj_ops'])) return $this->GetProjectTasksStatus($obj);
 		if(isset($obj['mod_ops'])) return $this->GetModulesTasksStatus($obj);
@@ -475,7 +484,6 @@ class ClonOS {
 		$stat_array['imgremove']=&$stat_array['jremove'];
 
 		foreach($obj as $key=>$task){
-			$status=$task['status'];
 			if(in_array($task['operation'],$ops_array)){
 				if(false !== ($res=$this->runTask($key,$task))){
 					if($res['error']) $obj[$key]['retval']=$res['retval'];
@@ -489,16 +497,18 @@ class ClonOS {
 							//$obj[$key]['txt_log']=file_get_contents('/tmp/taskd.'.$task_id.'.log');
 						}
 					}
-				}else $tasks[]=$task['task_id'];
+				} else {
+					$tasks[]=$task['task_id'];
+				}
 			}
 
-			if($status==-1) $obj[$key]['status']=0;
+			($task['status']==-1) AND $obj[$key]['status']=0;
 		}
 
 		$ids=join(',',$tasks);
 		if(empty($ids)) return $obj;
 
-		$statuses=$this->_db_tasks->select("SELECT id,status,logfile,errcode FROM taskd WHERE id IN (?)", array([$ids]));
+		$statuses=(new Db('base','cbsdtaskd'))->select("SELECT id,status,logfile,errcode FROM taskd WHERE id IN (?)", array([$ids]));
 
 		//print_r($statuses);
 		foreach($obj as $key=>$task){
@@ -545,7 +555,13 @@ class ClonOS {
 	function ccmd_jailRename() {
 		$form=$this->_vars['form_data'];
 		$cmd = "task owner=%s mode=new {cbsd_loc} jrename old=%s new=%s host_hostname=%s ip4_addr=%s restart=1";
-		$args = array($this->_user_info['username'], $form['oldJail'], $form['jname'], $form['host_hostname'], $form['ip4_addr']);
+		$args = array(
+			$this->_user_info['username'], 
+			$form['oldJail'], 
+			$form['jname'], 
+			$form['host_hostname'], 
+			$form['ip4_addr']
+		);
 		$res=CBSD::run($cmd, $args);
 
 		$err='Jail is not renamed!';
@@ -563,7 +579,13 @@ class ClonOS {
 	function ccmd_jailClone() {
 		$form=$this->_vars['form_data'];
 		$cmd = 'task owner=%s mode=new {cbsd_loc} jclone checkstate=0 old=%s new=%s host_hostname=%s ip4_addr=%s';
-		$args = array($this->_user_info['username'], $form['oldJail'], $form['jname'], $form['host_hostname'], $form['ip4_addr']);
+		$args = array(
+			$this->_user_info['username'], 
+			$form['oldJail'], 
+			$form['jname'],
+			$form['host_hostname'], 
+			$form['ip4_addr']
+		);
 		$res=CBSD::run($cmd, $args);
 
 		$err='Jail is not cloned!';
@@ -628,9 +650,9 @@ class ClonOS {
 					'reboot_title'=>$this->_locale->translate('Restart jail'),
 				);
 
-				foreach($vars as $var=>$val)
+				foreach($vars as $var=>$val){
 					$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
-
+				}
 				$html.=$html_tpl;
 			}
 		}
@@ -694,11 +716,15 @@ class ClonOS {
 
 			if(!isset($this->_vars['db_path'])){
 				$res=CBSD::run('make_tmp_helper module=%s', array($helper));
-				if($res['retval']==0) $db_path=$res['message']; else{
+				if($res['retval']==0){
+					$db_path=$res['message'];
+				} else {
 					echo json_encode(array('error'=>true,'errorMessage'=>'Error opening temporary form database!'));
 					return;
 				}
-			}else $db_path=$this->_vars['db_path'];
+			} else { 
+				$db_path=$this->_vars['db_path'];
+			}
 
 			
 			/*
@@ -765,21 +791,33 @@ class ClonOS {
 		);
 
 		$arr_copy=array('jname','host_hostname','ip4_addr','user_pw_root','interface');
-		foreach($arr_copy as $a) if(isset($form[$a])) $arr[$a]=$form[$a];
+		foreach($arr_copy as $a){
+			(isset($form[$a])) AND $arr[$a]=$form[$a];
+		}
 
 		$arr_copy=array('baserw','mount_ports','astart','vnet');
-		foreach($arr_copy as $a) if(isset($form[$a]) && $form[$a]=='on') $arr[$a]=1; else $arr[$a]=0;
+		foreach($arr_copy as $a){
+			if(isset($form[$a]) && $form[$a]=='on'){
+				$arr[$a]=1;
+			} else {
+				$arr[$a]=0;
+			}
+		}
 
 		$sysrc=array();
-		if(isset($form['serv-ftpd'])) $sysrc[]=$form['serv-ftpd'];
-		if(isset($form['serv-sshd'])) $sysrc[]=$form['serv-sshd'];
+		(isset($form['serv-ftpd'])) AND $sysrc[]=$form['serv-ftpd'];
+		(isset($form['serv-sshd'])) AND $sysrc[]=$form['serv-sshd'];
 		$arr['sysrc_enable']=implode(' ',$sysrc);
 
 		/* create jail */
 		$file_name='/tmp/'.$arr['jname'].'.conf';
 
 		$file=file_get_contents($this->realpath_public.'templates/jail.tpl');
-		if(!empty($file)) foreach($arr as $var=>$val) $file=str_replace('#'.$var.'#',$val,$file);
+		if(!empty($file)) {
+			foreach($arr as $var=>$val){
+				$file=str_replace('#'.$var.'#',$val,$file);
+			}
+		}
 		file_put_contents($file_name,$file);
 
 		$username=$this->_user_info['username'];
@@ -799,7 +837,7 @@ class ClonOS {
 		$jid=$arr['jname'];
 
 		$table='jailslist';
-		$html='';
+		#$html='';
 		$hres=$this->getTableChunk($table,'tbody');
 		if($hres!==false){
 			$html_tpl=$hres[1];
@@ -818,10 +856,11 @@ class ClonOS {
 				'reboot_title'=>$this->_locale->translate('Restart jail'),
 			);
 
-			foreach($vars as $var=>$val)
+			/* foreach($vars as $var=>$val){
 				$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
-
+			}
 			$html=$html_tpl;
+			*/
 		}
 
 		/*
@@ -886,9 +925,11 @@ class ClonOS {
 		if($db->isConnected()){
 			$query="SELECT jname,host_hostname FROM jails WHERE jname=?;";	//ip4_addr
 			$res['vars']=$db->selectOne($query, array([$form['jail_id']]));
-		}else $err=true;
+		} else {
+			$err=true;
+		}
 
-		if(empty($res['vars'])) $err=true;
+		(empty($res['vars'])) AND $err=true;
 		if($err){
 			$res['error']=true;
 			$res['error_message']=$this->_locale->translate('Jail '.$form['jail_id'].' is not present.');
@@ -916,8 +957,10 @@ class ClonOS {
 		if($db->isConnected()){
 			$query="SELECT jname,host_hostname,ip4_addr,allow_mount,interface,mount_ports,astart,vnet FROM jails WHERE jname=?;";
 			$res['vars']=$db->selectOne($query, array([$form['jail_id']]));
-		}else $err=true;
-		if(empty($res['vars']))	$err=true;
+		} else {
+			$err=true;
+		}
+		(empty($res['vars'])) AND $err=true;
 
 		if($err){
 			$res['error']=true;
@@ -942,9 +985,11 @@ class ClonOS {
 		foreach($arr as $a){
 			if(isset($form[$a])){
 				$val=$form[$a];
-				if($val=='on') $val=1;
+				($val=='on') AND $val=1;
 				$str[]=$a.'='.$val;
-			}else $str[]=$a.'=0';
+			} else {
+				$str[]=$a.'=0';
+			}
 		}
 
 		$cmd='jset jname=%s %s';
@@ -1003,7 +1048,9 @@ class ClonOS {
 		if($res['retval']==0){
 			$err='Virtual Machine was renamed!';
 			$taskId=$res['message'];
-		}else $err=$res['error'];
+		} else {
+			$err=$res['error'];
+		}
 
 		$html='';
 		$hres=$this->getTableChunk('bhyveslist','tbody');
@@ -1090,7 +1137,7 @@ class ClonOS {
 		}else{
 			$err=true;
 		}
-		if(empty($res['vars'])) $err=true;
+		(empty($res['vars'])) AND $err=true;
 
 		if($err){
 			$res['error']=true;
@@ -1121,7 +1168,9 @@ class ClonOS {
 		if($res['retval']==0){
 			$err='Virtual Machine was renamed!';
 			$taskId=$res['message'];
-		}else $err=$res['error'];
+		} else {
+			$err=$res['error'];
+		}
 
 		return array('errorMessage'=>$err,'jail_id'=>$form['jname'],'taskId'=>$taskId,'mode'=>$this->mode);
 	}
@@ -1136,9 +1185,11 @@ class ClonOS {
 		if($db->isConnected()){
 			$query="SELECT jname,vm_ram,vm_cpus,vm_os_type,hidden FROM bhyve WHERE jname=?"; //ip4_addr
 			$res['vars']=$db->selectOne($query, array([$jname]));
-		}else $err=true;
+		} else {
+			$err=true;
+		}
 
-		if(empty($res['vars'])) $err=true;
+		(empty($res['vars'])) AND $err=true;
 
 		if($err){
 			$res['error']=true;
@@ -1174,7 +1225,9 @@ class ClonOS {
 				$val=$form[$a];
 				if($val=='on') $val=1;
 				$str[]=$a.'='.$val;
-			}else $str[]=$a.'=0';
+			} else {
+				$str[]=$a.'=0';
+			}
 		}
 
 		$form['vm_ram']=$ram_tmp;
@@ -1315,9 +1368,9 @@ class ClonOS {
 				'reboot_title'=>$this->_locale->translate('Restart VM'),
 			);
 			
-			foreach($vars as $var=>$val)
+			foreach($vars as $var=>$val){
 				$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
-			
+			}
 			$html=$html_tpl;
 		}
 		
@@ -1340,10 +1393,8 @@ class ClonOS {
 		// os select
 		list($one,$two)=explode('.',$sel_os,2);
 
-		if(isset($os_types_obtain[$one]))
-		{
-			if(isset($os_types_obtain[$one]['items'][$two]))
-			{
+		if(isset($os_types_obtain[$one])){
+			if(isset($os_types_obtain[$one]['items'][$two])){
 				$os_profile=$os_types_obtain[$one]['items'][$two]['profile'];
 				$os_type=$os_types_obtain[$one]['items'][$two]['type'];
 			}
@@ -1416,9 +1467,9 @@ class ClonOS {
 				'reboot_title'=>$this->_locale->translate('Restart VM'),
 			);
 
-			foreach($vars as $var=>$val)
+			foreach($vars as $var=>$val){
 				$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
-			
+			}
 			$html=$html_tpl;
 		}
 
@@ -1472,9 +1523,9 @@ class ClonOS {
 				'deltitle'=>$this->_locale->translate('Delete'),
 			);
 
-			foreach($vars as $var=>$val)
+			foreach($vars as $var=>$val){
 				$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
-
+			}
 			$html=$html_tpl;
 		}
 
@@ -1513,9 +1564,9 @@ class ClonOS {
 				'deltitle'=>$this->_locale->translate('Delete'),
 			);
 
-			foreach($vars as $var=>$val)
+			foreach($vars as $var=>$val){
 				$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
-
+			}
 			$html=$html_tpl;
 		}
 
@@ -1553,7 +1604,9 @@ class ClonOS {
 		if($res['error']){
 			$arr['error']=true;
 			$arr['error_message']='File image was not deleted! '.$res['error_message'];
-		}else $arr['error']=false;
+		} else {
+			$arr['error']=false;
+		}
 
 		$arr['media_id']=$this->form['media_id'];
 		$arr['cmd']=$res;
@@ -1604,8 +1657,9 @@ class ClonOS {
 				'protitle'=>$this->_locale->translate('Delete'),
 			);
 
-			foreach($vars as $var=>$val) $html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
-
+			foreach($vars as $var=>$val){
+				$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
+			}
 			$html=$html_tpl;
 		}
 
@@ -1719,16 +1773,19 @@ class ClonOS {
 		return array('html'=>$html,'arr'=>$res);
 	}
 
-	function ccmd_repoCompile(){
-		$form=$this->form;
-		if(!isset($form['version']) || !is_numeric($form['version'])) return array('error'=>true,'errorMessage'=>'Wrong OS type input!');
+	function ccmd_repoCompile()
+	{
+		if(!isset($this->form['version']) || !is_numeric($this->form['version'])) {
+			return array('error'=>true,'errorMessage'=>'Wrong OS type input!');
+		}
 
+		$ver=$this->form['version'];
 		$stable_arr=array('release','stable');
 		$html='';
 		$hres=$this->getTableChunk('baseslist','tbody');
 		if($hres!==false){
 			$html_tpl=$hres[1];
-			$ver=$form['version'];
+			# TODO: This next line is weird
 			$stable_num=strlen(intval($ver))<strlen($ver)?0:1;	//'release':'stable';
 			$stable=$stable_arr[$stable_num];
 
@@ -1750,9 +1807,9 @@ class ClonOS {
 				'protitle'=>$this->_locale->translate('Delete'),
 			);
 
-			foreach($vars as $var=>$val)
+			foreach($vars as $var=>$val){
 				$html_tpl=str_replace('#'.$var.'#',$val,$html_tpl);
-
+			}
 			$html=$html_tpl;
 		}
 
@@ -1773,9 +1830,9 @@ class ClonOS {
 		return array('errorMessage'=>'','jail_id'=>'base'.$bid,'taskId'=>$taskId,'html'=>$html,'mode'=>$this->mode,'txt_status'=>$this->_locale->translate('Fetching'));
 	}
 
-	function ccmd_logLoad(){
-		$form=$this->_vars['form_data'];
-		$log_id=$form['log_id'];
+	function ccmd_logLoad()
+	{
+		$log_id=$this->_vars['form_data']['log_id'];
 		if(!is_numeric($log_id)) return array('error'=>'Log ID must be a number');
 
 		$html='';
@@ -1796,9 +1853,11 @@ class ClonOS {
 			}
 			$buf=htmlentities(trim($buf));
 			$arr=preg_split('#\n#iSu',trim($buf));
-			if(!empty($arr)) foreach($arr as $txt)
-				$html.='<p class="log-p">'.$txt.'</p>';
-
+			if ($arr != false){
+				foreach($arr as $txt){
+					$html.='<p class="log-p">'.$txt.'</p>';
+				}
+			}
 			return array('html'=>'<div style="font-weight:bold;">Log ID: '.$log_id.'</div><br />'.$html);
 		}
 
@@ -1844,8 +1903,11 @@ class ClonOS {
 	}
 
 	//function addJailHelperGroup(){
-	function ccmd_addJailHelperGroup(){
-		if($this->uri_chunks[0]!='jailscontainers' || empty($this->uri_chunks[1]) || empty($this->url_hash)) return array('error'=>true,'errorMessage'=>'Bad url!');
+	function ccmd_addJailHelperGroup()
+	{
+		if($this->uri_chunks[0]!='jailscontainers' || empty($this->uri_chunks[1]) || empty($this->url_hash)){
+			return array('error'=>true,'errorMessage'=>'Bad url!');
+		}
 		$jail_id=$this->uri_chunks[1];
 		$helper=$this->url_hash;
 
@@ -1858,39 +1920,51 @@ class ClonOS {
 			'forms inter=0 module=%s formfile=%s group=add',
 			array($helper, $db_path)
 		);
-		$form=new Forms('',$helper,$db_path);
-		$res=$form->generate();
 
-		return array('html'=>$res['html']);
+		$html=(new Forms('', $helper, $db_path))->generate();
+
+		return array('html'=>$html);
 	}
 
-	function addHelperGroup($mode){
+	function addHelperGroup($mode)
+	{
 		$module=$this->url_hash;
-		if(isset($this->form)) $form=$this->form; else $form=array();
+		if(isset($this->form)){
+			$form=$this->form;
+		} else { 
+			$form=array();
+		}
 		if(isset($form['db_path']) && !empty($form['db_path']))	{
 			$db_path=$form['db_path'];
 			if(!file_exists($db_path)){
 				$res=CBSD::run('make_tmp_helper module=%s', array($module));
-				if($res['retval']==0) $db_path=$res['message']; else return array('error'=>true,'errorMessage'=>'Error on open temporary form file!');
+				if($res['retval']==0){
+					$db_path=$res['message'];
+				} else {
+					return array('error'=>true,'errorMessage'=>'Error on open temporary form file!');
+				}
 			}
 		}else{
 			$res=CBSD::run('make_tmp_helper module=%s', array($module));
 			if($res['retval']==0) $db_path=$res['message'];
 		}
 		CBSD::run('forms inter=0 module=%s formfile=%s group=add', array($module, $db_path));
-		$form=new Forms('',$module,$db_path);
-		$res=$form->generate();
+		$html=(new Forms('',$module,$db_path))->generate();
 
-		return array('db_path'=>$db_path,'html'=>$res['html']);
+		return array('db_path'=>$db_path,'html'=>$html);
 	}
 
 	function deleteHelperGroup($mode){
 		$module=$this->url_hash;
-		if(isset($this->form)) $form=$this->form; else $form=array();
+		if(isset($this->form)){
+			$form=$this->form;
+		} else {
+			$form=array();
+		}
 		if(!isset($form['db_path']) || empty($form['db_path'])) return;
 
 		if(!file_exists($form['db_path'])) return array('error'=>true,'errorMessage'=>'Error on open temporary form file!');
-		
+
 		$index=$form['index'];
 		$index=str_replace('ind-','',$index);
 
@@ -1899,21 +1973,20 @@ class ClonOS {
 			'forms inter=0 module=%s formfile=%s group=del index=%s',
 			array($module, $db_path, $index)
 		);
-		$form=new Forms('',$module,$db_path);
-		$res=$form->generate();
+		$html=(new Forms('',$module,$db_path))->generate();
 
-		return array('db_path'=>$db_path,'html'=>$res['html']);
+		return array('db_path'=>$db_path,'html'=>$html);
 	}
 
 	//function deleteJailHelperGroup(){
-	function ccmd_deleteJailHelperGroup(){
-		$form=$this->form;
-		if(!isset($this->uri_chunks[1]) || !isset($this->url_hash)) return array('error'=>true,'errorMessage'=>'Bad url!');
-
+	function ccmd_deleteJailHelperGroup()
+	{
+		if(!isset($this->uri_chunks[1]) || !isset($this->url_hash)){
+			return array('error'=>true,'errorMessage'=>'Bad url!');
+		}
 		$jail_id=$this->uri_chunks[1];
 		$helper=$this->url_hash;
-		$index=$form['index'];
-		$index=str_replace('ind-','',$index);
+		$index=str_replace('ind-','',$this->form['index']);
 
 		$db=new Db('helper',array('jname'=>$jail_id,'helper'=>$helper));
 		if($db->error) return array('error'=>true,'errorMessage'=>'No helper database!');
@@ -1923,10 +1996,8 @@ class ClonOS {
 			'forms inter=0 module=%s formfile=%s group=del index=%s',
 			array($helper, $db_path, $index)
 		);
-		$form=new Forms('',$helper,$db_path);
-		$res=$form->generate();
-
-		return array('html'=>$res['html']);
+		$html=(new Forms('',$helper,$db_path))->generate();
+		return array('html'=>$html);
 	}
 
 	function useDialogs($arr=array()){
@@ -1954,25 +2025,6 @@ class ClonOS {
 			include($file_name);
 			echo PHP_EOL,PHP_EOL;
 		}
-	}
-
-	function runVNC($jname){
-		$query="SELECT vnc_password FROM bhyve WHERE jname=?";
-		$res=$this->_db_local->selectOne($query, array([$jname]));
-
-		$pass='cbsd';
-		if($res!==false) $pass=$res['vnc_password'];
-		
-		$resCBSD::run("vm_vncwss jname=%s permit=%s", array($jname, $this->_client_ip));
-		//$res=$this->_db_local->selectOne("SELECT nodeip FROM local", array());
-		//$nodeip=$res['nodeip'];
-		// need for IPv4/IPv6 regex here, instead of strlen
-		//if(strlen($nodeip)<7) $nodeip='127.0.0.1';
-		//if(strlen($nodeip)<7) $nodeip=$this->server_name;
-		$nodeip=$this->server_name;
-
-		header('Location: http://'.$nodeip.':6081/vnc_auto.html?host='.$nodeip.'&port=6081?password='.$pass);
-		exit;
 	}
 
 	//function getFreeJname($in_helper=false,$type='jail'){
@@ -2034,12 +2086,9 @@ class ClonOS {
 			'worker_img'=>'g',
 		);
 
-		foreach($form as $key=>$value)
-		{
-			if(isset($ass_arr[$key]))
-			{
-				if(isset($add_param[$key]))
-				{
+		foreach($form as $key=>$value){
+			if(isset($ass_arr[$key])){
+				if(isset($add_param[$key])){
 					$value.=$add_param[$key];
 				}
 				$res[$ass_arr[$key]]=$value;
@@ -2047,14 +2096,12 @@ class ClonOS {
 		}
 
 		$res['pv_enable']="0";
-		if(isset($form['pv_enable']))
-		{
+		if(isset($form['pv_enable'])){
 			if($form['pv_enable']=='on') $res['pv_enable']="1";
 		}
 
 		$res['kubelet_master']="0";
-		if(isset($form['kubelet_master']))
-		{
+		if(isset($form['kubelet_master'])){
 			if($form['kubelet_master']=='on') $res['kubelet_master']="1";
 		}
 
@@ -2170,17 +2217,6 @@ class ClonOS {
 		return '<span class="cbsd-str">'.$cmd_string.'</span>';
 	}
 
-	function register_media($path,$file,$ext){
-		$cmd='cbsd media mode=register name=%s path=%s type=%s';
-		$res=CBSD::run($cmd, array($file, $path.$file, $ext));
-		if($res['error']){
-			$arr['error']=true;
-			$arr['error_message']='File image not registered!';
-		}else $arr['error']=false;
-
-		echo json_encode($arr);
-	}
-
 	function media_iso_list_html(){
 //		$form=$this->form;
 		$db=new Db('base','storage_media');
@@ -2261,26 +2297,21 @@ class ClonOS {
 		if(isset($form['actuser']) && $form['actuser']=='on') $is_active=1;
 
 		$authorized_user_id=0;
-		if(isset($_COOKIE['mhash']))
-		{
+		if(isset($_COOKIE['mhash'])){
 			$mhash=$_COOKIE['mhash'];
 			if(!preg_match('#^[a-f0-9]{32}$#',$mhash)) return array('error'=>true,'error_message'=>'Bad data');
 			$query1="select user_id from auth_list WHERE sess_id=? limit 1";
 			$res1=$db->selectOne($query1, array([$mhash]));
-			{
-				if($res1['user_id']>0)
-				{
-					$authorized_user_id=$res1['user_id'];
-				}else{
-					return array('error'=>true,'error_message'=>'you are still not authorized');
-				}
+			if($res1['user_id']>0){
+				$authorized_user_id=$res1['user_id'];
+			} else {
+				return array('error'=>true,'error_message'=>'you are still not authorized');
 			}
-		}else{
+		} else {
 			return array('error'=>true,'error_message'=>'you must be authorized for this operation!');
 		}
 
-		if($user_id==0 || $user_id!=$authorized_user_id)
-		{
+		if($user_id==0 || $user_id!=$authorized_user_id){
 			return array('error'=>true,'error_message'=>'I think you\'re some kind of hacker');
 		}
 
@@ -2550,14 +2581,14 @@ class ClonOS {
 		return $this->messageSuccess($res);
 	}
 
-	function messageError($message,$vars=array()){
-		$rarr=array('error'=>true, 'error_message'=>$message);
-		return array_merge($rarr,$vars);
+	function messageError($message,$vars=[])
+	{
+		return array_merge(['error'=>true, 'error_message'=>$message], $vars);
 	}
 
-	function messageSuccess($vars=array()){
-		$rarr=array('error'=>false);
-		return array_merge($rarr,$vars);
+	function messageSuccess($vars=[])
+	{
+		return array_merge(['error'=>false], $vars);
 	}
 
 	function getImportedImages(){
@@ -2579,23 +2610,18 @@ class ClonOS {
 		return $files;
 	}
 
-	function ccmd_getImportedImageInfo(){
-		$form=$this->form;
-		$name=$form['id'];
-		$info=$this->getImageInfo($name);
-		return $info;
+	function ccmd_getImportedImageInfo()
+	{
+		return $this->getImageInfo($this->form['id']);
 	}
 
 	function getImagesList($path){
-		$files=array();
-		foreach (glob($path."*.img") as $filename)
-		{
-			$info=pathinfo($filename);
-			$arr=array(
-				'name'=>$info['basename'],
-				'fullname'=>$filename,
-			);
-			$files[]=$arr;
+		$files=[];
+		foreach (glob($path."*.img") as $filename){
+			$files[] = [
+				'name'=>pathinfo($filename)['basename'],
+				'fullname'=>$filename
+			];
 		}
 		return $files;
 	}
@@ -2629,8 +2655,15 @@ class ClonOS {
 			}
 		}
 
-		return array('orig_jname'=>$orig_jname,'jname'=>$jname,'host_hostname'=>$hostname,'ip4_addr'=>$ip,'file_id'=>$imgname,
-					'type'=>$type,'name_comment'=>$name_comment);
+		return [
+			'orig_jname'=>$orig_jname,
+			'jname'=>$jname,
+			'host_hostname'=>$hostname,
+			'ip4_addr'=>$ip,
+			'file_id'=>$imgname,
+			'type'=>$type,
+			'name_comment'=>$name_comment
+		];
 	}
 
 	function getImageVar($name,$buf){
@@ -2702,9 +2735,9 @@ class ClonOS {
 
 		$db=new Db('racct',array('jname'=>$jail_name));
 		if($db->isConnected()){
-			$quer=$db->select("SELECT ? as name,idx as time,memoryuse,pcpu,pmem,maxproc,openfiles,readbps, writebps,readiops,writeiops 
+			$query=$db->select("SELECT ? as name,idx as time,memoryuse,pcpu,pmem,maxproc,openfiles,readbps, writebps,readiops,writeiops 
 								FROM racct ORDER BY idx DESC LIMIT 25;", array([$jail_name]));	// where idx%5=0
-			$res['__all']=$quer;
+			$res['__all']=$query;
 		}
 
 		if($this->form['mode'] == 'bhyveslist'){
@@ -2722,11 +2755,13 @@ class ClonOS {
 			  FROM jails WHERE jname=?";
 		$db=new Db('base','local');
 		if($db->isConnected()){
-			$quer=$db->selectOne($sql, array([$jail_name]));
+			$query=$db->selectOne($sql, array([$jail_name]));
 			$html='<table class="summary_table">';
 
-			foreach($quer as $q=>$k){
-				if(is_numeric($k) && ($k==0 || $k==1)) $k=($k==0)?'no':'yes';
+			foreach($query as $q=>$k){
+				if(is_numeric($k) && ($k==0 || $k==1)){
+					$k = ($k==0) ? 'no':'yes';
+				}
 				$html.='<tr><td>'.$this->_locale->translate($q).'</td><td>'.$this->_locale->translate($k).'</td></tr>';
 			}
 
@@ -2739,7 +2774,7 @@ class ClonOS {
 
 	function getSummaryInfoBhyves(){
 
-		$res='';
+		$html='';
 
 		/*
 		$bool=array(
@@ -2763,12 +2798,16 @@ class ClonOS {
 				bhyve_wire_memory, bhyve_rts_keeps_utc, bhyve_force_msi_irq, bhyve_x2apic_mode,
 				bhyve_mptable_gen, bhyve_ignore_msr_acc, bhyve_vnc_vgaconf text, media_auto_eject,
 				vm_cpu_topology, debug_engine, xhci, cd_boot_firmware, jailed FROM settings";
-			$quer=$db->selectOne($sql, array());
+			$query=$db->selectOne($sql, array());
 			$html='<table class="summary_table">';
 
-			foreach($quer as $q=>$k){
-				if(in_array($q,$bool)) $k=($k==0)?'no':'yes';
-				if(in_array($q,$chck)) $k=($k==0)?'no':'yes';
+			foreach($query as $q=>$k){
+				if(in_array($q,$bool)){
+					$k=($k==0)?'no':'yes';
+				}
+				if(in_array($q,$chck)){
+					$k=($k==0)?'no':'yes';
+				}
 
 				if($q=='vm_ram') $k=$this->fileSizeConvert($k);
 				if($q=='state_time') $k=date('d.m.Y H:i:s',$k);
@@ -2777,10 +2816,8 @@ class ClonOS {
 			}
 
 			$html.='</table>';
-			$res=$html;
-
 		}
 
-		return $res;
+		return $html;
 	}
 }

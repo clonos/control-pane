@@ -30,7 +30,7 @@ class Menu
 	public $title='Error';
 	public $first_key=array();
 
-	function __construct(Locale $lang, $uri_chunks)
+	function __construct(Localization $lang, $uri_chunks)
 	{
 		$menu_config = Config::$menu;
 		$this->first_key = array_key_first($menu_config);

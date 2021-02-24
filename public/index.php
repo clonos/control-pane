@@ -11,7 +11,7 @@ require_once($_real_path.'/php/clonos.php');
 require_once($_real_path.'/php/menu.php');
 $chunks=Utils::gen_uri_chunks($uri);
 $clonos=new ClonOS($_real_path, $chunks);
-$locale = new Locale($_real_path.'/public/'); # /usr/home/web/cp/clonos/public/
+$locale = new Localization($_real_path.'/public/'); # /usr/home/web/cp/clonos/public/
 $menu=new Menu($locale, $chunks);
 
 if(isset($_GET['upload'])){

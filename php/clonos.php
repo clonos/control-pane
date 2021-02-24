@@ -2,7 +2,7 @@
 
 require_once("cbsd.php");
 require_once('config.php');
-require_once('locale.php');
+require_once('localization.php');
 require_once('db.php');
 require_once('forms.php');
 require_once('utils.php');
@@ -87,7 +87,7 @@ class ClonOS {
 
 		$this->config=new Config();
 
-		$this->_locale = new Locale($this->realpath_public);
+		$this->_locale = new Localization($this->realpath_public);
 
 		$this->_client_ip=$_SERVER['REMOTE_ADDR'];
 

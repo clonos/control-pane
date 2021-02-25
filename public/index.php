@@ -1,7 +1,7 @@
 <?php
 
 require_once('../php/clonos.php');
-require_once('../php/Tpl.php');
+require_once('../php/tpl.php');
 
 function get_title($menu_config, $active)
 {
@@ -86,6 +86,6 @@ $tpl->assign([
 	"menu_conf" => $menu_config,
 	"version" => Config::$version,
 	"isDev" => $isDev,
-	"langs" => Config::$languages,
+	"langs" => Config::$languages
 ]);
 $tpl->draw("index.2");

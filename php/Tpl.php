@@ -42,8 +42,8 @@ class Tpl {
 			(!array_key_exists($this->language, Config::$languages)) AND $this->language = 'en';
 			include($this->config['lang_dir'].$this->language.'.php');
 			$this->translate_arr = $lang;
-	
-			$this->assign("translate", function($word){	return $this->translate($word); });
+
+			$this->assign("translate", function($word){ return $this->translate($word); });
 		}
 	}
 
@@ -87,7 +87,7 @@ class Tpl {
 
 			// Compile the template if the original has been updated 
 			if ($fileTimeCached == 0 || $fileTimeCached < $fileTime) {
-				require_once("Parser.php");
+				require_once("parser.php");
 				$html = (new Parser($this->config))->compileFile($filePath);
 				$html = str_replace("?>\n", "?>\n\n", $html);
 				$ok = file_put_contents($filePathCached, $html);

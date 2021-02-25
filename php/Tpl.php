@@ -10,12 +10,14 @@
 class Tpl {
 
 	public $vars = [];
-	private $locale = null;
+	private $language = 'en';
+	private $translate_arr = [];
 
 	protected $config = [
 		'charset' => 'UTF-8',
 		'tpl_dir' => '../templates/',
 		'cache_dir' => '../cache/',
+		'lang_dir' => '../public/lang/',
 		'auto_escape' => true,
 		'remove_comments' => false,
 		'production_ready' => false
@@ -35,18 +37,24 @@ class Tpl {
 	function __construct($use_locale = true)
 	{
 		if ($use_locale){
-			$this->locale = new Localization();
-			$this->assign("translate", function($word){	return $this->locale->translate($word); });
+
+			(isset($_COOKIE['lang'])) AND $this->language = $_COOKIE['lang'];
+			(!array_key_exists($this->language, Config::$languages)) AND $this->language = 'en';
+			include($this->config['lang_dir'].$this->language.'.php');
+			$this->translate_arr = $lang;
+	
+			$this->assign("translate", function($word){	return $this->translate($word); });
 		}
 	}
 
 	public function get_lang()
 	{
-		if (!is_null($this->locale)){
-			return $this->locale->get_lang();
-		} else {
-			die("Tpl is not initialized with locale");
-		}
+		return $this->language;
+	}
+
+	public function translate($phrase)
+	{
+		return (isset($this->translate_arr[$phrase])) ? $this->translate_arr[$phrase] : $phrase;
 	}
 
 	/**

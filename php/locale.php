@@ -8,7 +8,7 @@ class Locale
 	function __construct()
 	{
 		(isset($_COOKIE['lang'])) AND $this->language = $_COOKIE['lang'];
-		(!array_key_exists($this->language, Config::$languages)) AND $this->languag = 'en';
+		(!array_key_exists($this->language, Config::$languages)) AND $this->language = 'en';
 		include('../public/lang/'.$this->language.'.php');
 		$this->translate_arr = $lang;
 	}

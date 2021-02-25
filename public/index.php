@@ -5,8 +5,6 @@ require_once('../tpl/Tpl.php');
 
 function get_title($menu_config, $uri_chunks)
 {
-	global $locale;
-
 	$title = 'Error';
 	$qstr = '';
 	if(isset($uri_chunks[0])){
@@ -15,13 +13,13 @@ function get_title($menu_config, $uri_chunks)
 
 	foreach($menu_config as $link => $val){
 		if($qstr == $link){
-			$title = $locale->translate($val['title']);
+			$title = $val['title'];
 		}
 	}
 
 	if($title == 'Error'){
 		if(isset(Config::$other_titles[$qstr])){
-			$title = $locale->translate($other_titles[$qstr]);
+			$title = $other_titles[$qstr];
 		}
 	}
 
@@ -91,7 +89,7 @@ $tpl->draw("index.1");
 if(file_exists($file_name)){
 	include($file_name);
 } else {
-	echo '<h1>'.$locale->translate('Not implemented yet').'!</h1>';
+	echo '<h1>Not implemented yet!</h1>';
 }
 $clonos->placeDialogs();
 

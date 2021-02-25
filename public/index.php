@@ -22,15 +22,6 @@ function get_title($menu_config, $active)
 	return $title;
 }
 
-$uri = trim($_SERVER['REQUEST_URI'],'/');
-$chunks = Utils::gen_uri_chunks($uri);
-
-$menu_config = Config::$menu;
-$isDev = (getenv('APPLICATION_ENV') == 'development');
-if($isDev){
-	unset($menu_config['sqlite']);
-}
-
 $clonos = new ClonOS($chunks);
 $tpl = new Tpl();
 $lang = $tpl->get_lang();
@@ -46,8 +37,14 @@ if(isset($_GET['download'])){
 	exit;
 }
 
-$_ds = DIRECTORY_SEPARATOR;
-$root = trim($_SERVER['DOCUMENT_ROOT'], $_ds);
+$uri = trim($_SERVER['REQUEST_URI'],'/');
+$chunks = Utils::gen_uri_chunks($uri);
+
+$menu_config = Config::$menu;
+$isDev = (getenv('APPLICATION_ENV') == 'development');
+if($isDev){
+	unset($menu_config['sqlite']);
+}
 
 if(empty($uri)){
 	header('Location: /'.array_key_first($menu_config).'/',true);
@@ -57,13 +54,9 @@ if(empty($uri)){
 	$active = trim($uri,'/');
 }
 
-$file_path = $_ds.$root.$_ds.'pages'.$_ds.$uri.$_ds;
-$file_name = $file_path.$lang.'.index.php';
-$json_name = $file_path.'a.json.php';
-
 $user_info = $clonos->userAutologin();
 if($user_info['error']){
-	$user_info['username']='guest';
+	$user_info['username'] = 'guest';
 }
 
 $tpl->assign([
@@ -74,6 +67,7 @@ $tpl->assign([
 ]);
 $tpl->draw("index.1");
 
+$file_name = 'pages/'.$uri.'/'.$lang.'.index.php';
 if(file_exists($file_name)){
 	include($file_name);
 } else {

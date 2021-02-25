@@ -1,6 +1,6 @@
 <?php
 
-class Locale
+class Localization
 {
 	private $language='en';
 	private $translate_arr=array();

@@ -1,6 +1,6 @@
 <dialog id="login" class="window-box">
 	<div class="login-wait hide"><div class="loadersmall"></div></div>
-	<div class="login-error-nouser hide"><?php echo $this->translate('<span class="icon-attention" style="font-size:large;"></span> Error! User not found!'); ?></div>
+	<div class="login-error-nouser hide"><span class="icon-attention" style="font-size:large;"><?php echo $this->translate('Error! User not found!'); ?></span></div>
 	<div class="login-header"><span class="icon-expeditedssl"></span><?php echo $this->translate('Login');?></div>
 	<form class="win" method="post" id="loginData" onsubmit="return false;">
 		<div class="window-content">

@@ -81,7 +81,7 @@ class Tpl {
 		}
 	}
 
-	public function assign($variable, $value)
+	public function assign($variable, $value = Null)
 	{
 		if (is_array($variable)){
 			$this->vars = $variable + $this->vars;

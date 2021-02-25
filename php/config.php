@@ -4,6 +4,7 @@ require_once("cbsd.php");
 
 class Config
 {
+	public static $version = '20.12';
 	/* Список языков, используемых в проекте */
 	public static $languages=array(
 		'en'=>'English',

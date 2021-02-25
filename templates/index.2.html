@@ -1,0 +1,119 @@
+</div>
+<div id="cdown"><span class="split-close"></span>
+<div id="cinfo">
+		<div class="left">
+			<dl id="summaryInfo">
+				<dt>Имя клетки:</dt>
+				<dd>Jail1</dd>
+			</dl>
+		</div>
+		<div class="right">
+			<h2>{function="$translate('CPU usage')"}, %:</h2>
+			<div class="graph v-black g--summary-cpu l-cpu"></div>
+			<br />
+			<h2>{function="$translate('Memory usage'"};, %:</h2>
+			<div class="graph v-black g--summary-mem l-mem"></div>
+			<br />
+			<h2>{function="$translate('I/O storage')"};, iops:</h2>
+			<div class="graph v-black g--summary-iops l-read,write pr-no te-iops"></div>
+			<br />
+			<h2>{function="$translate('I/O storage')"};, bit per seconds:</h2>
+			<div class="graph v-black g--summary-bps l-read,write pr-no te-bps"></div>
+		</div>
+</div>
+</div>
+</div></div>
+</main>
+
+<div class="menu">
+<div id="menu">
+	<div class="closer"></div>
+		<ul class="menu">
+
+			{loop="$menu_conf"}
+				<li>
+					<a href="/{$key}/" title="{$value.title|$translate}" 
+					{if="$menu_active == $key"} class="sel" {/if}
+					><span class="{$value.icon}"></span><span class="mtxt">{$value.name|$translate}</span></a>
+				</li>
+			{/loop}
+
+		</ul>
+	<div id="console"></div>
+</div>
+</div>
+
+<header>
+	<div class="top-right">
+		<span class="txt">
+			<a href="https://www.bsdstore.ru/ru/donate.html" target="_blank">{function="$translate('DONATE')"}</a>
+			<span class="space"></span>
+			{function="$translate('VERSION')"} : {$version}
+			<span class="space"></span>
+			{function="$translate('THEMES')"}
+		</span>
+		<span class="ch_theme">
+			 <span class="light"></span><span class="dark"></span>
+		</span>
+	</div>
+	<div class="header">
+	<span id="title">{$title}</span>
+	<ul>
+		<li class="mhome"><a href="/">Home</a></li>
+		{if="$isDev"}
+		<li><a href="/settings/">{function="$translate('Settings')"}</a></li>
+		{/if}
+		<li><a href="/users/">{function="$translate('Users')"}</a></li>
+<!--
+		<li><a href="/profile/">{function="$translate('Profile')"}</a></li>
+		<li><a href="/support/">{function="$translate('Support')"}</a></li>
+-->
+		<li><a name="">
+			<select id="lng-sel">
+				{loop="$langs"}
+						{if="$lang == $key"}
+						<option value="{$key}" selected="selected">{$value}</option> 
+						{else}
+							<option value="{$key}">{$value}</option>
+						{/if}
+				{/loop}
+			</select>
+		</a></li>
+		<li><a onclick="clonos.logout();" class="link" id="user-login">{$user_info.username}</a></li>
+	</ul>
+	</div>
+</header>
+
+{if="$user_info.error"}
+<div class="login-area">
+	<dialog id="login" class="window-box">
+		<div class="login-wait hide"><div class="loadersmall"></div></div>
+		<div class="login-error-nouser hide"><span class="icon-attention" style="font-size:large;">{function="$translate('Error! User not found!')"}</span></div>
+		<div class="login-header"><span class="icon-expeditedssl"></span>{function="$translate('Login')"}</div>
+		<form class="win" method="post" id="loginData" onsubmit="return false;">
+			<div class="window-content">
+				<p>
+					<span class="field-name">{function="$translate('Login')"}:</span>
+					<input type="text" name="login" value="" autofocus />
+				</p>
+				<p>
+					<span class="field-name">{function="$translate('Password')"}:</span>
+					<input type="password" name="password" value="" />
+				</p>
+			</div>
+		</form>
+		<div class="buttons">
+			<input type="button" value="Go to the system" class="button ok-but" />
+		</div>
+	</dialog>
+{else}
+<div>
+{/if}
+	<div class="ccopy">ClonOS — is a powerfull system for&hellip;</div>
+	<div class="ccopy">Cloud computing, Lightweight containerization, Virtualization, etc&hellip;</div>
+</div>
+
+<div class="spinner"></div>
+<div class="online icon-online" id="net-stat" onclick="ws_debug();"></div>
+</body>
+</html>

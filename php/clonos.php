@@ -2,7 +2,7 @@
 
 require_once("cbsd.php");
 require_once('config.php');
-require_once('locale.php');
+require_once('localization.php');
 require_once('db.php');
 require_once('forms.php');
 require_once('utils.php');
@@ -78,7 +78,7 @@ class ClonOS {
 		}
 
 		if (is_null($uri_chunks)) { # TODO Do we need this ?
-			$this->uri_chunks = Utils::gen_uri_chunks($uri);
+			$this->uri_chunks = Utils::gen_uri_chunks(trim($_SERVER['REQUEST_URI'],'/'));
 		} else {
 			$this->uri_chunks = $uri_chunks;
 		}

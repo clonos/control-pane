@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>ClonOS — {$title}</title>
+	<link href="/images/favicon.ico?" rel="shortcut icon" type="image/x-icon" />
+	<script src="/js/jquery.js" type="text/javascript"></script>
+	<script src="/js/clonos.js" type="text/javascript"></script>
+	<script src="/js/dmuploader.js" type="text/javascript"></script>
+	<script src="/js/smoothie.js" type="text/javascript"></script>
+	<script src="/js/noty/packaged/jquery.noty.packaged.min.js" type="text/javascript"></script>
+	<link type="text/css" href="/css/reset.css" rel="stylesheet" />
+	<link type="text/css" href="/css/styles.css" rel="stylesheet" />
+	<link type="text/css" href="/font/clonos.css" rel="stylesheet" />
+	<link type="text/css" href="/font/animation.css" rel="stylesheet" />
+	<script src="/lang/{$lang}.js" type="text/javascript"></script>
+	<style type="text/css">html{background-color:#aaa;} .hide{display:none;}</style>
+	<meta name="keywords" content="" />
+	<meta name="description" content="" />
+	{noparse}
+	<script type="text/javascript">
+		if (document.documentMode || /Edge/.test(navigator.userAgent) || /Edg/.test(navigator.userAgent)) {
+			document.body.innerHTML = '<div style="margin-top:10%;text-align:center;font-size:large;color:darkred;"><p>Sorry, your browser is not supported!</p><p>Please, use last version of any browser.</p>';
+		}
+		_first_start=true;
+		err_messages={add:function(arr){for(n in arr){err_messages[n]=arr[n];}}};
+	</script>
+</head>
+<script type="text/javascript">
+	try{
+		var theme=localStorage.getItem('Theme') || 'light';
+		var cs=['light','dark'];
+		for(c=0,cl=cs.length;c<cl;c++)
+		{
+			var css=cs[c];
+			var disabled=(theme==css)?'':' disabled="disabled"';
+			var hcss=$('<link rel="stylesheet" href="/css/themes/'+css+'.css" id="'+css+'" class="alternate"'+disabled+'>');
+			$('head').append(hcss);
+			$('#'+css).get(0).disabled=(theme!=css);
+		}
+	}catch(e){}
+</script>
+{/noparse}
+<body class="gadget1 login {$uri}">
+
+<main>
+<div class="main"><div id="content">
+<div id="ctop">

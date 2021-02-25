@@ -12,7 +12,6 @@ class ClonOS {
 	public $workdir='';
 	public $environment='';
 	public $realpath='';
-	public $realpath_php='';
 	public $realpath_public='';
 	public $realpath_page='';
 	public $uri_chunks=array();
@@ -56,77 +55,70 @@ class ClonOS {
 	private $_db_jails=null;
 */
 
-	function __construct($_real_path,$uri_chunks = null){	# /usr/home/web/cp/clonos
+	function __construct($uri_chunks = null){
 
-		$this->_post=($_SERVER['REQUEST_METHOD']=='POST');
-		$this->_vars=$_POST;
+		$this->_post = ($_SERVER['REQUEST_METHOD']=='POST');
+		$this->_vars = $_POST;
 
-		$this->workdir=getenv('WORKDIR'); # // /usr/jails
-		$this->environment=getenv('APPLICATION_ENV');
-		$this->realpath=$_real_path.'/'; # /usr/home/web/cp/clonos/
-		$this->realpath_php=$_real_path.'/php/'; # /usr/home/web/cp/clonos/php/
-		$this->realpath_public=$_real_path.'/public/'; # /usr/home/web/cp/clonos/public/
-		$this->media_import=$_real_path.'/media_import/';
+		$this->workdir = getenv('WORKDIR'); # // /usr/jails
+		$this->environment = getenv('APPLICATION_ENV');
+		$this->realpath = '../'; # /usr/local/www/clonos/
+		$this->realpath_public = '../public/'; # /usr/local/www/clonos/public/
+		$this->media_import = '../media_import/';
 
-		if($this->environment=='development'){
-			$sentry_file=$this->realpath_php.'sentry.php';
+		if($this->environment == 'development'){
+			$sentry_file = '../php/sentry.php';
 			if(file_exists($sentry_file)) include($sentry_file);
 		}
 
 		if(isset($_SERVER['SERVER_NAME']) && !empty(trim($_SERVER['SERVER_NAME']))){
-			$this->server_name=$_SERVER['SERVER_NAME'];
+			$this->server_name = $_SERVER['SERVER_NAME'];
 		} else {
-			$this->server_name=$_SERVER['SERVER_ADDR'];
+			$this->server_name = $_SERVER['SERVER_ADDR'];
 		}
 
 		if (is_null($uri_chunks)) { # TODO Do we need this ?
-			$this->uri_chunks=Utils::gen_uri_chunks($uri);
+			$this->uri_chunks = Utils::gen_uri_chunks($uri);
 		} else {
-			$this->uri_chunks=$uri_chunks;
+			$this->uri_chunks = $uri_chunks;
 		}
 
-		$this->config=new Config();
-
-		$this->_locale = new Locale($this->realpath_public);
-
-		$this->_client_ip=$_SERVER['REMOTE_ADDR'];
+		$this->config = new Config();
+		$this->_locale = new Localization($this->realpath_public);
+		$this->_client_ip = $_SERVER['REMOTE_ADDR'];
 
 		if(isset($this->_vars['path'])){
 			//$this->realpath_page=$this->realpath_public.'pages/'.trim($this->_vars['path'],'/').'/';
-			$this->realpath_page=$this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
-			$this->json_name=$this->realpath_page.'a.json.php';
+			$this->realpath_page = $this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
+			$this->json_name = $this->realpath_page.'a.json.php';
 			//echo $this->realpath_page;
 		}else if($_SERVER['REQUEST_URI']){
 			//$this->realpath_page=$this->realpath_public.'pages/'.trim($_SERVER['REQUEST_URI'],'/').'/';
 			if(isset($this->uri_chunks[0])){
-				$this->realpath_page=$this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
+				$this->realpath_page = $this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
 			}
 		}
 
-		if(isset($this->_vars['hash'])) $this->url_hash=preg_replace('/^#/','',$this->_vars['hash']);
-
-//		$this->json_name=$this->realpath_php.'pages'
-//		$clonos->json_name=$file_path.'a.json.php';
-
-		if(isset($this->_vars['mode'])) $this->mode=$this->_vars['mode'];
-		if(isset($this->_vars['form_data'])) $this->form=$this->_vars['form_data'];
+		if(isset($this->_vars['hash'])) $this->url_hash = preg_replace('/^#/','',$this->_vars['hash']);
+		if(isset($this->_vars['mode'])) $this->mode = $this->_vars['mode'];
+		if(isset($this->_vars['form_data'])) $this->form = $this->_vars['form_data'];
 
 		$ures=$this->userAutologin();
 		$this->sys_vars['authorized']=false;
 		if($ures!==false){
 			if(isset($ures['id']) && is_numeric($ures['id']) && $ures['id']>0){
-				$this->_user_info=$ures;
-				$this->_user_info['unregistered']=false;
-				$this->sys_vars['authorized']=true;
+				$this->_user_info = $ures;
+				$this->_user_info['unregistered'] = false;
+				$this->sys_vars['authorized'] = true;
 			}else{
-				$this->_user_info['unregistered']=true;
+				$this->_user_info['unregistered'] = true;
 				if($this->json_req) exit;
 			}
 		}
 
 		if($this->_post && isset($this->mode)){
 			if(isset($this->_user_info['error']) && $this->_user_info['error']){
-				if($this->mode!='login'){
+				if($this->mode != 'login'){
 					echo json_encode(array('error'=>true,'unregistered_user'=>true));
 					exit;
 				}

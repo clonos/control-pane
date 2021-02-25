@@ -2,15 +2,15 @@
 
 class Locale
 {
-	private $language='en';
-	private $translate_arr=array();
+	private $language = 'en';
+	private $translate_arr = [];
 
-	function __construct($realpath_public)
+	function __construct()
 	{
-		(isset($_COOKIE['lang'])) AND $this->language=$_COOKIE['lang'];
-		(!array_key_exists($this->language, Config::$languages)) AND $this->language='en';
-		include($realpath_public.'/lang/'.$this->language.'.php');
-		$this->translate_arr=$lang;
+		(isset($_COOKIE['lang'])) AND $this->language = $_COOKIE['lang'];
+		(!array_key_exists($this->language, Config::$languages)) AND $this->languag = 'en';
+		include('../public/lang/'.$this->language.'.php');
+		$this->translate_arr = $lang;
 	}
 
 	public function get_lang()

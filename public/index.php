@@ -5,14 +5,46 @@ if(preg_match('/(?i)msie [5-9]/',$_SERVER['HTTP_USER_AGENT']))
 	exit;
 }
 
-$_real_path=realpath('../');
-$uri=trim($_SERVER['REQUEST_URI'],'/');
-require_once($_real_path.'/php/clonos.php');
-require_once($_real_path.'/php/menu.php');
-$chunks=Utils::gen_uri_chunks($uri);
-$clonos=new ClonOS($_real_path, $chunks);
-$locale = new Locale($_real_path.'/public/'); # /usr/home/web/cp/clonos/public/
-$menu=new Menu($locale, $chunks);
+require_once('../php/clonos.php');
+require_once('../tpl/Tpl.php');
+
+function get_title($menu_config, $uri_chunks)
+{
+	global $locale;
+
+	$title = 'Error';
+	$qstr = '';
+	if(isset($uri_chunks[0])){
+		$qstr = trim($uri_chunks[0],'/');
+	}
+
+	foreach($menu_config as $link => $val){
+		if($qstr == $link){
+			$title = $locale->translate($val['title']);
+		}
+	}
+
+	if($title == 'Error'){
+		if(isset($menu_config::$other_titles[$qstr])){
+			$title = $locale->translate($other_titles[$qstr]);
+		}
+	}
+
+	return $title;
+}
+
+$uri = trim($_SERVER['REQUEST_URI'],'/');
+$chunks = Utils::gen_uri_chunks($uri);
+$menu_config = Config::$menu;
+
+$clonos = new ClonOS($chunks);
+$locale = new Localization();
+
+$translate = function($word)
+{
+	global $locale;
+	return $locale->translate($word);
+};
 
 if(isset($_GET['upload'])){
 	include('upload.php');
@@ -25,26 +57,26 @@ if(isset($_GET['download'])){
 	exit;
 }
 
-$lang=$locale->get_lang();
-$_ds=DIRECTORY_SEPARATOR;
-$root=trim($_SERVER['DOCUMENT_ROOT'], $_ds);
+$lang = $locale->get_lang();
+$_ds = DIRECTORY_SEPARATOR;
+$root = trim($_SERVER['DOCUMENT_ROOT'], $_ds);
 
-if(!empty($chunks)) $uri=$chunks[0];
+if(!empty($chunks)) $uri = $chunks[0];
 
-$file_path=$_ds.$root.$_ds.'pages'.$_ds.$uri.$_ds;
-$file_name=$file_path.$lang.'.index.php';
-$json_name=$file_path.'a.json.php';
+$file_path = $_ds.$root.$_ds.'pages'.$_ds.$uri.$_ds;
+$file_name = $file_path.$lang.'.index.php';
+$json_name = $file_path.'a.json.php';
 
 if(empty($uri)){
-	header('Location: /'.$menu->first_key.'/',true);
+	header('Location: /'.array_key_first($menu_config).'/',true);
 	exit;
 }
 
-error_reporting(E_ALL);
+$title = get_title($menu_config, $chunks);
 
-$user_info=$clonos->userAutologin();
+$user_info = $clonos->userAutologin();
 if(!$user_info['error']){
-	$user_info_txt="user_id='${user_info['id']}';user_login='${user_info['username']}';";
+	$user_info_txt = "user_id='${user_info['id']}';user_login='${user_info['username']}';";
 }else{
 	$user_info['username']='guest';
 }
@@ -52,7 +84,7 @@ if(!$user_info['error']){
 <!DOCTYPE html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>ClonOS — <?php echo $menu->title; ?></title>
+	<title>ClonOS — <?php echo $title; ?></title>
 	<link href="/images/favicon.ico?" rel="shortcut icon" type="image/x-icon" />
 	<script src="/js/jquery.js" type="text/javascript"></script>
 	<script src="/js/clonos.js" type="text/javascript"></script>
@@ -131,7 +163,20 @@ $clonos->placeDialogs();
 <div id="menu">
 	<div class="closer"></div>
 <?php
-echo $menu->html;
+if(getenv('APPLICATION_ENV') != 'development'){
+	unset($menu_config['sqlite']);
+}
+
+$menu_active='';
+if(isset($chunks[0])){
+	$menu_active=trim($chunks[0],'/');
+}
+
+$tpl = new Tpl();
+$tpl->assign("translate", $translate);
+$tpl->assign("menu_active", $menu_active);
+$tpl->assign("menu_conf", $menu_config);
+$tpl->draw("menu");
 ?>
 	<div id="console"></div>
 </div>
@@ -151,7 +196,7 @@ echo $menu->html;
 		</span>
 	</div>
 	<div class="header">
-	<span id="title"><?php echo $menu->title; ?></span>
+	<span id="title"><?php echo $title; ?></span>
 	<ul>
 		<li class="mhome"><a href="/">Home</a></li>
 <?php if($clonos->environment=='development') { ?>

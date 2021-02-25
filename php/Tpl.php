@@ -10,6 +10,7 @@
 class Tpl {
 
 	public $vars = [];
+	private $locale = null;
 
 	protected $config = [
 		'charset' => 'UTF-8',
@@ -28,6 +29,23 @@ class Tpl {
 			if (isset($this->config[$my])){
 				$this->config[$my] = $val;
 			}
+		}
+	}
+
+	function __construct($use_locale = true)
+	{
+		if ($use_locale){
+			$this->locale = new Localization();
+			$this->assign("translate", function($word){	return $this->locale->translate($word); });
+		}
+	}
+
+	public function get_lang()
+	{
+		if (!is_null($this->locale)){
+			return $this->locale->get_lang();
+		} else {
+			die("Tpl is not initialized with locale");
 		}
 	}
 

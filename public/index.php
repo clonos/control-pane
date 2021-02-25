@@ -1,7 +1,7 @@
 <?php
 
 require_once('../php/clonos.php');
-require_once('../tpl/Tpl.php');
+require_once('../php/Tpl.php');
 
 function get_title($menu_config, $uri_chunks)
 {
@@ -31,14 +31,7 @@ $chunks = Utils::gen_uri_chunks($uri);
 $menu_config = Config::$menu;
 
 $clonos = new ClonOS($chunks);
-$locale = new Localization();
 $tpl = new Tpl();
-$translate = function($word)
-{
-	global $locale;
-	return $locale->translate($word);
-};
-$tpl->assign("translate", $translate);
 
 $isDev = (getenv('APPLICATION_ENV') == 'development');
 if($isDev){
@@ -56,7 +49,7 @@ if(isset($_GET['download'])){
 	exit;
 }
 
-$lang = $locale->get_lang();
+$lang = $tpl->get_lang();
 $_ds = DIRECTORY_SEPARATOR;
 $root = trim($_SERVER['DOCUMENT_ROOT'], $_ds);
 

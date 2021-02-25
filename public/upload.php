@@ -1,7 +1,16 @@
 <?php
-header('Content-Type: application/json');
 
-require_once("../php/cbsd.php");
+if (isset($clonos)){
+	if ($clonos->sys_vars['authorized'] != true){
+		header('HTTP/1.1 401 Unauthorized');
+		exit;
+	}
+} else { # TODO: revisit this
+	header('HTTP/1.1 401 Unauthorized');
+	exit;
+}
+
+header('Content-Type: application/json');
 
 $cmd='';
 $status = '';

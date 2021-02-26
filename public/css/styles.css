@@ -89,7 +89,6 @@ main {
 	border-width:0 1px;
 	background:#eaeaea url(data:image/gif;base64,R0lGODlhFAAJAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUAAkAAAIdlC+Ain3ADHQNxjQpztJSy23h45HjEpYahq7L6xQAOw==) no-repeat -1px 50%;
 	cursor:pointer;
-	z-index:1000;
 }
 header {
 	position:absolute;
@@ -1499,10 +1498,11 @@ dialog#login input[type="password"] {
 	width:250px;
 }
 .ccopy {
+	height: 1px;
 	color:white;
 	text-align:center;
 	position:relative;
-	top:85%;
+	margin-top: 23px;
 	font:12px/18px Tahoma, Verdana, Arial;
 }
 .login-wait {

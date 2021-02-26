@@ -3245,7 +3245,7 @@ var clonos={
 		}
 		graphs.getMetrics();
 	},
-	createGraphByGr(gr)
+	createGraphByGr:function(gr)
 	{
 		$(gr).css({'padding':'1px 0','margin':0,'vertical-align':'middle','font-size':0});
 		var cl=$(gr).attr('class');

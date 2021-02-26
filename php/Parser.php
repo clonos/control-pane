@@ -38,6 +38,7 @@ class Parser {
 		'ternary' => ['({.[^{?}]*?\?.*?\:.*?})', '/{(.[^{?}]*?)\?(.*?)\:(.*?)}/'],
 		'variable' => ['({\$.*?})', '/{(\$.*?)}/'],
 		'constant' => ['({#.*?})', '/{#(.*?)#{0,1}}/'],
+		'translate' => ['({translate})', '/{translate::(.*)}/']
 	);
 
 	function __construct($config)
@@ -224,11 +225,17 @@ class Parser {
 					break;
 				//ternary
 				case (preg_match($tagMatch['ternary'], $html, $matches)):
-					$parsedCode .= "<?php echo " . '(' . $this->varReplace($matches[1]) . '?' . $this->varReplace($matches[2]) . ':' . $this->varReplace($matches[3]) . ')' . "; ?>";
+					$parsedCode .= '<?php echo (' . $this->varReplace($matches[1]) . '?' . $this->varReplace($matches[2]) . ':' . $this->varReplace($matches[3]) . '); ?>';
 					break;
 				//constants
 				case (preg_match($tagMatch['constant'], $html, $matches)):
 					$parsedCode .= "<?php " . $this->modifierReplace($matches[1]) . "; ?>";
+					break;
+				case (preg_match($tagMatch['translate'], $html, $matches)):
+					while (preg_match($tagMatch['translate'], $html, $matches)) {
+						$html = preg_replace($tagMatch['translate'], '<?php echo $translate' . $matches[1] . '; ?>', $html, 1);
+					}
+					$parsedCode .= $html;
 					break;
 				default:
 					$parsedCode .= $html;
@@ -283,8 +290,13 @@ class Parser {
 
 			preg_match('/([\$a-z_A-Z0-9\(\),\[\]"->]+)\|([\$a-z_A-Z0-9\(\):,\[\]"->]+)/i', $html, $result);
 
-			list($function, $params) = explode(":", $result[2]);
-			(!is_null($params)) AND $params = ",".$params;
+			$str = explode(":", $result[2]);
+			$function = $str[0];
+			if (count($str) == 2){
+				$params = ",".$str[1];
+			} else {
+				$params = "";
+			}
 
 			$html = str_replace($result[0], $function . "(" . $result[1] . "$params)", $html);
 		}

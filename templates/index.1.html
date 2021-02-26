@@ -18,30 +18,24 @@
 	<meta name="description" content="" />
 	{noparse}
 	<script type="text/javascript">
-		if (document.documentMode || /Edge/.test(navigator.userAgent) || /Edg/.test(navigator.userAgent)) {
-			document.body.innerHTML = '<div style="margin-top:10%;text-align:center;font-size:large;color:darkred;"><p>Sorry, your browser is not supported!</p><p>Please, use last version of any browser.</p></div>';
-		}
 		_first_start=true;
 		err_messages={add:function(arr){for(n in arr){err_messages[n]=arr[n];}}};
+		try{
+			var theme=localStorage.getItem('Theme') || 'light';
+			var cs=['light','dark'];
+			for(c=0,cl=cs.length;c<cl;c++)
+			{
+				var css=cs[c];
+				var disabled=(theme==css)?'':' disabled="disabled"';
+				var hcss=$('<link rel="stylesheet" href="/css/themes/'+css+'.css" id="'+css+'" class="alternate"'+disabled+'>');
+				$('head').append(hcss);
+				$('#'+css).get(0).disabled=(theme!=css);
+			}
+		}catch(e){}
 	</script>
 </head>
-<script type="text/javascript">
-	try{
-		var theme=localStorage.getItem('Theme') || 'light';
-		var cs=['light','dark'];
-		for(c=0,cl=cs.length;c<cl;c++)
-		{
-			var css=cs[c];
-			var disabled=(theme==css)?'':' disabled="disabled"';
-			var hcss=$('<link rel="stylesheet" href="/css/themes/'+css+'.css" id="'+css+'" class="alternate"'+disabled+'>');
-			$('head').append(hcss);
-			$('#'+css).get(0).disabled=(theme!=css);
-		}
-	}catch(e){}
-</script>
 {/noparse}
 <body class="gadget1 login {$uri}">
-
 <main>
 <div class="main"><div id="content">
 <div id="ctop">

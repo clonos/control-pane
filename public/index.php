@@ -22,6 +22,9 @@ function get_title($menu_config, $active)
 	return $title;
 }
 
+$uri = trim($_SERVER['REQUEST_URI'],'/');
+$chunks = Utils::gen_uri_chunks($uri);
+
 $clonos = new ClonOS($chunks);
 $tpl = new Tpl();
 $lang = $tpl->get_lang();
@@ -36,9 +39,6 @@ if(isset($_GET['download'])){
 	CBSD::register_media($path,$file,$ext);
 	exit;
 }
-
-$uri = trim($_SERVER['REQUEST_URI'],'/');
-$chunks = Utils::gen_uri_chunks($uri);
 
 $menu_config = Config::$menu;
 $isDev = (getenv('APPLICATION_ENV') == 'development');

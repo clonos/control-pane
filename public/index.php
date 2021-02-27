@@ -42,7 +42,7 @@ if(isset($_GET['download'])){
 
 $menu_config = Config::$menu;
 $isDev = (getenv('APPLICATION_ENV') == 'development');
-if($isDev){
+if(!$isDev){
 	unset($menu_config['sqlite']);
 }
 

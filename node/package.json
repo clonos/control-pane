@@ -10,7 +10,7 @@
   "dependencies": {
     "js-yaml": ">=3.13.1",
     "nodestalker": "^0.1.22",
-    "ws": "6.1.0"
+    "ws": "6.2.2"
   },
   "devDependencies": {},
   "scripts": {},

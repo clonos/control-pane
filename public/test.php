@@ -1,5 +1,5 @@
 <?php
-exit;
+
 $host = 'clonos.bsdstore.ru';  //where is the websocket server
 $port = 8082;
 $local = "http://clonos.bsdstore.ru/";  //url where this script run

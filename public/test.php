@@ -1,5 +1,5 @@
 <?php
-
+exit;
 $host = 'clonos.bsdstore.ru';  //where is the websocket server
 $port = 8082;
 $local = "http://clonos.bsdstore.ru/";  //url where this script run
@@ -37,7 +37,7 @@ function wall_get()
         'v'=>'5.60',
     );
 
-    // В $result вернется id отправленного сообщения
+    // пїЅ $result пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ id пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     $result = file_get_contents($url, false, stream_context_create(array(
         'http' => array(
             'method'  => 'POST',

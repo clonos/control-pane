@@ -12,7 +12,9 @@ function runVNC($jname)
 	$pass='cbsd';
 	if($res!==false) $pass=$res['vnc_password'];
 
-	CBSD::run("vm_vncwss jname=%s permit=%s", array($_SERVER['REMOTE_ADDR']));
+	$remote_ip=$_SERVER['REMOTE_ADDR'];
+
+	CBSD::run("vm_vncwss jname=%s permit=%s", array($jname,$remote_ip));
 
 	if(isset($_SERVER['SERVER_NAME']) && !empty(trim($_SERVER['SERVER_NAME']))){
 		$nodeip=$_SERVER['SERVER_NAME'];

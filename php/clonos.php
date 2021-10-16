@@ -1012,7 +1012,7 @@ class ClonOS {
 	function ccmd_jailStop(){
 		//$cbsd_queue_name=trim($this->_vars['path'],'/');
 		$res=CBSD::run(
-			'task owner='.$username.' mode=new {cbsd_loc} jstop inter=0 jname=%s',
+			'task owner=%s mode=new {cbsd_loc} jstop inter=0 jname=%s',
 			array($this->_user_info['username'], $this->_vars['form_data']['jname'])
 		);
 		//.' cbsd_queue_name=/clonos/'.$cbsd_queue_name.'/');	// autoflush=2

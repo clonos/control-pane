@@ -20,7 +20,7 @@ if(!isset($this->_vars['db_path']))
 }
 
 $freejname='';
-$jres=$this->getFreeJname(true);
+$jres=$this->ccmd_getFreeJname(false,'jail');
 if(!$jres['error']) $freejname=$jres['freejname'];
 
 $jname_desc=$this->translate('will be created new jail with helper inside');

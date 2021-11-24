@@ -23,6 +23,9 @@ class CBSD {
 			die("Shell escape attempt");
 		}
 
+		// olevole: to generic log_() function
+		// file_put_contents('/tmp/clonos-run_'.date("j.n.Y").'.log', $full_cmd . "\n", FILE_APPEND);
+
 		$process = proc_open($full_cmd,$specs,$pipes,null,null);
 
 		$error=false;

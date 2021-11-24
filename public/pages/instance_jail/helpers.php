@@ -46,4 +46,5 @@ EOT;
 $res_html=(new Forms('',$hash,$db_path))->generate();
 $html.='<h1>Helper: '.$hash.'</h1>'.$res_html;
 
-echo json_encode(array('html'=>$html,'func'=>'fillTab'));
+return array('html'=>$this->html);
+//echo json_encode(array('html'=>$html,'func'=>'fillTab'));

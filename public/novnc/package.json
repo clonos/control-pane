@@ -1,50 +1,82 @@
 {
-  "name": "noVNC",
-  "version": "0.6.2",
+  "name": "@novnc/novnc",
+  "version": "1.3.0",
   "description": "An HTML5 VNC client",
-  "main": "karma.conf.js",
+  "browser": "lib/rfb",
   "directories": {
+    "lib": "lib",
     "doc": "docs",
     "test": "tests"
   },
+  "files": [
+    "lib",
+    "AUTHORS",
+    "VERSION",
+    "docs/API.md",
+    "docs/LIBRARY.md",
+    "docs/LICENSE*",
+    "core",
+    "vendor/pako"
+  ],
   "scripts": {
-    "test": "PATH=$PATH:node_modules/karma/bin karma start karma.conf.js"
+    "lint": "eslint app core po/po2js po/xgettext-html tests utils",
+    "test": "karma start karma.conf.js",
+    "prepublish": "node ./utils/use_require.js --clean"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kanaka/noVNC.git"
+    "url": "git+https://github.com/novnc/noVNC.git"
   },
   "author": "Joel Martin <github@martintribe.org> (https://github.com/kanaka)",
   "contributors": [
-    "Solly Ross <sross@redhat.com> (https://github.com/directxman12)",
-    "Peter Åstrand <astrand@cendio.se> (https://github.com/astrand)",
-    "Samuel Mannehed <samuel@cendio.se> (https://github.com/samhed)"
+    "Samuel Mannehed <samuel@cendio.se> (https://github.com/samhed)",
+    "Pierre Ossman <ossman@cendio.se> (https://github.com/CendioOssman)"
   ],
-  "license": "MPL 2.0",
+  "license": "MPL-2.0",
   "bugs": {
-    "url": "https://github.com/kanaka/noVNC/issues"
+    "url": "https://github.com/novnc/noVNC/issues"
   },
-  "homepage": "https://github.com/kanaka/noVNC",
+  "homepage": "https://github.com/novnc/noVNC",
   "devDependencies": {
-    "ansi": "^0.3.0",
-    "casperjs": "^1.1.0-beta3",
-    "chai": "^2.1.0",
-    "commander": "^2.6.0",
-    "karma": "^0.12.31",
-    "karma-chai": "^0.1.0",
-    "karma-mocha": "^0.1.10",
-    "karma-mocha-reporter": "^1.0.0",
-    "karma-phantomjs-launcher": "^0.1.4",
-    "karma-sauce-launcher": "^0.2.10",
-    "karma-sinon": "^1.0.4",
-    "karma-sinon-chai-latest": "^0.1.0",
-    "mocha": "^2.1.0",
-    "open": "^0.0.5",
-    "phantom": "^0.7.2",
-    "phantomjs": "^1.9.15",
-    "sinon": "^1.12.2",
-    "sinon-chai": "^2.7.0",
-    "spooky": "^0.2.5",
-    "temp": "^0.8.1"
-  }
+    "@babel/core": "*",
+    "@babel/plugin-syntax-dynamic-import": "*",
+    "@babel/plugin-transform-modules-commonjs": "*",
+    "@babel/preset-env": "*",
+    "@babel/cli": "*",
+    "babel-plugin-import-redirect": "*",
+    "browserify": "*",
+    "babelify": "*",
+    "core-js": "*",
+    "chai": "*",
+    "commander": "*",
+    "es-module-loader": "*",
+    "eslint": "*",
+    "fs-extra": "*",
+    "jsdom": "*",
+    "karma": "*",
+    "karma-mocha": "*",
+    "karma-chrome-launcher": "*",
+    "@chiragrupani/karma-chromium-edge-launcher": "*",
+    "karma-firefox-launcher": "*",
+    "karma-ie-launcher": "*",
+    "karma-mocha-reporter": "*",
+    "karma-safari-launcher": "*",
+    "karma-script-launcher": "*",
+    "karma-sinon-chai": "*",
+    "mocha": "*",
+    "node-getopt": "*",
+    "po2json": "*",
+    "requirejs": "*",
+    "rollup": "*",
+    "rollup-plugin-node-resolve": "*",
+    "sinon": "*",
+    "sinon-chai": "*"
+  },
+  "dependencies": {},
+  "keywords": [
+    "vnc",
+    "rfb",
+    "novnc",
+    "websockify"
+  ]
 }

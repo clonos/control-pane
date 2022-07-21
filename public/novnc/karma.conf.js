@@ -1,167 +1,71 @@
 // Karma configuration
 
-module.exports = function(config) {
-  /*var customLaunchers = {
-    sl_chrome_win7: {
-      base: 'SauceLabs',
-      browserName: 'chrome',
-      platform: 'Windows 7'
-    },
+// The Safari launcher is broken, so construct our own
+function SafariBrowser(id, baseBrowserDecorator, args) {
+  baseBrowserDecorator(this);
 
-    sl_firefox30_linux: {
-      base: 'SauceLabs',
-      browserName: 'firefox',
-      version: '30',
-      platform: 'Linux'
-    },
+  this._start = function(url) {
+    this._execCommand('/usr/bin/open', ['-W', '-n', '-a', 'Safari', url]);
+  }
+}
 
-    sl_firefox26_linux: {
-      base: 'SauceLabs',
-      browserName: 'firefox',
-      version: 26,
-      platform: 'Linux'
-    },
+SafariBrowser.prototype = {
+  name: 'Safari'
+}
 
-    sl_windows7_ie10: {
-      base: 'SauceLabs',
-      browserName: 'internet explorer',
-      platform: 'Windows 7',
-      version: '10'
-    },
+module.exports = (config) => {
+  let browsers = [];
 
-    sl_windows81_ie11: {
-      base: 'SauceLabs',
-      browserName: 'internet explorer',
-      platform: 'Windows 8.1',
-      version: '11'
-    },
-
-    sl_osxmavericks_safari7: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      platform: 'OS X 10.9',
-      version: '7'
-    },
-
-    sl_osxmtnlion_safari6: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      platform: 'OS X 10.8',
-      version: '6'
-    }
-  };*/
-
-  var customLaunchers = {};
-  var browsers = [];
-  var useSauce = false;
-
-  if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
-    useSauce = true;
+  if (process.env.TEST_BROWSER_NAME) {
+    browsers = process.env.TEST_BROWSER_NAME.split(',');
   }
 
-  if (useSauce && process.env.TEST_BROWSER_NAME && process.env.TEST_BROWSER_NAME != 'PhantomJS') {
-    var names = process.env.TEST_BROWSER_NAME.split(',');
-    var platforms = process.env.TEST_BROWSER_OS.split(',');
-    var versions = [];
-    if (process.env.TEST_BROWSER_VERSION) {
-      versions = process.env.TEST_BROWSER_VERSION.split(',');
-    } else {
-      versions = [null];
-    }
-
-    for (var i = 0; i < names.length; i++) {
-      for (var j = 0; j < platforms.length; j++) {
-        for (var k = 0; k < versions.length; k++) {
-          var launcher_name = 'sl_' + platforms[j].replace(/[^a-zA-Z0-9]/g, '') + '_' + names[i];
-          if (versions[k]) {
-            launcher_name += '_' + versions[k];
-          }
-
-          customLaunchers[launcher_name] = {
-            base: 'SauceLabs',
-            browserName: names[i],
-            platform: platforms[j],
-          };
-
-          if (versions[i]) {
-            customLaunchers[launcher_name].version = versions[k];
-          }
-        }
-      }
-    }
-
-    browsers = Object.keys(customLaunchers);
-  } else {
-    useSauce = false;
-    browsers = ['PhantomJS'];
-  }
-
-  var my_conf = {
+  const my_conf = {
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'sinon', 'chai', 'sinon-chai'],
-
+    frameworks: ['mocha', 'sinon-chai'],
 
     // list of files / patterns to load in the browser (loaded in order)
     files: [
-      'tests/fake.*.js',
-      'tests/assertions.js',
-      'include/util.js',  // load first to avoid issues, since methods are called immediately
-      //'../include/*.js',
-      'include/base64.js',
-      'include/keysym.js',
-      'include/keysymdef.js',
-      'include/keyboard.js',
-      'include/input.js',
-      'include/websock.js',
-      'include/rfb.js',
-      'include/des.js',
-      'include/display.js',
-      'include/inflator.js',
-      'tests/test.*.js'
+      { pattern: 'app/localization.js', included: false, type: 'module' },
+      { pattern: 'app/webutil.js', included: false, type: 'module' },
+      { pattern: 'core/**/*.js', included: false, type: 'module' },
+      { pattern: 'vendor/pako/**/*.js', included: false, type: 'module' },
+      { pattern: 'tests/test.*.js', type: 'module' },
+      { pattern: 'tests/fake.*.js', included: false, type: 'module' },
+      { pattern: 'tests/assertions.js', type: 'module' },
     ],
 
     client: {
       mocha: {
+        // replace Karma debug page with mocha display
+        'reporter': 'html',
         'ui': 'bdd'
       }
     },
 
     // list of files to exclude
     exclude: [
-      '../include/playback.js',
-      '../include/ui.js'
     ],
 
-    customLaunchers: customLaunchers,
+    plugins: [
+      'karma-*',
+      '@chiragrupani/karma-chromium-edge-launcher',
+      { 'launcher:Safari': [ 'type', SafariBrowser ] },
+    ],
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     browsers: browsers,
 
-    // preprocess matching files before serving them to the browser
-    // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
-    preprocessors: {
-
-    },
-
-
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['mocha', 'saucelabs'],
-
-
-    // web server port
-    port: 9876,
-
-
-    // enable / disable colors in the output (reporters and logs)
-    colors: true,
+    reporters: ['mocha'],
 
 
     // level of logging
@@ -175,23 +79,7 @@ module.exports = function(config) {
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
     singleRun: true,
-
-    // Increase timeout in case connection is slow/we run more browsers than possible
-    // (we currently get 3 for free, and we try to run 7, so it can take a while)
-    captureTimeout: 240000,
-
-    // similarly to above
-    browserNoActivityTimeout: 100000,
   };
-
-  if (useSauce) {
-    my_conf.captureTimeout = 0; // use SL timeout
-    my_conf.sauceLabs = {
-      testName: 'noVNC Tests (all)',
-      startConnect: false,
-      tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER
-    };
-  }
 
   config.set(my_conf);
 };

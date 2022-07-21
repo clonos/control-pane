@@ -1,22 +1,14 @@
-var FakeWebSocket;
+import Base64 from '../core/base64.js';
 
-(function () {
-    // PhantomJS can't create Event objects directly, so we need to use this
-    function make_event(name, props) {
-        var evt = document.createEvent('Event');
-        evt.initEvent(name, true, true);
-        if (props) {
-            for (var prop in props) {
-                evt[prop] = props[prop];
-            }
-        }
-        return evt;
-    }
-
-    FakeWebSocket = function (uri, protocols) {
+export default class FakeWebSocket {
+    constructor(uri, protocols) {
         this.url = uri;
         this.binaryType = "arraybuffer";
         this.extensions = "";
+
+        this.onerror = null;
+        this.onmessage = null;
+        this.onopen = null;
 
         if (!protocols || typeof protocols === 'string') {
             this.protocol = protocols;
@@ -24,68 +16,73 @@ var FakeWebSocket;
             this.protocol = protocols[0];
         }
 
-        this._send_queue = new Uint8Array(20000);
+        this._sendQueue = new Uint8Array(20000);
 
         this.readyState = FakeWebSocket.CONNECTING;
         this.bufferedAmount = 0;
 
-        this.__is_fake = true;
-    };
+        this._isFake = true;
+    }
 
-    FakeWebSocket.prototype = {
-        close: function (code, reason) {
-            this.readyState = FakeWebSocket.CLOSED;
-            if (this.onclose) {
-                this.onclose(make_event("close", { 'code': code, 'reason': reason, 'wasClean': true }));
-            }
-        },
-
-        send: function (data) {
-            if (this.protocol == 'base64') {
-                data = Base64.decode(data);
-            } else {
-                data = new Uint8Array(data);
-            }
-            this._send_queue.set(data, this.bufferedAmount);
-            this.bufferedAmount += data.length;
-        },
-
-        _get_sent_data: function () {
-            var res = new Uint8Array(this._send_queue.buffer, 0, this.bufferedAmount);
-            this.bufferedAmount = 0;
-            return res;
-        },
-
-        _open: function (data) {
-            this.readyState = FakeWebSocket.OPEN;
-            if (this.onopen) {
-                this.onopen(make_event('open'));
-            }
-        },
-
-        _receive_data: function (data) {
-            this.onmessage(make_event("message", { 'data': data }));
+    close(code, reason) {
+        this.readyState = FakeWebSocket.CLOSED;
+        if (this.onclose) {
+            this.onclose(new CloseEvent("close", { 'code': code, 'reason': reason, 'wasClean': true }));
         }
-    };
+    }
 
-    FakeWebSocket.OPEN = WebSocket.OPEN;
-    FakeWebSocket.CONNECTING = WebSocket.CONNECTING;
-    FakeWebSocket.CLOSING = WebSocket.CLOSING;
-    FakeWebSocket.CLOSED = WebSocket.CLOSED;
-
-    FakeWebSocket.__is_fake = true;
-
-    FakeWebSocket.replace = function () {
-        if (!WebSocket.__is_fake) {
-            var real_version = WebSocket;
-            WebSocket = FakeWebSocket;
-            FakeWebSocket.__real_version = real_version;
+    send(data) {
+        if (this.protocol == 'base64') {
+            data = Base64.decode(data);
+        } else {
+            data = new Uint8Array(data);
         }
-    };
+        this._sendQueue.set(data, this.bufferedAmount);
+        this.bufferedAmount += data.length;
+    }
 
-    FakeWebSocket.restore = function () {
-        if (WebSocket.__is_fake) {
-            WebSocket = WebSocket.__real_version;
+    _getSentData() {
+        const res = new Uint8Array(this._sendQueue.buffer, 0, this.bufferedAmount);
+        this.bufferedAmount = 0;
+        return res;
+    }
+
+    _open() {
+        this.readyState = FakeWebSocket.OPEN;
+        if (this.onopen) {
+            this.onopen(new Event('open'));
         }
-    };
-})();
+    }
+
+    _receiveData(data) {
+        // Break apart the data to expose bugs where we assume data is
+        // neatly packaged
+        for (let i = 0;i < data.length;i++) {
+            let buf = data.subarray(i, i+1);
+            this.onmessage(new MessageEvent("message", { 'data': buf }));
+        }
+    }
+}
+
+FakeWebSocket.OPEN = WebSocket.OPEN;
+FakeWebSocket.CONNECTING = WebSocket.CONNECTING;
+FakeWebSocket.CLOSING = WebSocket.CLOSING;
+FakeWebSocket.CLOSED = WebSocket.CLOSED;
+
+FakeWebSocket._isFake = true;
+
+FakeWebSocket.replace = () => {
+    if (!WebSocket._isFake) {
+        const realVersion = WebSocket;
+        // eslint-disable-next-line no-global-assign
+        WebSocket = FakeWebSocket;
+        FakeWebSocket._realVersion = realVersion;
+    }
+};
+
+FakeWebSocket.restore = () => {
+    if (WebSocket._isFake) {
+        // eslint-disable-next-line no-global-assign
+        WebSocket = WebSocket._realVersion;
+    }
+};

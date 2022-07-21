@@ -1,262 +1,223 @@
-﻿// requires local modules: keysym, keysymdef, keyboard
+﻿const expect = chai.expect;
 
-var assert = chai.assert;
-var expect = chai.expect;
+import keysyms from '../core/input/keysymdef.js';
+import * as KeyboardUtil from "../core/input/util.js";
 
-describe('Helpers', function() {
+describe('Helpers', function () {
     "use strict";
-    describe('keysymFromKeyCode', function() {
-        it('should map known keycodes to keysyms', function() {
-            expect(kbdUtil.keysymFromKeyCode(0x41, false), 'a').to.be.equal(0x61);
-            expect(kbdUtil.keysymFromKeyCode(0x41, true), 'A').to.be.equal(0x41);
-            expect(kbdUtil.keysymFromKeyCode(0xd, false), 'enter').to.be.equal(0xFF0D);
-            expect(kbdUtil.keysymFromKeyCode(0x11, false), 'ctrl').to.be.equal(0xFFE3);
-            expect(kbdUtil.keysymFromKeyCode(0x12, false), 'alt').to.be.equal(0xFFE9);
-            expect(kbdUtil.keysymFromKeyCode(0xe1, false), 'altgr').to.be.equal(0xFE03);
-            expect(kbdUtil.keysymFromKeyCode(0x1b, false), 'esc').to.be.equal(0xFF1B);
-            expect(kbdUtil.keysymFromKeyCode(0x26, false), 'up').to.be.equal(0xFF52);
+
+    describe('keysyms.lookup', function () {
+        it('should map ASCII characters to keysyms', function () {
+            expect(keysyms.lookup('a'.charCodeAt())).to.be.equal(0x61);
+            expect(keysyms.lookup('A'.charCodeAt())).to.be.equal(0x41);
         });
-        it('should return null for unknown keycodes', function() {
-            expect(kbdUtil.keysymFromKeyCode(0xc0, false), 'DK æ').to.be.null;
-            expect(kbdUtil.keysymFromKeyCode(0xde, false), 'DK ø').to.be.null;
+        it('should map Latin-1 characters to keysyms', function () {
+            expect(keysyms.lookup('ø'.charCodeAt())).to.be.equal(0xf8);
+
+            expect(keysyms.lookup('é'.charCodeAt())).to.be.equal(0xe9);
+        });
+        it('should map characters that are in Windows-1252 but not in Latin-1 to keysyms', function () {
+            expect(keysyms.lookup('Š'.charCodeAt())).to.be.equal(0x01a9);
+        });
+        it('should map characters which aren\'t in Latin1 *or* Windows-1252 to keysyms', function () {
+            expect(keysyms.lookup('ũ'.charCodeAt())).to.be.equal(0x03fd);
+        });
+        it('should map unknown codepoints to the Unicode range', function () {
+            expect(keysyms.lookup('\n'.charCodeAt())).to.be.equal(0x100000a);
+            expect(keysyms.lookup('\u262D'.charCodeAt())).to.be.equal(0x100262d);
+        });
+        // This requires very recent versions of most browsers... skipping for now
+        it.skip('should map UCS-4 codepoints to the Unicode range', function () {
+            //expect(keysyms.lookup('\u{1F686}'.codePointAt())).to.be.equal(0x101f686);
         });
     });
 
-    describe('keysyms.fromUnicode', function() {
-        it('should map ASCII characters to keysyms', function() {
-            expect(keysyms.fromUnicode('a'.charCodeAt())).to.have.property('keysym', 0x61);
-            expect(keysyms.fromUnicode('A'.charCodeAt())).to.have.property('keysym', 0x41);
-            });
-        it('should map Latin-1 characters to keysyms', function() {
-            expect(keysyms.fromUnicode('ø'.charCodeAt())).to.have.property('keysym', 0xf8);
+    describe('getKeycode', function () {
+        it('should pass through proper code', function () {
+            expect(KeyboardUtil.getKeycode({code: 'Semicolon'})).to.be.equal('Semicolon');
+        });
+        it('should map legacy values', function () {
+            expect(KeyboardUtil.getKeycode({code: ''})).to.be.equal('Unidentified');
+            expect(KeyboardUtil.getKeycode({code: 'OSLeft'})).to.be.equal('MetaLeft');
+        });
+        it('should map keyCode to code when possible', function () {
+            expect(KeyboardUtil.getKeycode({keyCode: 0x14})).to.be.equal('CapsLock');
+            expect(KeyboardUtil.getKeycode({keyCode: 0x5b})).to.be.equal('MetaLeft');
+            expect(KeyboardUtil.getKeycode({keyCode: 0x35})).to.be.equal('Digit5');
+            expect(KeyboardUtil.getKeycode({keyCode: 0x65})).to.be.equal('Numpad5');
+        });
+        it('should map keyCode left/right side', function () {
+            expect(KeyboardUtil.getKeycode({keyCode: 0x10, location: 1})).to.be.equal('ShiftLeft');
+            expect(KeyboardUtil.getKeycode({keyCode: 0x10, location: 2})).to.be.equal('ShiftRight');
+            expect(KeyboardUtil.getKeycode({keyCode: 0x11, location: 1})).to.be.equal('ControlLeft');
+            expect(KeyboardUtil.getKeycode({keyCode: 0x11, location: 2})).to.be.equal('ControlRight');
+        });
+        it('should map keyCode on numpad', function () {
+            expect(KeyboardUtil.getKeycode({keyCode: 0x0d, location: 0})).to.be.equal('Enter');
+            expect(KeyboardUtil.getKeycode({keyCode: 0x0d, location: 3})).to.be.equal('NumpadEnter');
+            expect(KeyboardUtil.getKeycode({keyCode: 0x23, location: 0})).to.be.equal('End');
+            expect(KeyboardUtil.getKeycode({keyCode: 0x23, location: 3})).to.be.equal('Numpad1');
+        });
+        it('should return Unidentified when it cannot map the keyCode', function () {
+            expect(KeyboardUtil.getKeycode({keycode: 0x42})).to.be.equal('Unidentified');
+        });
 
-            expect(keysyms.fromUnicode('é'.charCodeAt())).to.have.property('keysym', 0xe9);
-        });
-        it('should map characters that are in Windows-1252 but not in Latin-1 to keysyms', function() {
-            expect(keysyms.fromUnicode('Š'.charCodeAt())).to.have.property('keysym', 0x01a9);
-        });
-        it('should map characters which aren\'t in Latin1 *or* Windows-1252 to keysyms', function() {
-            expect(keysyms.fromUnicode('ŵ'.charCodeAt())).to.have.property('keysym', 0x1000175);
-        });
-        it('should return undefined for unknown codepoints', function() {
-            expect(keysyms.fromUnicode('\n'.charCodeAt())).to.be.undefined;
-            expect(keysyms.fromUnicode('\u1F686'.charCodeAt())).to.be.undefined;
-        });
-    });
+        describe('Fix Meta on macOS', function () {
+            let origNavigator;
+            beforeEach(function () {
+                // window.navigator is a protected read-only property in many
+                // environments, so we need to redefine it whilst running these
+                // tests.
+                origNavigator = Object.getOwnPropertyDescriptor(window, "navigator");
 
-    describe('substituteCodepoint', function() {
-        it('should replace characters which don\'t have a keysym', function() {
-            expect(kbdUtil.substituteCodepoint('Ș'.charCodeAt())).to.equal('Ş'.charCodeAt());
-            expect(kbdUtil.substituteCodepoint('ș'.charCodeAt())).to.equal('ş'.charCodeAt());
-            expect(kbdUtil.substituteCodepoint('Ț'.charCodeAt())).to.equal('Ţ'.charCodeAt());
-            expect(kbdUtil.substituteCodepoint('ț'.charCodeAt())).to.equal('ţ'.charCodeAt());
-        });
-        it('should pass other characters through unchanged', function() {
-            expect(kbdUtil.substituteCodepoint('T'.charCodeAt())).to.equal('T'.charCodeAt());
-        });
-    });
-
-    describe('nonCharacterKey', function() {
-        it('should  recognize the right keys', function() {
-            expect(kbdUtil.nonCharacterKey({keyCode: 0xd}), 'enter').to.be.defined;
-            expect(kbdUtil.nonCharacterKey({keyCode: 0x08}), 'backspace').to.be.defined;
-            expect(kbdUtil.nonCharacterKey({keyCode: 0x09}), 'tab').to.be.defined;
-            expect(kbdUtil.nonCharacterKey({keyCode: 0x10}), 'shift').to.be.defined;
-            expect(kbdUtil.nonCharacterKey({keyCode: 0x11}), 'ctrl').to.be.defined;
-            expect(kbdUtil.nonCharacterKey({keyCode: 0x12}), 'alt').to.be.defined;
-            expect(kbdUtil.nonCharacterKey({keyCode: 0xe0}), 'meta').to.be.defined;
-        });
-        it('should  not recognize character keys', function() {
-            expect(kbdUtil.nonCharacterKey({keyCode: 'A'}), 'A').to.be.null;
-            expect(kbdUtil.nonCharacterKey({keyCode: '1'}), '1').to.be.null;
-            expect(kbdUtil.nonCharacterKey({keyCode: '.'}), '.').to.be.null;
-            expect(kbdUtil.nonCharacterKey({keyCode: ' '}), 'space').to.be.null;
-        });
-    });
-
-    describe('getKeysym', function() {
-        it('should prefer char', function() {
-            expect(kbdUtil.getKeysym({char : 'a', charCode: 'Š'.charCodeAt(), keyCode: 0x42, which: 0x43})).to.have.property('keysym', 0x61);
-        });
-        it('should use charCode if no char', function() {
-            expect(kbdUtil.getKeysym({char : '', charCode: 'Š'.charCodeAt(), keyCode: 0x42, which: 0x43})).to.have.property('keysym', 0x01a9);
-            expect(kbdUtil.getKeysym({charCode: 'Š'.charCodeAt(), keyCode: 0x42, which: 0x43})).to.have.property('keysym', 0x01a9);
-            expect(kbdUtil.getKeysym({char : 'hello', charCode: 'Š'.charCodeAt(), keyCode: 0x42, which: 0x43})).to.have.property('keysym', 0x01a9);
-        });
-        it('should use keyCode if no charCode', function() {
-            expect(kbdUtil.getKeysym({keyCode: 0x42, which: 0x43, shiftKey: false})).to.have.property('keysym', 0x62);
-            expect(kbdUtil.getKeysym({keyCode: 0x42, which: 0x43, shiftKey: true})).to.have.property('keysym', 0x42);
-        });
-        it('should use which if no keyCode', function() {
-            expect(kbdUtil.getKeysym({which: 0x43, shiftKey: false})).to.have.property('keysym', 0x63);
-            expect(kbdUtil.getKeysym({which: 0x43, shiftKey: true})).to.have.property('keysym', 0x43);
-        });
-        it('should substitute where applicable', function() {
-            expect(kbdUtil.getKeysym({char : 'Ș'})).to.have.property('keysym', 0x1aa);
-        });
-    });
-
-    describe('Modifier Sync', function() { // return a list of fake events necessary to fix modifier state
-        describe('Toggle all modifiers', function() {
-            var sync = kbdUtil.ModifierSync();
-            it ('should do nothing if all modifiers are up as expected', function() {
-                expect(sync.keydown({
-                    keyCode: 0x41,
-                    ctrlKey: false,
-                    altKey: false,
-                    altGraphKey: false,
-                    shiftKey: false,
-                    metaKey: false})
-                    ).to.have.lengthOf(0);
-            });
-            it ('should synthesize events if all keys are unexpectedly down', function() {
-                var result = sync.keydown({
-                    keyCode: 0x41,
-                    ctrlKey: true,
-                    altKey: true,
-                    altGraphKey: true,
-                    shiftKey: true,
-                    metaKey: true
-                });
-                expect(result).to.have.lengthOf(5);
-                var keysyms = {};
-                for (var i = 0; i < result.length; ++i) {
-                    keysyms[result[i].keysym] = (result[i].type == 'keydown');
+                Object.defineProperty(window, "navigator", {value: {}});
+                if (window.navigator.platform !== undefined) {
+                    // Object.defineProperty() doesn't work properly in old
+                    // versions of Chrome
+                    this.skip();
                 }
-                expect(keysyms[0xffe3]);
-                expect(keysyms[0xffe9]);
-                expect(keysyms[0xfe03]);
-                expect(keysyms[0xffe1]);
-                expect(keysyms[0xffe7]);
+
+                window.navigator.platform = "Mac x86_64";
             });
-            it ('should do nothing if all modifiers are down as expected', function() {
-                expect(sync.keydown({
-                    keyCode: 0x41,
-                    ctrlKey: true,
-                    altKey: true,
-                    altGraphKey: true,
-                    shiftKey: true,
-                    metaKey: true
-                    })).to.have.lengthOf(0);
+            afterEach(function () {
+                if (origNavigator !== undefined) {
+                    Object.defineProperty(window, "navigator", origNavigator);
+                }
             });
-        });
-        describe('Toggle Ctrl', function() {
-            var sync = kbdUtil.ModifierSync();
-            it('should sync if modifier is suddenly down', function() {
-                expect(sync.keydown({
-                    keyCode: 0x41,
-                    ctrlKey: true,
-                })).to.be.deep.equal([{keysym: keysyms.lookup(0xffe3), type: 'keydown'}]);
+
+            it('should respect ContextMenu on modern browser', function () {
+                expect(KeyboardUtil.getKeycode({code: 'ContextMenu', keyCode: 0x5d})).to.be.equal('ContextMenu');
             });
-            it('should sync if modifier is suddenly up', function() {
-                expect(sync.keydown({
-                    keyCode: 0x41,
-                    ctrlKey: false
-                })).to.be.deep.equal([{keysym: keysyms.lookup(0xffe3), type: 'keyup'}]);
+            it('should translate legacy ContextMenu to MetaRight', function () {
+                expect(KeyboardUtil.getKeycode({keyCode: 0x5d})).to.be.equal('MetaRight');
             });
         });
-        describe('Toggle Alt', function() {
-            var sync = kbdUtil.ModifierSync();
-            it('should sync if modifier is suddenly down', function() {
-                expect(sync.keydown({
-                    keyCode: 0x41,
-                    altKey: true,
-                })).to.be.deep.equal([{keysym: keysyms.lookup(0xffe9), type: 'keydown'}]);
+    });
+
+    describe('getKey', function () {
+        it('should prefer key', function () {
+            expect(KeyboardUtil.getKey({key: 'a', charCode: 'Š'.charCodeAt(), keyCode: 0x42, which: 0x43})).to.be.equal('a');
+        });
+        it('should map legacy values', function () {
+            expect(KeyboardUtil.getKey({key: 'OS'})).to.be.equal('Meta');
+            expect(KeyboardUtil.getKey({key: 'UIKeyInputLeftArrow'})).to.be.equal('ArrowLeft');
+        });
+        it('should handle broken Delete', function () {
+            expect(KeyboardUtil.getKey({key: '\x00', code: 'NumpadDecimal'})).to.be.equal('Delete');
+        });
+        it('should use code if no key', function () {
+            expect(KeyboardUtil.getKey({code: 'NumpadBackspace'})).to.be.equal('Backspace');
+        });
+        it('should not use code fallback for character keys', function () {
+            expect(KeyboardUtil.getKey({code: 'KeyA'})).to.be.equal('Unidentified');
+            expect(KeyboardUtil.getKey({code: 'Digit1'})).to.be.equal('Unidentified');
+            expect(KeyboardUtil.getKey({code: 'Period'})).to.be.equal('Unidentified');
+            expect(KeyboardUtil.getKey({code: 'Numpad1'})).to.be.equal('Unidentified');
+        });
+        it('should use charCode if no key', function () {
+            expect(KeyboardUtil.getKey({charCode: 'Š'.charCodeAt(), keyCode: 0x42, which: 0x43})).to.be.equal('Š');
+        });
+        it('should return Unidentified when it cannot map the key', function () {
+            expect(KeyboardUtil.getKey({keycode: 0x42})).to.be.equal('Unidentified');
+        });
+    });
+
+    describe('getKeysym', function () {
+        describe('Non-character keys', function () {
+            it('should recognize the right keys', function () {
+                expect(KeyboardUtil.getKeysym({key: 'Enter'})).to.be.equal(0xFF0D);
+                expect(KeyboardUtil.getKeysym({key: 'Backspace'})).to.be.equal(0xFF08);
+                expect(KeyboardUtil.getKeysym({key: 'Tab'})).to.be.equal(0xFF09);
+                expect(KeyboardUtil.getKeysym({key: 'Shift'})).to.be.equal(0xFFE1);
+                expect(KeyboardUtil.getKeysym({key: 'Control'})).to.be.equal(0xFFE3);
+                expect(KeyboardUtil.getKeysym({key: 'Alt'})).to.be.equal(0xFFE9);
+                expect(KeyboardUtil.getKeysym({key: 'Meta'})).to.be.equal(0xFFEB);
+                expect(KeyboardUtil.getKeysym({key: 'Escape'})).to.be.equal(0xFF1B);
+                expect(KeyboardUtil.getKeysym({key: 'ArrowUp'})).to.be.equal(0xFF52);
             });
-            it('should sync if modifier is suddenly up', function() {
-                expect(sync.keydown({
-                    keyCode: 0x41,
-                    altKey: false
-                })).to.be.deep.equal([{keysym: keysyms.lookup(0xffe9), type: 'keyup'}]);
+            it('should map left/right side', function () {
+                expect(KeyboardUtil.getKeysym({key: 'Shift', location: 1})).to.be.equal(0xFFE1);
+                expect(KeyboardUtil.getKeysym({key: 'Shift', location: 2})).to.be.equal(0xFFE2);
+                expect(KeyboardUtil.getKeysym({key: 'Control', location: 1})).to.be.equal(0xFFE3);
+                expect(KeyboardUtil.getKeysym({key: 'Control', location: 2})).to.be.equal(0xFFE4);
+            });
+            it('should handle AltGraph', function () {
+                expect(KeyboardUtil.getKeysym({code: 'AltRight', key: 'Alt', location: 2})).to.be.equal(0xFFEA);
+                expect(KeyboardUtil.getKeysym({code: 'AltRight', key: 'AltGraph', location: 2})).to.be.equal(0xFE03);
+            });
+            it('should handle Windows key with incorrect location', function () {
+                expect(KeyboardUtil.getKeysym({key: 'Meta', location: 0})).to.be.equal(0xFFEC);
+            });
+            it('should handle Clear/NumLock key with incorrect location', function () {
+                this.skip(); // Broken because of Clear/NumLock override
+                expect(KeyboardUtil.getKeysym({key: 'Clear', code: 'NumLock', location: 3})).to.be.equal(0xFF0B);
+            });
+            it('should handle Meta/Windows distinction', function () {
+                expect(KeyboardUtil.getKeysym({code: 'AltLeft', key: 'Meta', location: 1})).to.be.equal(0xFFE7);
+                expect(KeyboardUtil.getKeysym({code: 'AltRight', key: 'Meta', location: 2})).to.be.equal(0xFFE8);
+                expect(KeyboardUtil.getKeysym({code: 'MetaLeft', key: 'Meta', location: 1})).to.be.equal(0xFFEB);
+                expect(KeyboardUtil.getKeysym({code: 'MetaRight', key: 'Meta', location: 2})).to.be.equal(0xFFEC);
+            });
+            it('should send NumLock even if key is Clear', function () {
+                expect(KeyboardUtil.getKeysym({key: 'Clear', code: 'NumLock'})).to.be.equal(0xFF7F);
+            });
+            it('should return null for unknown keys', function () {
+                expect(KeyboardUtil.getKeysym({key: 'Semicolon'})).to.be.null;
+                expect(KeyboardUtil.getKeysym({key: 'BracketRight'})).to.be.null;
+            });
+            it('should handle remappings', function () {
+                expect(KeyboardUtil.getKeysym({code: 'ControlLeft', key: 'Tab'})).to.be.equal(0xFF09);
             });
         });
-        describe('Toggle AltGr', function() {
-            var sync = kbdUtil.ModifierSync();
-            it('should sync if modifier is suddenly down', function() {
-                expect(sync.keydown({
-                    keyCode: 0x41,
-                    altGraphKey: true,
-                })).to.be.deep.equal([{keysym: keysyms.lookup(0xfe03), type: 'keydown'}]);
+
+        describe('Numpad', function () {
+            it('should handle Numpad numbers', function () {
+                expect(KeyboardUtil.getKeysym({code: 'Digit5', key: '5', location: 0})).to.be.equal(0x0035);
+                expect(KeyboardUtil.getKeysym({code: 'Numpad5', key: '5', location: 3})).to.be.equal(0xFFB5);
             });
-            it('should sync if modifier is suddenly up', function() {
-                expect(sync.keydown({
-                    keyCode: 0x41,
-                    altGraphKey: false
-                })).to.be.deep.equal([{keysym: keysyms.lookup(0xfe03), type: 'keyup'}]);
+            it('should handle Numpad non-character keys', function () {
+                expect(KeyboardUtil.getKeysym({code: 'Home', key: 'Home', location: 0})).to.be.equal(0xFF50);
+                expect(KeyboardUtil.getKeysym({code: 'Numpad5', key: 'Home', location: 3})).to.be.equal(0xFF95);
+                expect(KeyboardUtil.getKeysym({code: 'Delete', key: 'Delete', location: 0})).to.be.equal(0xFFFF);
+                expect(KeyboardUtil.getKeysym({code: 'NumpadDecimal', key: 'Delete', location: 3})).to.be.equal(0xFF9F);
             });
-        });
-        describe('Toggle Shift', function() {
-            var sync = kbdUtil.ModifierSync();
-            it('should sync if modifier is suddenly down', function() {
-                expect(sync.keydown({
-                    keyCode: 0x41,
-                    shiftKey: true,
-                })).to.be.deep.equal([{keysym: keysyms.lookup(0xffe1), type: 'keydown'}]);
-            });
-            it('should sync if modifier is suddenly up', function() {
-                expect(sync.keydown({
-                    keyCode: 0x41,
-                    shiftKey: false
-                })).to.be.deep.equal([{keysym: keysyms.lookup(0xffe1), type: 'keyup'}]);
+            it('should handle Numpad Decimal key', function () {
+                expect(KeyboardUtil.getKeysym({code: 'NumpadDecimal', key: '.', location: 3})).to.be.equal(0xFFAE);
+                expect(KeyboardUtil.getKeysym({code: 'NumpadDecimal', key: ',', location: 3})).to.be.equal(0xFFAC);
             });
         });
-        describe('Toggle Meta', function() {
-            var sync = kbdUtil.ModifierSync();
-            it('should sync if modifier is suddenly down', function() {
-                expect(sync.keydown({
-                    keyCode: 0x41,
-                    metaKey: true,
-                })).to.be.deep.equal([{keysym: keysyms.lookup(0xffe7), type: 'keydown'}]);
+
+        describe('Japanese IM keys on Windows', function () {
+            let origNavigator;
+            beforeEach(function () {
+                // window.navigator is a protected read-only property in many
+                // environments, so we need to redefine it whilst running these
+                // tests.
+                origNavigator = Object.getOwnPropertyDescriptor(window, "navigator");
+
+                Object.defineProperty(window, "navigator", {value: {}});
+                if (window.navigator.platform !== undefined) {
+                    // Object.defineProperty() doesn't work properly in old
+                    // versions of Chrome
+                    this.skip();
+                }
+
+                window.navigator.platform = "Windows";
             });
-            it('should sync if modifier is suddenly up', function() {
-                expect(sync.keydown({
-                    keyCode: 0x41,
-                    metaKey: false
-                })).to.be.deep.equal([{keysym: keysyms.lookup(0xffe7), type: 'keyup'}]);
+
+            afterEach(function () {
+                if (origNavigator !== undefined) {
+                    Object.defineProperty(window, "navigator", origNavigator);
+                }
             });
-        });
-        describe('Modifier keyevents', function() {
-            it('should not sync a modifier on its own events', function() {
-                expect(kbdUtil.ModifierSync().keydown({
-                    keyCode: 0x11,
-                    ctrlKey: false
-                })).to.be.deep.equal([]);
-                expect(kbdUtil.ModifierSync().keydown({
-                    keyCode: 0x11,
-                    ctrlKey: true
-                }), 'B').to.be.deep.equal([]);
-            })
-            it('should update state on modifier keyevents', function() {
-                var sync = kbdUtil.ModifierSync();
-                sync.keydown({
-                    keyCode: 0x11,
+
+            const keys = { 'Zenkaku': 0xff2a, 'Hankaku': 0xff2a,
+                           'Romaji': 0xff24, 'KanaMode': 0xff24 };
+            for (let [key, keysym] of Object.entries(keys)) {
+                it(`should fake combined key for ${key} on Windows`, function () {
+                    expect(KeyboardUtil.getKeysym({code: 'FakeIM', key: key})).to.be.equal(keysym);
                 });
-                expect(sync.keydown({
-                    keyCode: 0x41,
-                    ctrlKey: true,
-                })).to.be.deep.equal([]);
-            });
-            it('should sync other modifiers on ctrl events', function() {
-                expect(kbdUtil.ModifierSync().keydown({
-                    keyCode: 0x11,
-                    altKey: true
-                })).to.be.deep.equal([{keysym: keysyms.lookup(0xffe9), type: 'keydown'}]);
-            })
-        });
-        describe('sync modifiers on non-key events', function() {
-            it('should generate sync events when receiving non-keyboard events', function() {
-                expect(kbdUtil.ModifierSync().syncAny({
-                    altKey: true
-                })).to.be.deep.equal([{keysym: keysyms.lookup(0xffe9), type: 'keydown'}]);
-            });
-        });
-        describe('do not treat shift as a modifier key', function() {
-            it('should not treat shift as a shortcut modifier', function() {
-                expect(kbdUtil.hasShortcutModifier([], {0xffe1 : true})).to.be.false;
-            });
-            it('should not treat shift as a char modifier', function() {
-                expect(kbdUtil.hasCharModifier([], {0xffe1 : true})).to.be.false;
-            });
+            }
         });
     });
 });

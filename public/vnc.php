@@ -23,7 +23,7 @@ function runVNC($jname)
 	}
 
 	# TODO: This will send the pass in clear text
-	header('Location: http://'.$nodeip.':6081/vnc_auto.html?host='.$nodeip.'&port=6081?password='.$pass);
+	header('Location: http://'.$nodeip.':6081/vnc_lite.html?scale=false&host='.$nodeip.'&port=6081?password='.$pass);
 	exit;
 }
 

@@ -21,7 +21,7 @@
   "scripts": {
     "lint": "eslint app core po/po2js po/xgettext-html tests utils",
     "test": "karma start karma.conf.js",
-    "prepublish": "node ./utils/use_require.js --clean"
+    "prepublish": "node ./utils/convert.js --clean"
   },
   "repository": {
     "type": "git",
@@ -66,9 +66,6 @@
     "mocha": "*",
     "node-getopt": "*",
     "po2json": "*",
-    "requirejs": "*",
-    "rollup": "*",
-    "rollup-plugin-node-resolve": "*",
     "sinon": "*",
     "sinon-chai": "*"
   },

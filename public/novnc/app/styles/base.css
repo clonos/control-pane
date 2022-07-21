@@ -842,6 +842,23 @@ select:active {
 }
 
 /* ----------------------------------------
+ * Server verification Dialog
+ * ----------------------------------------
+ */
+
+#noVNC_verify_server_dlg {
+  position: relative;
+
+  transform: translateY(-50px);
+}
+#noVNC_verify_server_dlg.noVNC_open {
+  transform: translateY(0);
+}
+#noVNC_fingerprint_block {
+  margin: 10px;
+}
+
+/* ----------------------------------------
  * Password Dialog
  * ----------------------------------------
  */
@@ -854,12 +871,8 @@ select:active {
 #noVNC_credentials_dlg.noVNC_open {
   transform: translateY(0);
 }
-#noVNC_credentials_dlg ul {
-  list-style: none;
-  margin: 0px;
-  padding: 0px;
-}
-.noVNC_hidden {
+#noVNC_username_block.noVNC_hidden,
+#noVNC_password_block.noVNC_hidden {
   display: none;
 }
 
@@ -871,7 +884,11 @@ select:active {
 
 /* Transition screen */
 #noVNC_transition {
-  display: none;
+  transition: 0.5s ease-in-out;
+
+  display: flex;
+  opacity: 0;
+  visibility: hidden;
 
   position: fixed;
   top: 0;
@@ -892,7 +909,8 @@ select:active {
 :root.noVNC_connecting #noVNC_transition,
 :root.noVNC_disconnecting #noVNC_transition,
 :root.noVNC_reconnecting #noVNC_transition {
-  display: flex;
+  opacity: 1;
+  visibility: visible;
 }
 :root:not(.noVNC_reconnecting) #noVNC_cancel_reconnect_button {
   display: none;

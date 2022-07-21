@@ -74,6 +74,9 @@ describe('Remote Frame Buffer Protocol Client', function () {
     let fakeResizeObserver = null;
     const realObserver = window.ResizeObserver;
 
+    // Since we are using fake timers we don't actually want
+    // to wait for the browser to observe the size change,
+    // that's why we use a fake ResizeObserver
     class FakeResizeObserver {
         constructor(handler) {
             this.fire = handler;
@@ -392,6 +395,13 @@ describe('Remote Frame Buffer Protocol Client', function () {
                 client.focus();
                 expect(client._canvas.focus).to.have.been.calledOnce;
             });
+
+            it('should include focus options', function () {
+                client._canvas.focus = sinon.spy();
+                client.focus({ foobar: 12, gazonk: true });
+                expect(client._canvas.focus).to.have.been.calledOnce;
+                expect(client._canvas.focus).to.have.been.calledWith({ foobar: 12, gazonk: true});
+            });
         });
 
         describe('#blur', function () {
@@ -513,7 +523,7 @@ describe('Remote Frame Buffer Protocol Client', function () {
             container.style.width = '40px';
             container.style.height = '50px';
             fakeResizeObserver.fire();
-            clock.tick();
+            clock.tick(1000);
 
             expect(client._display.viewportChangeSize).to.have.been.calledOnce;
             expect(client._display.viewportChangeSize).to.have.been.calledWith(40, 50);
@@ -530,6 +540,10 @@ describe('Remote Frame Buffer Protocol Client', function () {
             sinon.spy(client._display, "viewportChangeSize");
 
             client._sock._websocket._receiveData(new Uint8Array(incoming));
+            // The resize will cause scrollbars on the container, this causes a
+            // resize observation in the browsers
+            fakeResizeObserver.fire();
+            clock.tick(1000);
 
             // FIXME: Display implicitly calls viewportChangeSize() when
             //        resizing the framebuffer, hence calledTwice.
@@ -543,9 +557,8 @@ describe('Remote Frame Buffer Protocol Client', function () {
 
             container.style.width = '40px';
             container.style.height = '50px';
-            const event = new UIEvent('resize');
-            window.dispatchEvent(event);
-            clock.tick();
+            fakeResizeObserver.fire();
+            clock.tick(1000);
 
             expect(client._display.viewportChangeSize).to.not.have.been.called;
         });
@@ -556,11 +569,36 @@ describe('Remote Frame Buffer Protocol Client', function () {
 
             container.style.width = '40px';
             container.style.height = '50px';
-            const event = new UIEvent('resize');
-            window.dispatchEvent(event);
-            clock.tick();
+            fakeResizeObserver.fire();
+            clock.tick(1000);
 
             expect(client._display.viewportChangeSize).to.not.have.been.called;
+        });
+
+        describe('Clipping and remote resize', function () {
+            beforeEach(function () {
+                // Given a remote (100, 100) larger than the container (70x80),
+                client._resize(100, 100);
+                client._supportsSetDesktopSize = true;
+                client.resizeSession = true;
+                sinon.spy(RFB.messages, "setDesktopSize");
+            });
+            afterEach(function () {
+                RFB.messages.setDesktopSize.restore();
+            });
+            it('should not change remote size when changing clipping', function () {
+                // When changing clipping the scrollbars of the container
+                // will appear and disappear and thus trigger resize observations
+                client.clipViewport = false;
+                fakeResizeObserver.fire();
+                clock.tick(1000);
+                client.clipViewport = true;
+                fakeResizeObserver.fire();
+                clock.tick(1000);
+
+                // Then no resize requests should be sent
+                expect(RFB.messages.setDesktopSize).to.not.have.been.called;
+            });
         });
 
         describe('Dragging', function () {
@@ -709,7 +747,7 @@ describe('Remote Frame Buffer Protocol Client', function () {
             container.style.width = '40px';
             container.style.height = '50px';
             fakeResizeObserver.fire();
-            clock.tick();
+            clock.tick(1000);
 
             expect(client._display.autoscale).to.have.been.calledOnce;
             expect(client._display.autoscale).to.have.been.calledWith(40, 50);
@@ -726,6 +764,10 @@ describe('Remote Frame Buffer Protocol Client', function () {
             sinon.spy(client._display, "autoscale");
 
             client._sock._websocket._receiveData(new Uint8Array(incoming));
+            // The resize will cause scrollbars on the container, this causes a
+            // resize observation in the browsers
+            fakeResizeObserver.fire();
+            clock.tick(1000);
 
             expect(client._display.autoscale).to.have.been.calledOnce;
             expect(client._display.autoscale).to.have.been.calledWith(70, 80);
@@ -738,9 +780,8 @@ describe('Remote Frame Buffer Protocol Client', function () {
 
             container.style.width = '40px';
             container.style.height = '50px';
-            const event = new UIEvent('resize');
-            window.dispatchEvent(event);
-            clock.tick();
+            fakeResizeObserver.fire();
+            clock.tick(1000);
 
             expect(client._display.autoscale).to.not.have.been.called;
         });
@@ -770,20 +811,39 @@ describe('Remote Frame Buffer Protocol Client', function () {
 
         it('should request a resize when initially connecting', function () {
             // Simple ExtendedDesktopSize FBU message
-            const incoming = [ 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x04, 0x00, 0x04, 0xff, 0xff, 0xfe, 0xcc,
-                               0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x04,
-                               0x00, 0x00, 0x00, 0x00 ];
+            const incoming = [ 0x00,        // msg-type=FBU
+                               0x00,        // padding
+                               0x00, 0x01,  // number of rects = 1
+                               0x00, 0x00,  // reason = server initialized
+                               0x00, 0x00,  // status = no error
+                               0x00, 0x04,  // new width = 4
+                               0x00, 0x04,  // new height = 4
+                               0xff, 0xff,
+                               0xfe, 0xcc,  // enc = (-308) ExtendedDesktopSize
+                               0x01,        // number of screens = 1
+                               0x00, 0x00,
+                               0x00,        // padding
+                               0x00, 0x00,
+                               0x00, 0x00,  // screen id = 0
+                               0x00, 0x00,  // screen x = 0
+                               0x00, 0x00,  // screen y = 0
+                               0x00, 0x04,  // screen width = 4
+                               0x00, 0x04,  // screen height = 4
+                               0x00, 0x00,
+                               0x00, 0x00]; // screen flags
+
+            // This property is indirectly used as a marker for the first update
+            client._supportsSetDesktopSize = false;
 
             // First message should trigger a resize
 
-            client._supportsSetDesktopSize = false;
-
             client._sock._websocket._receiveData(new Uint8Array(incoming));
 
+            // It should match the current size of the container,
+            // not the reported size from the server
             expect(RFB.messages.setDesktopSize).to.have.been.calledOnce;
-            expect(RFB.messages.setDesktopSize).to.have.been.calledWith(sinon.match.object, 70, 80, 0, 0);
+            expect(RFB.messages.setDesktopSize).to.have.been.calledWith(
+                sinon.match.object, 70, 80, 0, 0);
 
             RFB.messages.setDesktopSize.resetHistory();
 
@@ -802,6 +862,35 @@ describe('Remote Frame Buffer Protocol Client', function () {
 
             expect(RFB.messages.setDesktopSize).to.have.been.calledOnce;
             expect(RFB.messages.setDesktopSize).to.have.been.calledWith(sinon.match.object, 40, 50, 0, 0);
+        });
+
+        it('should not request the same size twice', function () {
+            container.style.width = '40px';
+            container.style.height = '50px';
+            fakeResizeObserver.fire();
+            clock.tick(1000);
+
+            expect(RFB.messages.setDesktopSize).to.have.been.calledOnce;
+            expect(RFB.messages.setDesktopSize).to.have.been.calledWith(
+                sinon.match.object, 40, 50, 0, 0);
+
+            // Server responds with the requested size 40x50
+            const incoming = [ 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00,
+                               0x00, 0x28, 0x00, 0x32, 0xff, 0xff, 0xfe, 0xcc,
+                               0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                               0x00, 0x00, 0x00, 0x00, 0x00, 0x28, 0x00, 0x32,
+                               0x00, 0x00, 0x00, 0x00];
+
+            client._sock._websocket._receiveData(new Uint8Array(incoming));
+            clock.tick(1000);
+
+            RFB.messages.setDesktopSize.resetHistory();
+
+            // size is still 40x50
+            fakeResizeObserver.fire();
+            clock.tick(1000);
+
+            expect(RFB.messages.setDesktopSize).to.not.have.been.called;
         });
 
         it('should not resize until the container size is stable', function () {
@@ -830,8 +919,7 @@ describe('Remote Frame Buffer Protocol Client', function () {
 
             container.style.width = '40px';
             container.style.height = '50px';
-            const event = new UIEvent('resize');
-            window.dispatchEvent(event);
+            fakeResizeObserver.fire();
             clock.tick(1000);
 
             expect(RFB.messages.setDesktopSize).to.not.have.been.called;
@@ -842,8 +930,7 @@ describe('Remote Frame Buffer Protocol Client', function () {
 
             container.style.width = '40px';
             container.style.height = '50px';
-            const event = new UIEvent('resize');
-            window.dispatchEvent(event);
+            fakeResizeObserver.fire();
             clock.tick(1000);
 
             expect(RFB.messages.setDesktopSize).to.not.have.been.called;
@@ -854,24 +941,40 @@ describe('Remote Frame Buffer Protocol Client', function () {
 
             container.style.width = '40px';
             container.style.height = '50px';
-            const event = new UIEvent('resize');
-            window.dispatchEvent(event);
+            fakeResizeObserver.fire();
             clock.tick(1000);
 
             expect(RFB.messages.setDesktopSize).to.not.have.been.called;
         });
 
         it('should not try to override a server resize', function () {
-            // Simple ExtendedDesktopSize FBU message
+            // Simple ExtendedDesktopSize FBU message, new size: 100x100
             const incoming = [ 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x04, 0x00, 0x04, 0xff, 0xff, 0xfe, 0xcc,
+                               0x00, 0x64, 0x00, 0x64, 0xff, 0xff, 0xfe, 0xcc,
                                0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x04,
                                0x00, 0x00, 0x00, 0x00 ];
 
+            // Note that this will cause the browser to display scrollbars
+            // since the framebuffer is 100x100 and the container is 70x80.
+            // The usable space (clientWidth/clientHeight) will be even smaller
+            // due to the scrollbars taking up space.
             client._sock._websocket._receiveData(new Uint8Array(incoming));
+            // The scrollbars cause the ResizeObserver to fire
+            fakeResizeObserver.fire();
+            clock.tick(1000);
 
             expect(RFB.messages.setDesktopSize).to.not.have.been.called;
+
+            // An actual size change must not be ignored afterwards
+            container.style.width = '120px';
+            container.style.height = '130px';
+            fakeResizeObserver.fire();
+            clock.tick(1000);
+
+            expect(RFB.messages.setDesktopSize).to.have.been.calledOnce;
+            expect(RFB.messages.setDesktopSize.firstCall.args[1]).to.equal(120);
+            expect(RFB.messages.setDesktopSize.firstCall.args[2]).to.equal(130);
         });
     });
 
@@ -945,9 +1048,9 @@ describe('Remote Frame Buffer Protocol Client', function () {
                     expect(client._rfbVersion).to.equal(3.3);
                 });
 
-                it('should interpret version 003.889 as version 3.3', function () {
+                it('should interpret version 003.889 as version 3.8', function () {
                     sendVer('003.889', client);
-                    expect(client._rfbVersion).to.equal(3.3);
+                    expect(client._rfbVersion).to.equal(3.8);
                 });
 
                 it('should interpret version 003.007 as version 3.7', function () {
@@ -1167,6 +1270,79 @@ describe('Remote Frame Buffer Protocol Client', function () {
                     client._sock._websocket._receiveData(new Uint8Array(challenge));
 
                     expect(client._rfbInitState).to.equal('SecurityResult');
+                });
+            });
+
+            describe('ARD Authentication (type 30) Handler', function () {
+
+                beforeEach(function () {
+                    client._rfbInitState = 'Security';
+                    client._rfbVersion = 3.8;
+                });
+
+                it('should fire the credentialsrequired event if all credentials are missing', function () {
+                    const spy = sinon.spy();
+                    client.addEventListener("credentialsrequired", spy);
+                    client._rfbCredentials = {};
+                    sendSecurity(30, client);
+
+                    expect(client._rfbCredentials).to.be.empty;
+                    expect(spy).to.have.been.calledOnce;
+                    expect(spy.args[0][0].detail.types).to.have.members(["username", "password"]);
+                });
+
+                it('should fire the credentialsrequired event if some credentials are missing', function () {
+                    const spy = sinon.spy();
+                    client.addEventListener("credentialsrequired", spy);
+                    client._rfbCredentials = { password: 'password'};
+                    sendSecurity(30, client);
+
+                    expect(spy).to.have.been.calledOnce;
+                    expect(spy.args[0][0].detail.types).to.have.members(["username", "password"]);
+                });
+
+                it('should return properly encrypted credentials and public key', async function () {
+                    client._rfbCredentials = { username: 'user',
+                                               password: 'password' };
+                    sendSecurity(30, client);
+
+                    expect(client._sock).to.have.sent([30]);
+
+                    function byteArray(length) {
+                        return Array.from(new Uint8Array(length).keys());
+                    }
+
+                    let generator = [127, 255];
+                    let prime = byteArray(128);
+                    let serverPrivateKey = byteArray(128);
+                    let serverPublicKey = client._modPow(generator, serverPrivateKey, prime);
+
+                    let clientPrivateKey = byteArray(128);
+                    let clientPublicKey = client._modPow(generator, clientPrivateKey, prime);
+
+                    let padding = Array.from(byteArray(64), byte => String.fromCharCode(65+byte%26)).join('');
+
+                    await client._negotiateARDAuthAsync(generator, 128, prime, serverPublicKey, clientPrivateKey, padding);
+
+                    client._negotiateARDAuth();
+
+                    expect(client._rfbInitState).to.equal('SecurityResult');
+
+                    let expectEncrypted = new Uint8Array([
+                        232, 234, 159, 162, 170, 180, 138, 104, 164, 49, 53, 96, 20, 36, 21, 15,
+                        217, 219, 107, 173, 196, 60, 96, 142, 215, 71, 13, 185, 185, 47, 5, 175,
+                        151, 30, 194, 55, 173, 214, 141, 161, 36, 138, 146, 3, 178, 89, 43, 248,
+                        131, 134, 205, 174, 9, 150, 171, 74, 222, 201, 20, 2, 30, 168, 162, 123,
+                        46, 86, 81, 221, 44, 211, 180, 247, 221, 61, 95, 155, 157, 241, 76, 76,
+                        49, 217, 234, 75, 147, 237, 199, 159, 93, 140, 191, 174, 52, 90, 133, 58,
+                        243, 81, 112, 182, 64, 62, 149, 7, 151, 28, 36, 161, 247, 247, 36, 96,
+                        230, 95, 58, 207, 46, 183, 100, 139, 143, 155, 224, 43, 219, 3, 71, 139]);
+
+                    let output = new Uint8Array(256);
+                    output.set(expectEncrypted, 0);
+                    output.set(clientPublicKey, 128);
+
+                    expect(client._sock).to.have.sent(output);
                 });
             });
 
@@ -1616,6 +1792,10 @@ describe('Remote Frame Buffer Protocol Client', function () {
                     expect(RFB.messages.pixelFormat).to.have.been.calledBefore(RFB.messages.clientEncodings);
                     expect(RFB.messages.clientEncodings).to.have.been.calledOnce;
                     expect(RFB.messages.clientEncodings.getCall(0).args[1]).to.include(encodings.encodingTight);
+                    RFB.messages.clientEncodings.getCall(0).args[1].forEach((enc) => {
+                        expect(enc).to.be.a('number');
+                        expect(Number.isInteger(enc)).to.be.true;
+                    });
                     expect(RFB.messages.clientEncodings).to.have.been.calledBefore(RFB.messages.fbUpdateRequest);
                     expect(RFB.messages.fbUpdateRequest).to.have.been.calledOnce;
                     expect(RFB.messages.fbUpdateRequest).to.have.been.calledWith(client._sock, false, 0, 0, 27, 32);

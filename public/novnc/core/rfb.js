@@ -25,6 +25,8 @@ import DES from "./des.js";
 import KeyTable from "./input/keysym.js";
 import XtScancode from "./input/xtscancodes.js";
 import { encodings } from "./encodings.js";
+import RSAAESAuthenticationState from "./ra2.js";
+import { MD5 } from "./util/md5.js";
 
 import RawDecoder from "./decoders/raw.js";
 import CopyRectDecoder from "./decoders/copyrect.js";
@@ -32,6 +34,8 @@ import RREDecoder from "./decoders/rre.js";
 import HextileDecoder from "./decoders/hextile.js";
 import TightDecoder from "./decoders/tight.js";
 import TightPNGDecoder from "./decoders/tightpng.js";
+import ZRLEDecoder from "./decoders/zrle.js";
+import JPEGDecoder from "./decoders/jpeg.js";
 
 // How many seconds to wait for a disconnect to finish
 const DISCONNECT_TIMEOUT = 3;
@@ -75,6 +79,12 @@ export default class RFB extends EventTargetMixin {
             throw new Error("Must specify URL, WebSocket or RTCDataChannel");
         }
 
+        // We rely on modern APIs which might not be available in an
+        // insecure context
+        if (!window.isSecureContext) {
+            Log.Error("noVNC requires a secure context (TLS). Expect crashes!");
+        }
+
         super();
 
         this._target = target;
@@ -98,6 +108,7 @@ export default class RFB extends EventTargetMixin {
         this._rfbInitState = '';
         this._rfbAuthScheme = -1;
         this._rfbCleanDisconnect = true;
+        this._rfbRSAAESAuthenticationState = null;
 
         // Server capabilities
         this._rfbVersion = 0;
@@ -176,6 +187,8 @@ export default class RFB extends EventTargetMixin {
             handleMouse: this._handleMouse.bind(this),
             handleWheel: this._handleWheel.bind(this),
             handleGesture: this._handleGesture.bind(this),
+            handleRSAAESCredentialsRequired: this._handleRSAAESCredentialsRequired.bind(this),
+            handleRSAAESServerVerification: this._handleRSAAESServerVerification.bind(this),
         };
 
         // main setup
@@ -218,6 +231,8 @@ export default class RFB extends EventTargetMixin {
         this._decoders[encodings.encodingHextile] = new HextileDecoder();
         this._decoders[encodings.encodingTight] = new TightDecoder();
         this._decoders[encodings.encodingTightPNG] = new TightPNGDecoder();
+        this._decoders[encodings.encodingZRLE] = new ZRLEDecoder();
+        this._decoders[encodings.encodingJPEG] = new JPEGDecoder();
 
         // NB: nothing that needs explicit teardown should be done
         // before this point, since this can throw an exception
@@ -240,6 +255,8 @@ export default class RFB extends EventTargetMixin {
         this._sock.on('message', this._handleMessage.bind(this));
         this._sock.on('error', this._socketError.bind(this));
 
+        this._expectedClientWidth = null;
+        this._expectedClientHeight = null;
         this._resizeObserver = new ResizeObserver(this._eventHandlers.handleResize);
 
         // All prepared, kick off the connection
@@ -372,6 +389,15 @@ export default class RFB extends EventTargetMixin {
         this._sock.off('error');
         this._sock.off('message');
         this._sock.off('open');
+        if (this._rfbRSAAESAuthenticationState !== null) {
+            this._rfbRSAAESAuthenticationState.disconnect();
+        }
+    }
+
+    approveServer() {
+        if (this._rfbRSAAESAuthenticationState !== null) {
+            this._rfbRSAAESAuthenticationState.approveServer();
+        }
     }
 
     sendCredentials(creds) {
@@ -432,8 +458,8 @@ export default class RFB extends EventTargetMixin {
         }
     }
 
-    focus() {
-        this._canvas.focus();
+    focus(options) {
+        this._canvas.focus(options);
     }
 
     blur() {
@@ -609,7 +635,7 @@ export default class RFB extends EventTargetMixin {
             return;
         }
 
-        this.focus();
+        this.focus({ preventScroll: true });
     }
 
     _setDesktopName(name) {
@@ -619,7 +645,26 @@ export default class RFB extends EventTargetMixin {
             { detail: { name: this._fbName } }));
     }
 
+    _saveExpectedClientSize() {
+        this._expectedClientWidth = this._screen.clientWidth;
+        this._expectedClientHeight = this._screen.clientHeight;
+    }
+
+    _currentClientSize() {
+        return [this._screen.clientWidth, this._screen.clientHeight];
+    }
+
+    _clientHasExpectedSize() {
+        const [currentWidth, currentHeight] = this._currentClientSize();
+        return currentWidth == this._expectedClientWidth &&
+            currentHeight == this._expectedClientHeight;
+    }
+
     _handleResize() {
+        // Don't change anything if the client size is already as expected
+        if (this._clientHasExpectedSize()) {
+            return;
+        }
         // If the window resized then our screen element might have
         // as well. Update the viewport dimensions.
         window.requestAnimationFrame(() => {
@@ -660,6 +705,12 @@ export default class RFB extends EventTargetMixin {
             this._display.viewportChangeSize(size.w, size.h);
             this._fixScrollbars();
         }
+
+        // When changing clipping we might show or hide scrollbars.
+        // This causes the expected client dimensions to change.
+        if (curClip !== newClip) {
+            this._saveExpectedClientSize();
+        }
     }
 
     _updateScale() {
@@ -684,6 +735,7 @@ export default class RFB extends EventTargetMixin {
         }
 
         const size = this._screenSize();
+
         RFB.messages.setDesktopSize(this._sock,
                                     Math.floor(size.w), Math.floor(size.h),
                                     this._screenID, this._screenFlags);
@@ -699,12 +751,13 @@ export default class RFB extends EventTargetMixin {
     }
 
     _fixScrollbars() {
-        // This is a hack because Chrome screws up the calculation
-        // for when scrollbars are needed. So to fix it we temporarily
-        // toggle them off and on.
+        // This is a hack because Safari on macOS screws up the calculation
+        // for when scrollbars are needed. We get scrollbars when making the
+        // browser smaller, despite remote resize being enabled. So to fix it
+        // we temporarily toggle them off and on.
         const orig = this._screen.style.overflow;
         this._screen.style.overflow = 'hidden';
-        // Force Chrome to recalculate the layout by asking for
+        // Force Safari to recalculate the layout by asking for
         // an element's dimensions
         this._screen.getBoundingClientRect();
         this._screen.style.overflow = orig;
@@ -1242,13 +1295,13 @@ export default class RFB extends EventTargetMixin {
                 break;
             case "003.003":
             case "003.006":  // UltraVNC
-            case "003.889":  // Apple Remote Desktop
                 this._rfbVersion = 3.3;
                 break;
             case "003.007":
                 this._rfbVersion = 3.7;
                 break;
             case "003.008":
+            case "003.889":  // Apple Remote Desktop
             case "004.000":  // Intel AMT KVM
             case "004.001":  // RealVNC 4.6
             case "005.000":  // RealVNC 5.3
@@ -1302,8 +1355,12 @@ export default class RFB extends EventTargetMixin {
                 this._rfbAuthScheme = 22; // XVP
             } else if (types.includes(16)) {
                 this._rfbAuthScheme = 16; // Tight
+            } else if (types.includes(6)) {
+                this._rfbAuthScheme = 6; // RA2ne Auth
             } else if (types.includes(2)) {
                 this._rfbAuthScheme = 2; // VNC Auth
+            } else if (types.includes(30)) {
+                this._rfbAuthScheme = 30; // ARD Auth
             } else if (types.includes(19)) {
                 this._rfbAuthScheme = 19; // VeNCrypt Auth
             } else {
@@ -1496,6 +1553,117 @@ export default class RFB extends EventTargetMixin {
         return true;
     }
 
+    _negotiateARDAuth() {
+
+        if (this._rfbCredentials.username === undefined ||
+            this._rfbCredentials.password === undefined) {
+            this.dispatchEvent(new CustomEvent(
+                "credentialsrequired",
+                { detail: { types: ["username", "password"] } }));
+            return false;
+        }
+
+        if (this._rfbCredentials.ardPublicKey != undefined &&
+            this._rfbCredentials.ardCredentials != undefined) {
+            // if the async web crypto is done return the results
+            this._sock.send(this._rfbCredentials.ardCredentials);
+            this._sock.send(this._rfbCredentials.ardPublicKey);
+            this._rfbCredentials.ardCredentials = null;
+            this._rfbCredentials.ardPublicKey = null;
+            this._rfbInitState = "SecurityResult";
+            return true;
+        }
+
+        if (this._sock.rQwait("read ard", 4)) { return false; }
+
+        let generator = this._sock.rQshiftBytes(2);   // DH base generator value
+
+        let keyLength = this._sock.rQshift16();
+
+        if (this._sock.rQwait("read ard keylength", keyLength*2, 4)) { return false; }
+
+        // read the server values
+        let prime = this._sock.rQshiftBytes(keyLength);  // predetermined prime modulus
+        let serverPublicKey = this._sock.rQshiftBytes(keyLength); // other party's public key
+
+        let clientPrivateKey = window.crypto.getRandomValues(new Uint8Array(keyLength));
+        let padding = Array.from(window.crypto.getRandomValues(new Uint8Array(64)), byte => String.fromCharCode(65+byte%26)).join('');
+
+        this._negotiateARDAuthAsync(generator, keyLength, prime, serverPublicKey, clientPrivateKey, padding);
+
+        return false;
+    }
+
+    _modPow(base, exponent, modulus) {
+
+        let baseHex = "0x"+Array.from(base, byte => ('0' + (byte & 0xFF).toString(16)).slice(-2)).join('');
+        let exponentHex = "0x"+Array.from(exponent, byte => ('0' + (byte & 0xFF).toString(16)).slice(-2)).join('');
+        let modulusHex = "0x"+Array.from(modulus, byte => ('0' + (byte & 0xFF).toString(16)).slice(-2)).join('');
+
+        let b = BigInt(baseHex);
+        let e = BigInt(exponentHex);
+        let m = BigInt(modulusHex);
+        let r = 1n;
+        b = b % m;
+        while (e > 0) {
+            if (e % 2n === 1n) {
+                r = (r * b) % m;
+            }
+            e = e / 2n;
+            b = (b * b) % m;
+        }
+        let hexResult = r.toString(16);
+
+        while (hexResult.length/2<exponent.length || (hexResult.length%2 != 0)) {
+            hexResult = "0"+hexResult;
+        }
+
+        let bytesResult = [];
+        for (let c = 0; c < hexResult.length; c += 2) {
+            bytesResult.push(parseInt(hexResult.substr(c, 2), 16));
+        }
+        return bytesResult;
+    }
+
+    async _aesEcbEncrypt(string, key) {
+        // perform AES-ECB blocks
+        let keyString = Array.from(key, byte => String.fromCharCode(byte)).join('');
+        let aesKey = await window.crypto.subtle.importKey("raw", MD5(keyString), {name: "AES-CBC"}, false, ["encrypt"]);
+        let data = new Uint8Array(string.length);
+        for (let i = 0; i < string.length; ++i) {
+            data[i] = string.charCodeAt(i);
+        }
+        let encrypted = new Uint8Array(data.length);
+        for (let i=0;i<data.length;i+=16) {
+            let block = data.slice(i, i+16);
+            let encryptedBlock = await window.crypto.subtle.encrypt({name: "AES-CBC", iv: block},
+                                                                    aesKey, new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            );
+            encrypted.set((new Uint8Array(encryptedBlock)).slice(0, 16), i);
+        }
+        return encrypted;
+    }
+
+    async _negotiateARDAuthAsync(generator, keyLength, prime, serverPublicKey, clientPrivateKey, padding) {
+        // calculate the DH keys
+        let clientPublicKey = this._modPow(generator, clientPrivateKey, prime);
+        let sharedKey = this._modPow(serverPublicKey, clientPrivateKey, prime);
+
+        let username = encodeUTF8(this._rfbCredentials.username).substring(0, 63);
+        let password = encodeUTF8(this._rfbCredentials.password).substring(0, 63);
+
+        let paddedUsername = username + '\0' + padding.substring(0, 63);
+        let paddedPassword = password + '\0' + padding.substring(0, 63);
+        let credentials = paddedUsername.substring(0, 64) + paddedPassword.substring(0, 64);
+
+        let encrypted = await this._aesEcbEncrypt(credentials, sharedKey);
+
+        this._rfbCredentials.ardCredentials = encrypted;
+        this._rfbCredentials.ardPublicKey = clientPublicKey;
+
+        setTimeout(this._initMsg.bind(this), 0);
+    }
+
     _negotiateTightUnixAuth() {
         if (this._rfbCredentials.username === undefined ||
             this._rfbCredentials.password === undefined) {
@@ -1619,6 +1787,44 @@ export default class RFB extends EventTargetMixin {
         return this._fail("No supported sub-auth types!");
     }
 
+    _handleRSAAESCredentialsRequired(event) {
+        this.dispatchEvent(event);
+    }
+
+    _handleRSAAESServerVerification(event) {
+        this.dispatchEvent(event);
+    }
+
+    _negotiateRA2neAuth() {
+        if (this._rfbRSAAESAuthenticationState === null) {
+            this._rfbRSAAESAuthenticationState = new RSAAESAuthenticationState(this._sock, () => this._rfbCredentials);
+            this._rfbRSAAESAuthenticationState.addEventListener(
+                "serververification", this._eventHandlers.handleRSAAESServerVerification);
+            this._rfbRSAAESAuthenticationState.addEventListener(
+                "credentialsrequired", this._eventHandlers.handleRSAAESCredentialsRequired);
+        }
+        this._rfbRSAAESAuthenticationState.checkInternalEvents();
+        if (!this._rfbRSAAESAuthenticationState.hasStarted) {
+            this._rfbRSAAESAuthenticationState.negotiateRA2neAuthAsync()
+                .catch((e) => {
+                    if (e.message !== "disconnect normally") {
+                        this._fail(e.message);
+                    }
+                }).then(() => {
+                    this.dispatchEvent(new CustomEvent('securityresult'));
+                    this._rfbInitState = "SecurityResult";
+                    this._initMsg();
+                }).finally(() => {
+                    this._rfbRSAAESAuthenticationState.removeEventListener(
+                        "serververification", this._eventHandlers.handleRSAAESServerVerification);
+                    this._rfbRSAAESAuthenticationState.removeEventListener(
+                        "credentialsrequired", this._eventHandlers.handleRSAAESCredentialsRequired);
+                    this._rfbRSAAESAuthenticationState = null;
+                });
+        }
+        return false;
+    }
+
     _negotiateAuthentication() {
         switch (this._rfbAuthScheme) {
             case 1:  // no auth
@@ -1632,6 +1838,9 @@ export default class RFB extends EventTargetMixin {
             case 22:  // XVP auth
                 return this._negotiateXvpAuth();
 
+            case 30:  // ARD auth
+                return this._negotiateARDAuth();
+
             case 2:  // VNC authentication
                 return this._negotiateStdVNCAuth();
 
@@ -1643,6 +1852,9 @@ export default class RFB extends EventTargetMixin {
 
             case 129:  // TightVNC UNIX Security Type
                 return this._negotiateTightUnixAuth();
+
+            case 6:  // RA2ne Security Type
+                return this._negotiateRA2neAuth();
 
             default:
                 return this._fail("Unsupported auth scheme (scheme: " +
@@ -1772,6 +1984,8 @@ export default class RFB extends EventTargetMixin {
         if (this._fbDepth == 24) {
             encs.push(encodings.encodingTight);
             encs.push(encodings.encodingTightPNG);
+            encs.push(encodings.encodingZRLE);
+            encs.push(encodings.encodingJPEG);
             encs.push(encodings.encodingHextile);
             encs.push(encodings.encodingRRE);
         }
@@ -2500,6 +2714,9 @@ export default class RFB extends EventTargetMixin {
         this._updateScale();
 
         this._updateContinuousUpdates();
+
+        // Keep this size until browser client size changes
+        this._saveExpectedClientSize();
     }
 
     _xvpOp(ver, op) {

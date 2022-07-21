@@ -113,8 +113,13 @@ proxy.
   used to specify the location of a running VNC server:
 
     `./utils/novnc_proxy --vnc localhost:5901`
+    
+* If you don't need to expose the web server to public internet, you can
+  bind to localhost:
+  
+    `./utils/novnc_proxy --vnc localhost:5901 --listen localhost:6081`
 
-* Point your browser to the cut-and-paste URL that is output by the `novnc_procy`
+* Point your browser to the cut-and-paste URL that is output by the `novnc_proxy`
   script. Hit the Connect button, enter a password if the VNC server has one
   configured, and enjoy!
 
@@ -123,13 +128,17 @@ Running the command below will install the latest release of noVNC from Snap:
 
 `sudo snap install novnc`
 
-#### Running noVNC
+#### Running noVNC from Snap Directly
 
 You can run the Snap-package installed novnc directly with, for example:
 
 `novnc --listen 6081 --vnc localhost:5901 # /snap/bin/novnc if /snap/bin is not in your PATH`
 
-#### Running as a Service (Daemon)
+If you want to use certificate files, due to standard Snap confinement restrictions you need to have them in the /home/\<user\>/snap/novnc/current/ directory. If your username is jsmith an example command would be:
+  
+  `novnc --listen 8443 --cert ~jsmith/snap/novnc/current/self.crt --key ~jsmith/snap/novnc/current/self.key --vnc ubuntu.example.com:5901`
+
+#### Running noVNC from Snap as a Service (Daemon)
 The Snap package also has the capability to run a 'novnc' service which can be 
 configured to listen on multiple ports connecting to multiple VNC servers 
 (effectively a service runing multiple instances of novnc).
@@ -203,6 +212,7 @@ that list and you think you should be, feel free to send a PR to fix that.
     * UI and Icons : Pierre Ossman, Chris Gordon
     * Original Logo : Michael Sersen
     * tight encoding : Michael Tinglof (Mercuri.ca)
+    * RealVNC RSA AES authentication : USTC Vlab Team
 
 * Included libraries:
     * base64 : Martijn Pieters (Digital Creations 2), Samuel Sieb (sieb.net)

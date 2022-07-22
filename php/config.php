@@ -4,6 +4,8 @@ require_once("cbsd.php");
 
 class Config
 {
+	private $_workdir='';
+
 	/* Список языков, используемых в проекте */
 	public static $languages=array(
 		'en'=>'English',
@@ -185,19 +187,81 @@ class Config
 	public $os_interfaces=array();
 
 	function __construct(){
-		$res=CBSD::run('get_bhyve_profiles src=vm clonos=1', array());
-		if($res['retval']==0){
+
+		$this->_workdir=getenv('WORKDIR');
+		$vm_profile_list_file=$this->_workdir.'/tmp/bhyve-vm.json';
+		$cloud_profile_list_file=$this->_workdir.'/tmp/bhyve-cloud.json';
+		$interface_list_file=$this->_workdir.'/tmp/interfaces.json';
+
+		/// check for file/cache first
+		// vm profile (ISO)
+		$vm_profile_list_file_size=0;
+		if(file_exists($vm_profile_list_file)) {
+			$vm_profile_list_file_size=filesize($vm_profile_list_file);
+			if( $vm_profile_list_file_size < 16 ) {
+				// probably empty, renew needed
+				$vm_profile_list_file_size=0;
+			}
+		}
+
+		// cloud profile
+		$cloud_profile_list_file_size=0;
+		// check for file/cache first
+		if(file_exists($cloud_profile_list_file)) {
+			$cloud_profile_list_file_size=filesize($cloud_profile_list_file);
+			if( $cloud_profile_list_file_size < 16 ) {
+				// probably empty, renew needed
+				$cloud_profile_list_file_size=0;
+			}
+		}
+
+		// interface profile
+		$interface_list_file_size=0;
+		// check for file/cache first
+		if(file_exists($interface_list_file)) {
+			$interface_list_file_size=filesize($interface_list_file);
+			if( $interface_list_file_size < 4 ) {
+				// probably empty, renew needed
+				$interface_list_file_size=0;
+			}
+		}
+
+		/// load vm profile list
+		// vm profile (ISO)
+		if ($vm_profile_list_file_size > 0 ) {
+			Utils::clonos_syslog("config.php: (cached) found vm_profile cache file/size: $vm_profile_list_file exist/$vm_profile_list_file_size");
+			$res['message']=file_get_contents($vm_profile_list_file);
 			$this->os_types=$this->create_bhyve_profiles($res);
+		} else {
+			Utils::clonos_syslog("config.php: vm_profile cache file not found: $vm_profile_list_file");
+			$res=CBSD::run('get_bhyve_profiles src=vm clonos=1', array());
+			if($res['retval']==0){
+				$this->os_types=$this->create_bhyve_profiles($res);
+			}
 		}
 
-		$res1=CBSD::run('get_bhyve_profiles src=cloud', array());
-		if($res1['retval']==0){
+		// cloud profile
+		if ($cloud_profile_list_file_size > 0 ) {
+			Utils::clonos_syslog("config.php: (cached) found cloud_profile cache file/size: $cloud_profile_list_file exist/$cloud_profile_list_file_size");
+			$res1['message']=file_get_contents($cloud_profile_list_file);
 			$this->os_types_obtain=$this->create_bhyve_profiles($res1);
+		} else {
+			$res1=CBSD::run('get_bhyve_profiles src=cloud', array());
+			if($res1['retval']==0){
+				$this->os_types_obtain=$this->create_bhyve_profiles($res1);
+			}
 		}
 
-		$res2=CBSD::run('get_interfaces', array());
-		if($res2['retval']==0){
+		// interfaces
+		if ($interface_list_file_size > 0 ) {
+			Utils::clonos_syslog("config.php: (cached) found interfaces cache file/size: $interface_list_file exist/$interface_list_file_size");
+			$res2['message']=file_get_contents($interface_list_file);
 			$this->os_interfaces=$this->create_interfaces($res2);
+		} else {
+			$res2=CBSD::run('get_interfaces', array());
+			if($res2['retval']==0){
+				$this->os_interfaces=$this->create_interfaces($res2);
+			}
 		}
 	}
 
@@ -220,7 +284,7 @@ class Config
 	function create_interfaces($info){
 		$res=json_decode($info['message'],true);
 		if(!is_null($res) && $res != false){
-			return $res;
+			return $res['interfaces'];
 		} else {
 			return array();
 		}

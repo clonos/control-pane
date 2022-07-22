@@ -35,8 +35,6 @@ $file_path=$_ds.$root.$_ds.'pages'.$_ds.$uri.$_ds;
 $file_name=$file_path.$lang.'.index.php';
 $json_name=$file_path.'a.json.php';
 
-Utils::clonos_syslog("my json_name:". $json_name);
-
 if(empty($uri)){
 	header('Location: /'.$menu->first_key.'/',true);
 	exit;

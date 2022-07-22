@@ -1,6 +1,8 @@
 server {
 	listen *:80;
 
+	server_name _;
+
 	root /usr/local/www/clonos/public;
 	set $php_root $document_root;
 	client_max_body_size 0;
@@ -24,6 +26,7 @@ server {
 		fastcgi_param  SCRIPT_FILENAME    $php_root$fastcgi_script_name;
 		fastcgi_pass  unix:/tmp/php-fpm.sock;
 		fastcgi_param WORKDIR /usr/jails;
+		# fastcgi_param APPLICATION_ENV development;
 	}
 
 	location / {

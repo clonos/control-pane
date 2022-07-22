@@ -79,8 +79,15 @@ class ClonOS {
 			$this->server_name=$_SERVER['SERVER_ADDR'];
 		}
 
+		// olevole: where $uri came from? is_emtpy
+		// public/index.php:$uri=trim($_SERVER['REQUEST_URI'],'/');    not work?
 		if (is_null($uri_chunks)) { # TODO Do we need this ?
-			$this->uri_chunks=Utils::gen_uri_chunks($uri);
+			//  a.json.php not work ?
+			//Utils::clonos_syslog("clonos.php: \$uri_chunks is empty, force to \$uri values:".$_SERVER['REQUEST_URI']);
+			//$uri=trim($_SERVER['REQUEST_URI'],'/');
+
+			// HP Warning:  Undefined variable $uri in /usr/local/www/clonos/php/clonos.php on line 88
+			$this->uri_chunks=Utils::gen_uri_chunks("");
 		} else {
 			$this->uri_chunks=$uri_chunks;
 		}
@@ -1400,20 +1407,28 @@ class ClonOS {
 			}
 		}
 
-		$key_name='/usr/home/olevole/.ssh/authorized_keys';
+		//$key_name='/usr/home/olevole/.ssh/authorized_keys';
 		if(!isset($form['vm_authkey'])) $form['vm_authkey']=0;
 		$key_id=(int)$form['vm_authkey'];
+		Utils::clonos_syslog("clonos.php: key_id: [".$key_id."]");
 
-		$db=new Db('base','authkey');
-		if(!$db->isConnected())  return array('error'=>true,'errorMessage'=>'Database error!');
+		if($key_id>0) {
+			$db=new Db('base','authkey');
+			if(!$db->isConnected())  return array('error'=>true,'errorMessage'=>'Database error!');
+			if($nres['name']!==false) $key_name=$nres['name'];
+			Utils::clonos_syslog("clonos.php:". 'SELECT authkey FROM authkey WHERE idx=?'. array([$key_id, PDO::PARAM_INT]));
+			$nres=$db->selectOne('SELECT authkey FROM authkey WHERE idx=?', array([$key_id, PDO::PARAM_INT]));
+			//var_dump($nres);exit;
 
-		//if($nres['name']!==false) $key_name=$nres['name'];
-		$nres=$db->selectOne('SELECT authkey FROM authkey WHERE idx=?', array([$key_id, PDO::PARAM_INT]));
-		if($nres['authkey']!==false) $authkey=$nres['authkey']; else $authkey='';
-		//var_dump($nres);exit;
+	//		[22-Jul-2022 13:15:19 UTC] PHP Warning:  Trying to access array offset on value of type bool in /usr/local/www/clonos/php/clonos.php on line 1416
+			if($nres['authkey']!==false) $authkey=$nres['authkey']; else $authkey='';
+		} else {
+			$authkey='';
+		}
 
 		$user_pw=(!empty($form['user_password']))?' ci_user_pw_user='.$form['user_password'].' ':'';
 
+		// olevole: SHELL ESCAPE here - tabs + \r\n
 		$res=CBSD::run( // TODO: THIS SEEMS WRONG pw_user={$form['vm_password']} {$user_pw}vnc_password={$form['vnc_password']}";
 			'task owner=%s mode=new {cbsd_loc} bcreate jname=%s 
 			vm_os_profile="%s" imgsize=%s vm_cpus=%s vm_ram=%s vm_os_type=%s mask=%s 

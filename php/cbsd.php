@@ -17,15 +17,16 @@ class CBSD {
 
 		$cmd = vsprintf($cmd, $args); # make sure we deal with a string
 		$cmd = strtr($cmd, $defines);
+		// olevole: add trim tabs + \r\n
+		$cmd = trim(preg_replace('/\t+|\r|\n/', '', $cmd));
 		$full_cmd = $prepend.trim($cmd);
 
 		if ($cmd != escapeshellcmd($cmd)){
+			Utils::clonos_syslog("cmd.php SHELL ESCAPE:". $cmd);
 			die("Shell escape attempt");
 		}
 
-		// olevole: to generic log_() function
-		// file_put_contents('/tmp/clonos-run_'.date("j.n.Y").'.log', $full_cmd . "\n", FILE_APPEND);
-
+		Utils::clonos_syslog("cmd.php:". $full_cmd);
 		$process = proc_open($full_cmd,$specs,$pipes,null,null);
 
 		$error=false;
@@ -46,6 +47,8 @@ class CBSD {
 				$error_message=$buf;
 			}
 
+			Utils::clonos_syslog("cmd.php:"."ret:".$return_value." msg:[".$message."] "."error:[".$error."] "."error_message:[".$error_message." ]");
+
 			return array(
 				'cmd'=>$cmd,
 				'full_cmd'=>$full_cmd,
@@ -54,6 +57,8 @@ class CBSD {
 				'error'=>$error,
 				'error_message'=>$error_message
 			);
+		} else {
+			Utils::clonos_syslog("cmd.php: empty process resource");
 		}
 	}
 

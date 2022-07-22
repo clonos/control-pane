@@ -29,6 +29,9 @@ if(!empty($nodes))foreach($nodes as $node)
 	if($db1!==false)
 	{
 		$jails=$db1->select("SELECT jname,ip4_addr,status,protected FROM jails WHERE emulator!='bhyve' and hidden!=1 order by jname asc;", []);
+
+		Utils::clonos_syslog("jailscontainers a.json.php:" . "SELECT jname,ip4_addr,status,protected FROM jails WHERE emulator!='bhyve' and hidden!=1 order by jname asc;");
+
 		$allnodes[$node]=$jails;
 		
 		$num=$nth & 1;
@@ -106,6 +109,8 @@ EOT;
 		}
 		
 		$nth++;
+	} else {
+		Utils::clonos_syslog("jailscontainers a.json.php: DB1 FALSE");
 	}
 }
 

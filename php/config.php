@@ -195,7 +195,7 @@ class Config
 			$this->os_types_obtain=$this->create_bhyve_profiles($res1);
 		}
 
-		$res2=CBSD::run('cbsd get_interfaces', array());
+		$res2=CBSD::run('get_interfaces', array());
 		if($res2['retval']==0){
 			$this->os_interfaces=$this->create_interfaces($res2);
 		}

@@ -44,6 +44,7 @@ $html=<<<EOT
 EOT;
 
 $res_html=(new Forms('',$hash,$db_path))->generate();
+$res_html='test';
 $html.='<h1>Helper: '.$hash.'</h1>'.$res_html;
 
 

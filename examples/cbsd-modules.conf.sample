@@ -5,3 +5,4 @@ puppet.d
 convectix.d
 cbsd_queue.d
 vncterm.d
+clonosdb.d

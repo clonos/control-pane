@@ -26,7 +26,7 @@ class CBSD {
 			die("Shell escape attempt");
 		}
 
-		Utils::clonos_syslog("cmd.php:". $full_cmd);
+//		Utils::clonos_syslog("cmd.php:". $full_cmd);
 		$process = proc_open($full_cmd,$specs,$pipes,null,null);
 
 		$error=false;
@@ -47,7 +47,7 @@ class CBSD {
 				$error_message=$buf;
 			}
 
-			Utils::clonos_syslog("cmd.php:"."ret:".$return_value." msg:[".$message."] "."error:[".$error."] "."error_message:[".$error_message." ]");
+//			Utils::clonos_syslog("cmd.php:"."ret:".$return_value." msg:[".$message."] "."error:[".$error."] "."error_message:[".$error_message." ]");
 
 			return array(
 				'cmd'=>$cmd,

@@ -49,6 +49,16 @@ export default class RawDecoder {
             index = 0;
         }
 
+        const newdata = new Uint8Array(pixels * 4);
+        for (let i = 0; i < pixels; i++) {
+            newdata[i * 4 + 0] = data[index + i * 4 + 2]
+            newdata[i * 4 + 1] = data[index + i * 4 + 1]
+            newdata[i * 4 + 2] = data[index + i * 4 + 0]
+            newdata[i * 4 + 3] = 255;
+        }
+        data = newdata;
+        index = 0;
+
         // Max sure the image is fully opaque
         for (let i = 0; i < pixels; i++) {
             data[index + i * 4 + 3] = 255;

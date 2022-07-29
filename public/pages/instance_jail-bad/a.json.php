@@ -1,23 +1,7 @@
 <?php
 if(!empty($this->_vars['hash']))
 {
-	Utils::clonos_syslog("instance_jail a.json.php: hash not empty:". $this->_vars['hash']);
 	include('helpers.php');
-
-//	$html=str_replace(array("\n","\r","\t"),'',$html);
-
-//	$html=str_replace(array("\n","\r","\t"),'',$html);
-
-//	Utils::clonos_syslog("instance_jail a.json.php: HTML:". $html);
-//	echo $html;
-
-
-//	$html=str_replace(array("\n","\r","\t"),'',$html);
-//	Utils::clonos_syslog("instance_jail a.json.php: HTML:". $html);
-//	echo $html;
-
-
-
 	return;
 }
 
@@ -101,13 +85,7 @@ if($res['retval']==0)
 	}
 }
 
-
-
 $html=str_replace(array("\n","\r","\t"),'',$html);
-
-
-//Utils::clonos_syslog("instance_jail a.json.php: HTML:". $html);
-
 
 /*
 echo json_encode(array(

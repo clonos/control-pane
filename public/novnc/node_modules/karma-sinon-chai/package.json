@@ -1,0 +1,34 @@
+{
+  "name": "karma-sinon-chai",
+  "description": "Sinon and Chai for Karma",
+  "keywords": [
+    "karma",
+    "chai",
+    "sinon",
+    "mocha",
+    "should"
+  ],
+  "version": "2.0.2",
+  "author": "Kevin Mees <kev.mees@gmail.com>",
+  "main": "./index.js",
+  "license": "MIT",
+  "homepage": "https://github.com/kmees/karma-sinon-chai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kmees/karma-sinon-chai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kmees/karma-sinon-chai/issues"
+  },
+  "contributors": [
+    "Greg Thornton <xdissent@me.com>",
+    "Tobias Kopelke <nox@raynode.de>",
+    "Kevin Mees <kev.mees@gmail.com>",
+    "Adam Banky <banky.adam@gmail.com>"
+  ],
+  "peerDependencies": {
+    "chai": ">=3.5.0",
+    "sinon": ">=2.1.0",
+    "sinon-chai": ">=2.9.0"
+  }
+}

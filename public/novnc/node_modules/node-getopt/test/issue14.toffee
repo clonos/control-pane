@@ -1,0 +1,4 @@
+opt = require('..').create([
+    ['d', '=']
+]).parse(['-d', 'bla'])
+console.log opt.options

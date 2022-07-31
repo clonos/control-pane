@@ -1,0 +1,280 @@
+path = require 'path'
+
+class Getopt
+  @HAS_ARGUMENT = true
+  @NO_ARGUMENT = false
+  @MULTI_SUPPORTED = true
+  @SINGLE_ONLY = false
+  @VERSION = '0.3.2'
+
+  # public
+  constructor: (optionsPattern) ->
+    @short_options = {}
+    @long_options  = {}
+    @long_names = []
+    @events = {}
+    @argv = []
+    @options = {}
+    @unique_names = {}
+    @optionsPattern = []
+    @errorFunc = (e) ->
+      console.info(e.message)
+      process.exit(1)
+
+
+    if process.argv[1]
+      @help = """
+Usage:
+  node #{path.basename(process.argv[1])} [OPTION]
+
+Options:
+[[OPTIONS]]
+      """
+    else
+      @help = "[[OPTIONS]]"
+    @append optionsPattern
+
+  append: (optionsPattern) ->
+    for option in optionsPattern
+      [short_name, definition, comment, def] = option
+
+      comment    ?= ''
+      definition ?= ''
+      short_name ?= ''
+
+      definition =~ /^([\w\-]*)/
+      long_name = \1
+      has_argument    = definition.indexOf('=') != -1
+      multi_supported = definition.indexOf('+') != -1
+      optional        = /\[=.*?\]/.test(definition)
+
+      long_name  = long_name.trim()
+      short_name = short_name.trim()
+
+      if optional && short_name
+        throw new Error('optional argument can only work with long option');
+
+      long_name ||= short_name
+
+      fixed_long_name = 'opt_' + long_name
+      name = long_name
+
+      if long_name == ''
+        throw new Error("empty option found. the last option name is #{@long_names.slice(-1)}");
+
+      unless @unique_names[fixed_long_name]?
+        @long_names.push long_name
+        @long_options[long_name] = {name, short_name, long_name, has_argument, multi_supported, comment, optional, definition, def}
+        @unique_names[fixed_long_name] = true
+      else
+        throw new Error("option #{long_name} is redefined.");
+
+      if short_name != ''
+        if short_name.length != 1
+          throw new Error 'short option must be single characters'
+        @short_options[short_name] = @long_options[long_name]
+    @
+
+  # fill pattern if not exists
+  fill: (pattern) ->
+    [s_, l_] = pattern
+    s = ''
+    l = ''
+    @short_options[s_] || s = s_
+    @long_options[l_] || l = l_
+    if s || l
+      @append([[s, l, pattern[2..]...]])
+
+  getOptionByName: (name) ->
+    @long_options[name] ? @short_options[name]
+
+  getOptionName: (name) ->
+    @getOptionByName(name)?.name
+
+  # Events
+  on: (name, cb) ->
+    if name
+      iname = @getOptionName(name)
+      unless iname
+        throw new Error "unknown option #{name}"
+    else
+      iname = name
+    @events[iname] = cb
+    @
+
+  emit: (name, value) ->
+    event = @events[@getOptionName(name)]
+    if event
+      event.call @, value
+    else
+      throw new Error("Getopt event on '#{name}' is not found")
+
+  # Command line parser
+  save_option_: (options, option, argv) ->
+    if option.has_argument
+      if argv.length == 0
+        throw new Error("option #{option.long_name} need argument")
+      value = argv.shift()
+    else
+      value = true
+
+    name = option.name
+    if option.multi_supported
+      options[name] ?= []
+      options[name].push value
+    else
+      options[name] = value
+    @events[name]?.call @, value
+    @
+
+  parse: (argv) ->
+    try
+      # clone argv
+      argv = argv[0..]
+      rt_options = {}
+      rt_argv = []
+      for long_name in @long_names
+        option = @long_options[long_name]
+        # set all proto keys eg: constructor toString to undefined
+        if option.def? || rt_options[option.long_name]?
+          rt_options[option.long_name] = option.def
+      while (arg = argv.shift())?
+        if arg =~ /^-(\w[\w\-]*)/
+          # short option
+          short_names = \1
+          for short_name, i in short_names
+            option = @short_options[short_name]
+            unless option
+              throw new Error("invalid option #{short_name}")
+
+            if option.has_argument
+              if i < arg.length - 2
+                argv.unshift arg.slice(i+2)
+              @save_option_(rt_options, option, argv)
+              break
+            else
+              @save_option_(rt_options, option, argv)
+
+        else if arg =~ /^--(\w[\w\-]*)((?:=[^]*)?)$/
+          # long option
+          long_name = \1
+          value     = \2
+          # value     = arg.substring(long_name.length+2)
+          option = @long_options[long_name]
+          unless option
+            throw new Error("invalid option #{long_name}")
+
+          if value != ''
+            value = value[1..]
+            argv.unshift(value)
+          else if option.optional
+            argv.unshift('')
+
+          @save_option_(rt_options, option, argv)
+
+        else if arg == '--'
+          rt_argv = rt_argv.concat(argv)
+          for arg in argv
+            @events['']?.call @, arg
+          break
+
+        else
+          rt_argv.push arg
+          @events['']?.call @, arg
+      # assign to short name
+      for name in Object.keys(rt_options)
+        sname = @long_options[name].short_name
+        if sname != ''
+          rt_options[sname] = rt_options[name]
+    catch e
+      @errorFunc(e)
+
+    @argv = rt_argv
+    @options = rt_options
+    @
+
+  parse_system: ->
+    @parseSystem()
+
+  parseSystem: ->
+    @parse(process.argv.slice(2))
+
+  # Help Controller
+  setHelp: (@help) ->
+    @
+
+  sort: ->
+    @long_names.sort (a, b) ->
+      a > b && 1 || a < b && -1 || 0
+
+  getHelp: ->
+    ws = []
+    options = []
+    table = []
+
+    for long_name in @long_names
+      tr = []
+      option = @long_options[long_name]
+      {short_name, long_name, comment, definition, def} = option
+      tr.push(
+        if short_name
+          if short_name == long_name
+            # only has short name
+            "  -#{short_name}"
+          else
+            # both has short name and long name
+            "  -#{short_name}, --#{definition}"
+        else
+            # only has long name
+            "      --#{definition}"
+      )
+      tr.push " " + comment
+      if def
+        tr.push " (default: #{def})"
+      table.push tr
+    for tr in table
+      for td, i in tr
+        ws[i] ?= 0
+        ws[i] = Math.max(ws[i], td.length)
+
+    lines = for tr in table
+      line = ''
+      for td, i in tr
+        if i
+          n = ws[i-1] - tr[i-1].length
+          while n--
+            line += ' '
+        line += td
+      line.trimRight()
+
+    @help.replace('[[OPTIONS]]', lines.join("\n"))
+
+  showHelp: ->
+    console.info @getHelp()
+    @
+
+  bindHelp: (help) ->
+    if help
+      @setHelp help
+    @fill(['h', 'help', 'display this help'])
+    @on 'help', ->
+      @showHelp()
+      process.exit(0)
+    @
+
+  getVersion: ->
+    Getopt.VERSION
+
+  error: (@errorFunc) ->
+    @
+
+  @getVersion: ->
+    @VERSION
+
+  # For oneline creator
+  @create: (options) ->
+    new Getopt(options)
+
+module.exports = Getopt
+
+# vim: sw=2 ts=2 sts=2 expandtab :

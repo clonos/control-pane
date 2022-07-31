@@ -7,5 +7,4 @@ public/media/*.iso
 public/media/*.img
 public/media/*.size
 composer.lock
-vendor
 php/sentry.php

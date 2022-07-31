@@ -22,6 +22,11 @@ function runVNC($jname)
 		$nodeip=$_SERVER['SERVER_ADDR'];
 	}
 
+	// handle when 'server_name _;' - use IP instead
+	if (strcmp($nodeip, "_") == 0) {
+		$nodeip=$_SERVER['SERVER_ADDR'];
+	}
+
 	# TODO: This will send the pass in clear text
 	header('Location: http://'.$nodeip.':6081/vnc_lite.html?scale=true&host='.$nodeip.'&port=6081?password='.$pass);
 	exit;

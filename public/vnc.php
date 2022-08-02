@@ -7,46 +7,29 @@ if(!isset($_GET['jname'])){
 
 function runVNC($jname)
 {
-	$res=(new Db('base','local'))->selectOne("SELECT vnc_password FROM bhyve WHERE jname=?", array([$jname]));
+	$res = (new Db('base','local'))->selectOne("SELECT vnc_password FROM bhyve WHERE jname=?", array([$jname]));
 
-	$pass='cbsd';
-	if($res!==false) $pass=$res['vnc_password'];
+	$pass = ($res !== false) ? $res['vnc_password'] : 'cbsd';
 
-	$remote_ip=$_SERVER['REMOTE_ADDR'];
-
-	CBSD::run("vm_vncwss jname=%s permit=%s", array($jname,$remote_ip));
+	CBSD::run("vm_vncwss jname=%s permit=%s", array($jname, $_SERVER['REMOTE_ADDR']));
 
 	// HTTP_HOST is preferred for href
 	if (isset($_SERVER['HTTP_HOST']) && !empty(trim($_SERVER['HTTP_HOST']))){
-		$nodeip=$_SERVER['HTTP_HOST'];
-	}
-
-	if (filter_var($nodeip, FILTER_VALIDATE_IP)) {
-		$is_ip4=true;
+		$nodeip = $_SERVER['HTTP_HOST'];
 	} else {
-		$is_ip4=false;
-	}
-
-	if ($is_ip4 == false) {
-		if (filter_var($nodeip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-			$is_ip6=true;
-		} else {
-			$is_ip6=false;
-		}
+		# use localhost as fallback in case the HTTP_HOST header is not set
+		$nodeip = '127.0.0.1';
 	}
 
 	// HTTP_HOST is IP, try to check SERVER_NAME
-	if (($is_ip4==true)||($is_ip6==true)) {
-		if(isset($_SERVER['SERVER_NAME']) && !empty(trim($_SERVER['SERVER_NAME']))){
-			$nodeip=$_SERVER['SERVER_NAME'];
-		} else {
-			$nodeip=$_SERVER['SERVER_ADDR'];
+	if (filter_var($nodeip, FILTER_VALIDATE_IP)) {
+		$nodeip = $_SERVER['SERVER_ADDR'];
+		// https://www.php.net/manual/en/reserved.variables.server.php
+		// Note: Under Apache 2, you must set UseCanonicalName = On and ServerName. 
+		// handle when 'server_name _;' - use IP instead
+		if(isset($_SERVER['SERVER_NAME']) && !empty(trim($_SERVER['SERVER_NAME'])) && (strcmp($_SERVER['SERVER_NAME'], "_") != 0)){
+			$nodeip = $_SERVER['SERVER_NAME'];
 		}
-	}
-
-	// handle when 'server_name _;' - use IP instead
-	if (strcmp($nodeip, "_") == 0) {
-		$nodeip=$_SERVER['SERVER_ADDR'];
 	}
 
 	# TODO: This will send the pass in clear text
@@ -54,8 +37,9 @@ function runVNC($jname)
 	exit;
 }
 
-$rp=realpath('../');
+$rp = realpath('../');
 require_once($rp.'/php/db.php');
 require_once($rp.'/php/cbsd.php');
+require_once($rp.'/php/validate.php');
 
-runVNC($_GET['jname']);
+runVNC(Validate::short_string($_GET['jname'], 32));

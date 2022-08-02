@@ -15,7 +15,6 @@ class Db {
 
 		if (is_null($connect)){
 			list($file_name, $connect) = $this->prep_connect($place, $database);
-
 			if(is_null($file_name) || !file_exists($file_name)){
 				$this->error=true;
 				$this->error_message='DB file name not set or not found!';
@@ -38,7 +37,6 @@ class Db {
 			$this->error=true;
 			$this->error_message=$e->getMessage();	//'DB Error';
 		}
-
 	}
 
 	private function prep_connect($place, $database){
@@ -131,6 +129,9 @@ class Db {
 
 	# TODO once tested $values can have a default value of an empty array
 	function select($sql, $values, $single = false){
+		if ($this->error){
+			return array('error' => $this->error, 'info' => $this->error_message);
+		}
 		try {
 			$query = $this->_pdo->prepare($sql);
 			$i = 1;
@@ -150,8 +151,7 @@ class Db {
 			}
 			return $res;
 		} catch(PDOException $e) {
-			# TODO: Handling ?
-			return array();
+			return array('error' => $this->error, 'info' => $this->error_message);
 		}
 	}
 
@@ -160,6 +160,9 @@ class Db {
 	}
 
 	function insert($sql, $values){
+		if ($this->error){
+			return array('error' => $this->error, 'info' => $this->error_message);
+		}
 		try {
 			$this->_pdo->beginTransaction();
 			$query = $this->_pdo->prepare($sql);
@@ -184,6 +187,9 @@ class Db {
 	}
 
 	function update($sql, $values){
+		if ($this->error){
+			throw new Exception($this->error_message);
+		}
 		try {
 			$this->_pdo->beginTransaction();
 			$query = $this->_pdo->prepare($sql);

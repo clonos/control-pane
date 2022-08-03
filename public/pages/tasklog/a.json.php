@@ -3,11 +3,8 @@
 $username=$this->_user_info['username'];
 
 $db=new Db('base','cbsdtaskd');
-Utils::clonos_syslog("tasklog: ". "SELECT id,st_time,end_time,cmd,status,errcode,logfile FROM taskd WHERE owner='". $username."' ORDER BY id DESC;");
-//olevole why array?!
-//$res=$db->select("SELECT id,st_time,end_time,cmd,status,errcode,logfile FROM taskd WHERE owner='?' ORDER BY id DESC", array([$username]));
 
-$res=$db->select("SELECT id,st_time,end_time,cmd,status,errcode,logfile FROM taskd WHERE owner='".$username."' ORDER BY id DESC", $username);
+$res=$db->select("SELECT id,st_time,end_time,cmd,status,errcode,logfile FROM taskd WHERE owner=? ORDER BY id DESC", array([$username]));
 
 $html='';
 if($res!==false)
@@ -17,7 +14,7 @@ if($res!==false)
 
 	if(!empty($res)) foreach($res as $item)
 	{
-Utils::clonos_syslog("tasklog: HTML");
+		//Utils::clonos_syslog("tasklog: HTML");
 
 		$hres=$this->getTableChunk('tasklog','tbody');
 		if($hres!==false)

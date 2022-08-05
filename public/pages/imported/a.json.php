@@ -31,8 +31,8 @@ if($hres !== false){
 	$html_tpl_1 = replaceVars($hres[1], [
 		'deltitle' => ' title="'.$this->translate('Delete').'"',
 		'dnldtitle' => ' title="'.$this->translate('Download').'"',
-		'imptitle' => ' title="'.$this->translate('Create').'"')
-	];
+		'imptitle' => ' title="'.$this->translate('Create').'"'
+	]);
 }
 
 foreach($images as $item){

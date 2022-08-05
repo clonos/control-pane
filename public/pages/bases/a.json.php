@@ -60,8 +60,8 @@ foreach($nodes as $node){
 
 $tasks = (empty($ids)) ? '' : $tasks = $this->getRunningTasks($ids);
 
-if($hres! == false){
-	$html_tpl = str_replace(["\n","\r","\t"]), '', $hres[1]);
+if($hres !== false){
+	$html_tpl = str_replace(["\n","\r","\t"], '', $hres[1]);
 	$vars = [
 		'nth-num' => 'nth0',
 		'status' => '',

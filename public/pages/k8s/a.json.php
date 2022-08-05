@@ -50,6 +50,7 @@ if(!empty($res) && isset($res['clusters'])){
 	//	if($node!='local') $html_tpl=str_replace('<span class="icon-cog"></span>','',$html_tpl);
 		$html .= $html_tpl;
 		$nth++;
+	}
 }
 
 $html_tpl_1 = str_replace(["\n","\r","\t"], '', $hres[1]);

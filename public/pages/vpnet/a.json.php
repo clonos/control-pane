@@ -4,11 +4,11 @@ $db = new Db('base','vpnet');
 $res = $db->select('SELECT idx,name,vpnet FROM vpnet', []);
 $html = '';
 
-if($res !== false){
+if(!$db->error){
 	$nth = 0;
 	$num = $nth & 1;
 
-	if(!empty($res)) foreach($res as $item){
+	foreach($res as $item){
 		$hres = $this->getTableChunk('vpnetslist','tbody');
 		if($hres !== false){
 			$html_tmp = $hres[1];
@@ -20,7 +20,7 @@ if($res !== false){
 				'deltitle' => ' title="'.$this->translate('Delete').'"'
 			];
 
-			foreach($vars as $var=>$val){
+			foreach($vars as $var => $val){
 				$html_tmp = str_replace('#'.$var.'#', $val, $html_tmp);
 			}
 			$html .= $html_tmp;
@@ -28,9 +28,9 @@ if($res !== false){
 	}
 
 	$included_result_array = [
-		'tbody'=>$html,
-		'error'=>false,
-		'func'=>'fillTable',
-		'id'=>'vpnetslist'
+		'tbody' => $html,
+		'error' => false,
+		'func' => 'fillTable',
+		'id' => 'vpnetslist'
 	];
 }

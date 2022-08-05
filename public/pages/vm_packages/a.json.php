@@ -1,7 +1,7 @@
 <?php
 
 $db = new Db('base','local');
-if(!$db){
+if(!$db->error){
 	$res = $db->select("select id,name,description,pkg_vm_ram,pkg_vm_disk,pkg_vm_cpus,owner from vmpackages order by name asc", []);
 }
 

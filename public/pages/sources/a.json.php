@@ -16,7 +16,7 @@ $hres_set = ($hres !== false);
 foreach($nodes as $node){
 
 	$db1 = new Db('base', $node['nodename']);
-	if($db1->error !== false){
+	if(!$db1->error){
 
 		$bases = $db1->select("SELECT idx,name,platform,ver,rev,date FROM bsdsrc ORDER BY CAST(ver AS int)", []);
 		$num = $nth & 1;

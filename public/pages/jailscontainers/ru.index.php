@@ -1,19 +1,17 @@
 <?php
-if(isset($clonos->uri_chunks[1]))
-{
+if(isset($clonos->uri_chunks[1])){
 	include('helpers.php');
 	return;
 }
 
-
-$clonos->useDialogs(array(
+$clonos->useDialogs([
 	'vnc',
 	'jail-settings',
 	'jail-settings-config-menu',
 	'jail-import',
 	'jail-clone',
-	'jail-rename',
-));
+	'jail-rename'
+]);
 
 ?>
 <h1>Контейнеры:</h1>

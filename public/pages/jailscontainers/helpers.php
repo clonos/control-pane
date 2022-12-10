@@ -1,10 +1,8 @@
 <?php
-$clonos->useDialogs(array(
-	'helpers-add',
-));
+$clonos->useDialogs(['helpers-add']);
 ?>
 
-<h1><?php echo $clonos->translate('Helpers list for jail'),': ',$clonos->uri_chunks[1]; ?></h1>
+<h1><?php echo $clonos->translate('Helpers list for jail'), ': ', $clonos->uri_chunks[1]; ?></h1>
 
 <div id="tab1">
 	<p><span class="top-button icon-plus id:helpers-add"><?php echo $clonos->translate('Add helper'); ?></span></p>

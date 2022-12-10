@@ -1,7 +1,5 @@
 <?php
-$clonos->useDialogs(array(
-	'vpnet',
-));
+$clonos->useDialogs(['vpnet']);
 ?>
 <h1>Список подсетей</h1>
 

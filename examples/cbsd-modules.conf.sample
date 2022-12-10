@@ -6,3 +6,6 @@ convectix.d
 cbsd_queue.d
 vncterm.d
 clonosdb.d
+api.d
+k8s.d
+myb.d

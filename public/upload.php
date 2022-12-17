@@ -24,11 +24,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 	// https://www.php.net/manual/en/features.file-upload.php
 	// Undefined | Multiple Files | $_FILES Corruption Attack
 	// If this request falls under any of them, treat it invalid.
-	if (
-		!isset($_FILES['file']['error']) ||
-		is_array($_FILES['file']['error'])
-	) {
-		echo json_encode(array('status' => 'Upload Fail: An error occurred!';));
+	if (!isset($_FILES['file']['error']) || is_array($_FILES['file']['error'])) {
+		echo json_encode( array( 'status'=>'Upload Fail: An error occurred!'));
 		exit;
 	}
 

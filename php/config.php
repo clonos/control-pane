@@ -10,6 +10,7 @@ class Config
 	public static $languages=array(
 		'en'=>'English',
 		'ru'=>'Russian',
+		'es'=>'Spanish',
 	);
 
 	public $os_types_names=array(

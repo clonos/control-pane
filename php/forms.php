@@ -42,7 +42,8 @@ class Forms
 
 	private function fetch_from_db($link)
 	{
-		return $this->db->select("select * from ? order by order_id asc", array([$link]));
+//		return $this->db->select("select * from ? order by order_id asc", array([$link]));
+		return $this->db->select("select * from {$link} order by order_id asc", array());
 	}
 
 	function generate(){
@@ -184,6 +185,9 @@ class Forms
 				$tpl.='<option>'.$opt['text'].'</option>';
 			}
 			$tpl.='</datalist>';
+
+			Utils::clonos_syslog("forms.php template: " . $tpl);
+
 			return array('list'=>$id,'datalist'=>$tpl);
 		}else {
 			return false;

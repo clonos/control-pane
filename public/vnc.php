@@ -1,8 +1,13 @@
 <?php
-
 if(!isset($_GET['jname'])){
 	echo 'You forgot to specify a name of jail!';
 	exit;
+}
+
+function clonos_syslog($msg)
+{
+	file_put_contents('/tmp/clonos.log', date("j.n.Y").":".$msg . "\n", FILE_APPEND);
+	return 0;
 }
 
 function runVNC($jname)
@@ -11,7 +16,12 @@ function runVNC($jname)
 
 	$pass = ($res !== false) ? $res['vnc_password'] : 'cbsd';
 
-	CBSD::run("vm_vncwss jname=%s permit=%s", array($jname, $_SERVER['REMOTE_ADDR']));
+	$permit=$_SERVER['REMOTE_ADDR'];
+
+//	clonos_syslog("vnc.php run: vm_vncwss jname={$jname} permit={$permit}");
+
+	$res=CBSD::run("vm_vncwss jname={$jname} permit={$permit}",array());
+//	, array($jname, $_SERVER['REMOTE_ADDR']));
 
 	// HTTP_HOST is preferred for href
 	if (isset($_SERVER['HTTP_HOST']) && !empty(trim($_SERVER['HTTP_HOST']))){
@@ -51,4 +61,5 @@ if ($jname != escapeshellcmd($jname)){
 	die("Shell escape attempt");
 }
 
-runVNC(Validate::long_string($jname));
+//runVNC(Validate::long_string($jname));
+runVNC($jname);

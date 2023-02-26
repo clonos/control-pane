@@ -44,7 +44,7 @@ $html=<<<EOT
 EOT;
 
 $res_html=(new Forms('',$hash,$db_path))->generate();
-$res_html='test';
+//$res_html='test';
 $html.='<h1>Helper: '.$hash.'</h1>'.$res_html;
 
 
@@ -52,7 +52,7 @@ $html.='<h1>Helper: '.$hash.'</h1>'.$res_html;
 // olevole: why return here?
 // Undefined property: ClonOS::$html in /usr/local/www/clonos/public/pages/instance_jail/helpers.php on line 49
 //return array('html'=>$this->html);
-echo json_encode(array('html'=>$html,'func'=>'fillTab'));
+echo json_encode(array('html'=>$html,'func'=>'fillTab'));exit;
 
 /*
 $included_result_array=array(
@@ -62,4 +62,5 @@ $included_result_array=array(
 	'id'=>'instanceslist',
 );
 */
+
 

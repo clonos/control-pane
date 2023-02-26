@@ -41,6 +41,8 @@ function runVNC($jname)
 		if(isset($_SERVER['SERVER_NAME']) && !empty(trim($_SERVER['SERVER_NAME'])) && (strcmp($_SERVER['SERVER_NAME'], "_") != 0)){
 			$nodeip = $_SERVER['SERVER_NAME'];
 		}
+	} else {
+		$nodeip = $_SERVER['SERVER_ADDR'];
 	}
 
 	# TODO: This will send the pass in clear text

@@ -176,7 +176,7 @@ class Forms
 
 	function getInputAutofill($arr)
 	{
-		if(isset($arr['link'])){
+		if(isset($arr['link']) && $arr['link']!=''){
 			$id=$arr['link'];	//$arr['param'].'-'.
 			$tpl='<datalist id="'.$id.'">';
 			$opts = $this->fetch_from_db($arr['link']);

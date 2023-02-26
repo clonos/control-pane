@@ -1,5 +1,4 @@
 <?php
-
 require_once("cbsd.php");
 require_once('config.php');
 require_once('localization.php');
@@ -1634,8 +1633,12 @@ class ClonOS {
 	function ccmd_srcRemove(){
 		$ver=str_replace('src','',$this->formform['jname']);
 		if(empty($ver)) return array('error'=>true,'errorMessage'=>'Version of sources is emtpy!');
+//		return CBSD::run(
+//			'task owner='.$username.' mode=new {cbsd_loc} removesrc inter=0 ver=%s jname=#src%s',
+//			array($this->_user_info['username'], $ver, $ver)
+//		);
 		return CBSD::run(
-			'task owner='.$username.' mode=new {cbsd_loc} removesrc inter=0 ver=%s jname=#src%s',
+			'task owner='.$username.' mode=new {cbsd_loc} removesrc inter=0 ver=%s jname=src%s',
 			array($this->_user_info['username'], $ver, $ver)
 		);
 	}
@@ -1644,8 +1647,12 @@ class ClonOS {
 		$ver=str_replace('src','',$this->form['jname']);
 		$stable=(preg_match('#\.\d#',$ver))?0:1;
 		if(empty($ver)) return array('error'=>true,'errorMessage'=>'Version of sources is emtpy!');
+//		return CBSD::run(
+//			'task owner=%s mode=new {cbsd_loc} srcup stable=%s inter=0 ver=%s jname=#src%s',
+//			array($this->_user_info['username'], $stable, $ver, $ver)
+//		);
 		return CBSD::run(
-			'task owner=%s mode=new {cbsd_loc} srcup stable=%s inter=0 ver=%s jname=#src%s',
+			'task owner=%s mode=new {cbsd_loc} srcup stable=%s inter=0 ver=%s jname=src%s',
 			array($this->_user_info['username'], $stable, $ver, $ver)
 		);
 	}
@@ -1693,10 +1700,24 @@ class ClonOS {
 		$arch=$res[2];
 		$stable=$res[3];
 
-		return $this->CBSD::run(
-			'task owner=%s mode=new {cbsd_loc} removebase inter=0 stable=%s ver=%s arch=%s jname=#%s',
-			array($this->_user_info['username'], $stable, $ver, $arch, $this->form['jname'])
-		);
+		$username=$this->_user_info['username'];
+
+		$remove_cmd="task owner={$username} mode=new /usr/local/bin/cbsd removebase inter=0 stable={$stable} ver={$ver} arch={$arch} jname=#".$this->form['jname'];
+
+		Utils::clonos_syslog("cmd.php removeBase cmd:". $remove_cmd);
+
+//		return $this->CBSD::run(
+//			'task owner=%s mode=new {cbsd_loc} removebase inter=0 stable=%s ver=%s arch=%s jname=#%s',
+//			array($this->_user_info['username'], $stable, $ver, $arch, $this->form['jname'])
+//		);
+//		$res=CBSD::run('task owner=%s mode=new {cbsd_loc} removebase inter=0 stable=%s ver=%s arch=%s jname=#%s',array($this->_user_info['username'], $stable, $ver, $arch, $this->form['jname']));
+		$res=CBSD::run('task owner=%s mode=new {cbsd_loc} removebase inter=0 stable=%s ver=%s arch=%s jname=%s',array($this->_user_info['username'], $stable, $ver, $arch, $this->form['jname']));
+
+		return $res;
+
+//		return $this->CBSD::run('task owner=%s mode=new {cbsd_loc} removebase inter=0 stable=%s ver=%s arch=%s jname=#%s',array($this->_user_info['username'], $stable, $ver, $arch, $this->form['jname']));
+//		return $this->CBSD::run('task owner={$username} mode=new {cbsd_loc} removebase inter=0 stable=%s ver=%s arch=%s jname=#%s',array($this->_user_info['username'], $stable, $ver, $arch, $this->form['jname']));
+//		return $this->CBSD::run($remove_cmd);
 	}
 
 	function ccmd_basesCompile(){

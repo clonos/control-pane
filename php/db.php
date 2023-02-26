@@ -56,7 +56,7 @@ class Db {
 				break;
 			case 'helper':
 				if(is_array($database)){
-					///usr/jails/jails-system/cbsdpuppet1/helpers/redis.sqlite
+					//usr/jails/jails-system/cbsdpuppet1/helpers/redis.sqlite
 					$file_name=$this->_workdir.'/jails-system/'.$database['jname'].'/helpers/'.$database['helper'].".sqlite";
 					$connect='sqlite:'.$file_name;
 				} else {

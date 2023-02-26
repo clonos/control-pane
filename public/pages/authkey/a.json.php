@@ -3,6 +3,8 @@
 $db = new Db('base','authkey');
 $res = $db->select('SELECT idx,name,authkey FROM authkey;', []);
 $html = '';
+$html_tpl = '';
+
 
 if($res !== false){
 	$nth = 0;
@@ -19,10 +21,12 @@ if($res !== false){
 				'deltitle' => ' title="'.$this->translate('Delete').'"'
 			];
 
+			$html_tpl=$hres[1];
+
 			foreach($vars as $var => $val){
-				$html_tmp = str_replace('#'.$var.'#', $val, $hres[1]);
+				$html_tpl = str_replace('#'.$var.'#', $val, $html_tpl);
 			}
-			$html .= $html_tmp;
+			$html .= $html_tpl;
 		}
 	}
 

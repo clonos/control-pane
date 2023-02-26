@@ -1,5 +1,5 @@
 {
     "require": {
-        "sentry/sdk": "^3.2"
+        "sentry/sdk": "^3.3"
     }
 }

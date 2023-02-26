@@ -67,8 +67,10 @@ foreach($nodes as $node){
 					'vnc_port_status' => $vnc_port_status
 				];
 
+				$html_tpl=$hres[1];
+
 				foreach($vars as $var => $val){
-					$html_tpl = str_replace('#'.$var.'#', $val, $hres[1]);
+					$html_tpl = str_replace('#'.$var.'#', $val, $html_tpl);
 				}
 				if($node != 'local'){
 					$html_tpl = str_replace('<span class="icon-cog"></span>', '', $html_tpl);

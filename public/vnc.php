@@ -16,6 +16,7 @@ function runVNC($jname)
 	// HTTP_HOST is preferred for href
 	if (isset($_SERVER['HTTP_HOST']) && !empty(trim($_SERVER['HTTP_HOST']))){
 		$nodeip = $_SERVER['HTTP_HOST'];
+		$nodeip = parse_url($nodeip, PHP_URL_HOST);
 	} else {
 		# use localhost as fallback in case the HTTP_HOST header is not set
 		$nodeip = '127.0.0.1';
@@ -42,4 +43,12 @@ require_once($rp.'/php/db.php');
 require_once($rp.'/php/cbsd.php');
 require_once($rp.'/php/validate.php');
 
-runVNC(Validate::short_string($_GET['jname'], 32));
+
+$jname = trim(preg_replace('/\t+|\r|\n/', '', $_GET['jname']));
+
+if ($jname != escapeshellcmd($jname)){
+	Utils::clonos_syslog("cmd.php SHELL ESCAPE:". $jname);
+	die("Shell escape attempt");
+}
+
+runVNC(Validate::long_string($jname));

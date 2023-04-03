@@ -158,6 +158,8 @@ class ClonOS {
 				}
 				echo json_encode($new_array);
 				return;
+			}else{
+				echo json_encode(array('error'=>true,'error_message'=>'PHP Method is not exists: '.$this->mode));
 			}
 
 			$included_result_array='';
@@ -2160,6 +2162,16 @@ class ClonOS {
 			return array('error'=>'true','errorMessage'=>'something wrong...');
 		}
 	}
+	
+	function ccmd_settingsUpdateCheck()
+	{
+		return array('error'=>true,'error_message'=>'Ещё не реализовано...');
+	}
+	
+	
+	
+	
+	
 
 	function postCurl($url,$vars=false)
 	{

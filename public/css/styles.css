@@ -1009,7 +1009,7 @@ td.error {
 	width:60%;
 	max-width:60%;
 	/*margin-left:-30% !important;*/
-	left:50%;
+	/*left:50%;*/
 }
 .tasklog .window-content {
 	user-select:auto;

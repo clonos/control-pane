@@ -2,7 +2,7 @@
 
 /* hardcode API ip. Change it later */
 //$api_ip='https://bitclouds.convectix.com:1443';
-$api_ip = 'http://144.76.225.238';
+$api_ip = 'http://127.0.0.1:65531';
 
 function getSslPage($url) {
 	$ch = curl_init();

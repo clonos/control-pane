@@ -232,6 +232,10 @@ var clonos={
 				this.getFreeCname();	// Берём с сервера свободное имя kubernetes
 				//this.trids=this.getTrIdsForCheck('jailslist');
 			}
+			if(id='settings-update')
+			{
+				this.settingsUpdateCheck();
+			}
 			this.dialogShow1(id);
 		}
 	},
@@ -871,6 +875,14 @@ var clonos={
 	{
 		$('dialog#k8s-new input[name="cname"]').val(data.freejname);
 		//$('dialog#jail-settings input[name="host_hostname"]').val(data.freecname+'.my.domain');
+	},
+	settingsUpdateCheck:function()
+	{
+		this.loadData('settingsUpdateCheck',$.proxy(this.onSettingsUpdateCheck,this));
+	},
+	onSettingsUpdateCheck:function(data)
+	{
+		
 	},
 	
 	onUsersAdd:function(data)

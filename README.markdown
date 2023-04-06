@@ -32,8 +32,7 @@ For installing on FreeBSD: https://clonos.tekroutine.com/installation_on_freebsd
 
 Tested with following OSes and distribution:
 
-- FreeBSD 12.0, 12.1
-- FreeBSD 13-CURRENT (HEAD)
+- FreeBSD 13x, 14-CURRENT
 
 Errata: https://clonos.tekroutine.com/errata.html
 

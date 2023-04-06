@@ -522,6 +522,10 @@ thead td:first-child, td:first-child {
 .tsimple td.vmiddle {
 	vertical-align:middle;
 }
+.tsimple tr.changed td {
+	color:coral;
+	font-weight:bold;
+}
 .tsimple tr.helper:hover {
 	background-color:#fcfccc;
 	cursor:pointer;

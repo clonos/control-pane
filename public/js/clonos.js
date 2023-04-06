@@ -232,7 +232,7 @@ var clonos={
 				this.getFreeCname();	// Берём с сервера свободное имя kubernetes
 				//this.trids=this.getTrIdsForCheck('jailslist');
 			}
-			if(id='settings-update')
+			if(id=='settings-update')
 			{
 				this.settingsUpdateCheck();
 			}
@@ -882,7 +882,7 @@ var clonos={
 	},
 	onSettingsUpdateCheck:function(data)
 	{
-		
+		$('dialog#settings-update .window-content').append('<p>'+data.installed+'</p>');
 	},
 	
 	onUsersAdd:function(data)
@@ -1017,6 +1017,7 @@ var clonos={
 			if(typeof data.func!='undefined')
 			{
 				this[data.func](data);
+				if(isset(data.latest)) this.checkLatestUpdates(data.latest);
 				return;
 			}
 			for(id in data) $('#'+id).html(data[id]);
@@ -2223,6 +2224,16 @@ var clonos={
 			{
 				this.notify(data.Message,'success');
 			}
+		}
+	},
+	
+	checkLatestUpdates:function(data)
+	{
+		for(n in data)
+		{
+			var key='updlist_'+n;
+			$('#'+key).addClass('changed');
+			$('#'+key).find('td:eq(2)').text(data[n]);
 		}
 	},
 	

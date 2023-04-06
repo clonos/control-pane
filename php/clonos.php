@@ -1,4 +1,5 @@
 <?php
+
 require_once("cbsd.php");
 require_once('config.php');
 require_once('localization.php');
@@ -2165,7 +2166,18 @@ class ClonOS {
 	
 	function ccmd_settingsUpdateCheck()
 	{
-		return array('error'=>true,'error_message'=>'Ещё не реализовано...');
+		$res=CBSD::run(
+			'cix_upgrade mode=listjson',
+			array()
+		);
+		if($res['error']){
+			$arr['error']=true;
+			$arr['error_message']=$err['error_message'];
+		}else{
+			$arr['error']=false;
+			$arr['update_list']=json_decode($res['message']);
+		}
+		return $arr;
 	}
 	
 	

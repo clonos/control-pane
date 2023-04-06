@@ -10,7 +10,8 @@ $clonos->useDialogs(['settings-update']);
 	<thead>
 		<tr>
 			<th class="txtleft">Компонент</th>
-			<th class="txtleft">Версия</th>
+			<th class="txtcenter">Версия</th>
+			<th class="txtcenter">Доступная версия</th>
 		</tr>
 	</thead>
 	<tbody></tbody>

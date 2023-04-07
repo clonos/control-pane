@@ -5,6 +5,8 @@ var clonos={
 	lastX:0,
 	oldHash:'',
 	authorized:false,
+	updates_exists:false,
+	updates:{},
 	commands:
 	{
 		'jstart':{stat:['Not launched','Starting','Launched'],cmd:'jailStart'},
@@ -882,7 +884,19 @@ var clonos={
 	},
 	onSettingsUpdateCheck:function(data)
 	{
-		$('dialog#settings-update .window-content').append('<p>'+data.installed+'</p>');
+		var msg='<p>'+this.translate('No updates&hellip;')+'</p>';
+		if(this.updates_exists)
+		{
+			msg='<p>'+this.translate('Updates available:')+'</p>';
+			for(n in this.updates)
+			{
+				msg+='<p>'+n+', version: '+this.updates[n]+'</p>';
+			}
+			$('#settings-update .button.ok-but').removeClass('hidden');
+		}else{
+			$('#settings-update .button.ok-but').addClass('hidden');
+		}
+		$('dialog#settings-update .window-content').html(msg);
 	},
 	
 	onUsersAdd:function(data)
@@ -2229,12 +2243,15 @@ var clonos={
 	
 	checkLatestUpdates:function(data)
 	{
+		this.updates_exists=false;
 		for(n in data)
 		{
 			var key='updlist_'+n;
 			$('#'+key).addClass('changed');
 			$('#'+key).find('td:eq(2)').text(data[n]);
+			this.updates_exists=true;
 		}
+		if(this.updates_exists) this.updates=data;
 	},
 	
 	

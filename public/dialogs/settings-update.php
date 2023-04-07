@@ -4,6 +4,7 @@
 		Check for updates&hellip;
 	</div>
 	<div class="buttons">
+		<input type="button" value="<?php echo $this->translate('Get updates');?>" class="new button ok-but hidden">
 		<input type="button" value="<?php echo $this->translate('Close');?>" class="button red cancel-but" />
 	</div>
 </dialog>

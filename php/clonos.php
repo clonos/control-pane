@@ -159,8 +159,6 @@ class ClonOS {
 				}
 				echo json_encode($new_array);
 				return;
-			}else{
-				echo json_encode(array('error'=>true,'error_message'=>'PHP Method is not exists: '.$this->mode));
 			}
 
 			$included_result_array='';
@@ -252,6 +250,12 @@ class ClonOS {
 					echo json_encode($this->saveHelperValues());
 					return;
 */
+				if(!method_exists($this,$cfunc))
+				{
+					//echo json_encode(array('error'=>true,'error_message'=>'PHP Method is not exists: '.$this->mode));
+					$this->vars['error']=true;
+					$this->vars['error_message']='PHP Method is not exists: '.$this->mode;
+				}
 			}
 		}
 	}

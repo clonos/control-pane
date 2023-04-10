@@ -237,6 +237,12 @@ var clonos={
 			if(id=='settings-update')
 			{
 				this.settingsUpdateCheck();
+				return;
+			}
+			if(id=='settings-getupdate')
+			{
+				$('dialog#settings-getupdate .window-content').html('');
+				this.settingsUpdateComponents();
 			}
 			this.dialogShow1(id);
 		}
@@ -253,6 +259,12 @@ var clonos={
 	dialogShow1:function(id,mode)
 	{
 		var dlg=$('dialog#'+id);
+		if(dlg.length==0)
+		{
+				//console.log('Not found dialog: '+id);
+				this.notify('Not found dialog: '+id,'error');
+				return;
+		}
 		
 		if(mode=='edit')
 		{
@@ -892,13 +904,29 @@ var clonos={
 			{
 				msg+='<p>'+n+', version: '+this.updates[n]+'</p>';
 			}
-			$('#settings-update .button.ok-but').removeClass('hidden');
-		}else{
-			$('#settings-update .button.ok-but').addClass('hidden');
 		}
+		this.setButtonUpdate();
 		$('dialog#settings-update .window-content').html(msg);
 	},
-	
+	setButtonUpdate:function()
+	{
+		if(this.updates_exists)
+		{
+			$('#but-getupdate').removeClass('hidden');
+		}else{
+			$('#but-getupdate').addClass('hidden');
+		}
+	},
+	settingsUpdateComponents:function()
+	{
+		this.loadData('settingsUpdateComponents',$.proxy(this.onSettingsUpdateComponents,this));
+	},
+	onSettingsUpdateComponents:function(data)
+	{
+		var msg='getData';
+		$('dialog#settings-update .window-content').html(msg);
+	},
+
 	onUsersAdd:function(data)
 	{
 		if(typeof data.error!='undefined')
@@ -2252,6 +2280,7 @@ var clonos={
 			this.updates_exists=true;
 		}
 		if(this.updates_exists) this.updates=data;
+		this.setButtonUpdate();
 	},
 	
 	
@@ -2989,6 +3018,17 @@ var clonos={
 			case 'update':
 				if(isset(data.data))
 				{
+					if(data.id=='update')
+					{
+						var msg=data.data.message;
+						//console.log(msg);
+						$('dialog#settings-getupdate .window-content').append('<p>'+this.translate(msg)+'</p>');
+						if(msg=='complete')
+							this.settingsUpdateCheck();
+						return;
+					}
+					
+					
 					for(n in data.data)
 					{
 						if(n=='impsize') data.data[n]=this.formatBytes(data.data[n],0);

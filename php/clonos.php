@@ -2184,6 +2184,23 @@ class ClonOS {
 		return $arr;
 	}
 	
+	function ccmd_settingsUpdateComponents()
+	{
+		$res=CBSD::run(
+			'cix_upgrade mode=upgrade',
+			array()
+		);
+		if($res['error']){
+			$arr['error']=true;
+			$arr['error_message']=$err['error_message'];
+		}else{
+			$arr['error']=false;
+			$arr['response']=$res['msg'];
+			//$arr['update_list']=json_decode($res['message']);
+		}
+		return $arr;
+	}
+	
 	
 	
 	

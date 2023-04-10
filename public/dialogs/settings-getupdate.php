@@ -1,4 +1,4 @@
-<dialog id="settings-update" class="window-box tasklog">
+<dialog id="settings-getupdate" class="window-box tasklog">
 	<h1><?php echo $this->translate('Settings update');?></h1>
 	<div class="window-content">
 		Check for updates&hellip;

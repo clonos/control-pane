@@ -154,9 +154,9 @@ echo $menu->html;
 	<span id="title"><?php echo $menu->title; ?></span>
 	<ul>
 		<li class="mhome"><a href="/">Home</a></li>
-<?php if($clonos->environment=='development') { ?>
+<?php // if($clonos->environment=='development') { ?>
 		<li><a href="/settings/"><?php echo $locale->translate('Settings'); ?></a></li>
-<?php } ?>
+<?php // } ?>
 		<li><a href="/users/"><?php echo $locale->translate('Users'); ?></a></li>
 <!--
 		<li><a href="/profile/"><?php echo $locale->translate('Profile'); ?></a></li>

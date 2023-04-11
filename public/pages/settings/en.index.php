@@ -1,20 +1,18 @@
 <?php
-$clonos->useDialogs(['users-new']);
+$clonos->useDialogs(['settings-getupdate']);
 ?>
 
-<h1>User management</h1>
-<p><span class="top-button icon-plus id:users-new">Add users</span></p>
+<h1>Настройки</h1>
+<p><span class="top-button icon-plus id:settings-update">Check for updates</span>
+	<span class="top-button icon-upload id:settings-getupdate hidden" id="but-getupdate">Upgrade</span></p>
 
-<table class="tsimple" id="userslist" width="100%">
+
+<table class="tsimple" id="update_files" width="100%">
 	<thead>
 		<tr>
-			<th class="txtleft">Login</th>
-			<th class="txtleft">First Name</th>
-			<th class="txtleft">Last Name</th>
-			<th class="txtleft">Registration</th>
-			<th class="txtleft">Last login</th>
-			<th class="txtcenter">Active</th>
-			<th class="txtcenter wd-100">Action</th>
+			<th class="txtleft">Component</th>
+			<th class="txtcenter">Version</th>
+			<th class="txtcenter">Available</th>
 		</tr>
 	</thead>
 	<tbody></tbody>

@@ -312,6 +312,13 @@ var clonos={
 		}
 		$(dlg).find('input[type=text],textarea').filter(':visible:first').focus();
 	},
+	isDialogOpened:function(id)
+	{
+		var dlg=$('dialog#'+id);
+		if(dlg.length==0) return false;
+		if(dlg.css('display')=='block') return true;
+		return false;
+	},
 	dialogSetPosition:function(dialog)
 	{
 		var wd=$(dialog).width();
@@ -897,16 +904,14 @@ var clonos={
 	onSettingsUpdateCheck:function(data)
 	{
 		var msg='<p>'+this.translate('No updates&hellip;')+'</p>';
-		if(this.updates_exists)
+		if(typeof data.update_list != "undefined" && typeof data.update_list.latest != "undefined")
 		{
-			msg='<p>'+this.translate('Updates available:')+'</p>';
-			for(n in this.updates)
-			{
-				msg+='<p>'+n+', version: '+this.updates[n]+'</p>';
-			}
+			this.updates_exists=true;
+			this.checkLatestUpdates(data.update_list.latest);
 		}
-		this.setButtonUpdate();
-		$('dialog#settings-update .window-content').html(msg);
+		//this.checkLatestUpdates(data.latest)
+		//this.setButtonUpdate();
+		//$('dialog#settings-update .window-content').html(msg);
 	},
 	setButtonUpdate:function()
 	{
@@ -3020,6 +3025,9 @@ var clonos={
 				{
 					if(data.id=='update')
 					{
+						var dlgId='settings-getupdate';
+						if(!this.isDialogOpened(dlgId))
+							this.dialogShow1(dlgId);
 						var msg=data.data.message;
 						//console.log(msg);
 						$('dialog#settings-getupdate .window-content').append('<p>'+this.translate(msg)+'</p>');

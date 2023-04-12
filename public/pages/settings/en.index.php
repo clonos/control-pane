@@ -2,7 +2,7 @@
 $clonos->useDialogs(['settings-getupdate']);
 ?>
 
-<h1>Настройки</h1>
+<h1>Settings</h1>
 <p><span class="top-button icon-plus id:settings-update">Check for updates</span>
 	<span class="top-button icon-upload id:settings-getupdate hidden" id="but-getupdate">Upgrade</span></p>
 

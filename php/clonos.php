@@ -2168,7 +2168,7 @@ class ClonOS {
 		}
 	}
 	
-	function ccmd_settingsUpdateCheck()
+	function ccmd_settingsGetList()
 	{
 		$res=CBSD::run(
 			'cix_upgrade mode=listjson',
@@ -2177,6 +2177,21 @@ class ClonOS {
 		if($res['error']){
 			$arr['error']=true;
 			$arr['error_message']=$err['error_message'];
+		}else{
+			$arr['error']=false;
+			$arr['update_list']=json_decode($res['message']);
+		}
+	}
+	
+	function ccmd_settingsUpdateCheck()
+	{
+		$res=CBSD::run(
+			'cix_upgrade mode=check_upgrade',	//listjson
+			array()
+		);
+		if($res['error']){
+			$arr['error']=true;
+			$arr['error_message']=$res['error_message'];
 		}else{
 			$arr['error']=false;
 			$arr['update_list']=json_decode($res['message']);

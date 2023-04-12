@@ -4,7 +4,7 @@ require_once("../php/cbsd.php");
 $html = '';
 $hres = $this->getTableChunk('components','tbody');
 
-$res=CBSD::run('cix_upgrade mode=listjson', array());
+$res=CBSD::run('/root/bin/web_upgrade listjson', array());
 $latest=[];
 if($res['retval']==0)
 {

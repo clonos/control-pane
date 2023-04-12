@@ -2171,7 +2171,7 @@ class ClonOS {
 	function ccmd_settingsGetList()
 	{
 		$res=CBSD::run(
-			'cix_upgrade mode=listjson',
+			'/root/bin/web_upgrade listjson',
 			array()
 		);
 		if($res['error']){
@@ -2186,7 +2186,7 @@ class ClonOS {
 	function ccmd_settingsUpdateCheck()
 	{
 		$res=CBSD::run(
-			'cix_upgrade mode=check_upgrade',	//listjson
+			'/root/bin/web_upgrade check_upgrade',	//listjson
 			array()
 		);
 		if($res['error']){
@@ -2202,7 +2202,7 @@ class ClonOS {
 	function ccmd_settingsUpdateComponents()
 	{
 		$res=CBSD::run(
-			'cix_upgrade mode=upgrade',
+			'/root/bin/web_upgrade upgrade',
 			array()
 		);
 		if($res['error']){

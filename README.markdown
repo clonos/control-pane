@@ -32,7 +32,7 @@ For installing on FreeBSD: https://clonos.tekroutine.com/installation_on_freebsd
 
 Tested with following OSes and distribution:
 
-- FreeBSD 13x, 14-CURRENT
+- FreeBSD 13x, 14x
 
 Errata: https://clonos.tekroutine.com/errata.html
 

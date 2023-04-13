@@ -27,6 +27,7 @@ server {
 		fastcgi_pass  unix:/tmp/php-fpm.sock;
 		fastcgi_param WORKDIR /usr/jails;
 		# fastcgi_param APPLICATION_ENV development;
+		fastcgi_read_timeout 1200;	# keep in sync with PHP max_execution_time = 1200
 	}
 
 	location / {

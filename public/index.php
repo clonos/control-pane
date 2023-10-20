@@ -158,6 +158,7 @@ echo $menu->html;
 		<li><a href="/settings/"><?php echo $locale->translate('Settings'); ?></a></li>
 <?php // } ?>
 		<li><a href="/users/"><?php echo $locale->translate('Users'); ?></a></li>
+		<li><a target="_blank" href="/shell/">&gt;&gt;<?php echo $locale->translate('Console'); ?></a></li>
 <!--
 		<li><a href="/profile/"><?php echo $locale->translate('Profile'); ?></a></li>
 		<li><a href="/support/"><?php echo $locale->translate('Support'); ?></a></li>

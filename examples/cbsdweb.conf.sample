@@ -1,3 +1,7 @@
+upstream ttyd_back {
+	server unix:/var/run/ttyd.sock;
+}
+
 server {
 	listen *:80;
 
@@ -15,6 +19,19 @@ server {
 	location ~* \.(jpg|jpeg|gif|png|swf|tiff|swf|flv|zip|rar|bz2|iso|xz|img|css|txt|html|js|xsl|eot|svg|ttf|woff|woff2)$ {
 		index     index.php;
 		try_files $uri $uri/ =404;
+	}
+
+	location /shell/ {
+		proxy_pass            http://ttyd_back/;
+		proxy_read_timeout    90s;
+		proxy_connect_timeout 90s;
+		proxy_send_timeout    90s;
+		proxy_http_version    1.1;
+		proxy_set_header      Host $http_host;
+		proxy_set_header      X-Forwarded-Proto $scheme;
+		proxy_set_header      X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header      Upgrade $http_upgrade;
+		proxy_set_header      Connection "upgrade";
 	}
 
 	location ~ \.php$ {

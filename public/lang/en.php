@@ -37,7 +37,7 @@ $lang=array(
 	'TaskLog'=>'TaskLog',
 		'System task log'=>'System task log',
 	
-	'Not implemented yet'=>'Not implemented yet',
+	'Not implemented yet'=>'Not yet implemented',
 	
 
 	'Not Launched'=>'Not Launched',
@@ -60,7 +60,7 @@ $lang=array(
 	'Jail Settings'=>'Jail Settings',
 	'Jail name'=>'Jail name',
 	'Hostname'=>'Hostname',
-	'available on the jail is not running'=>'available on the jail is not running',
+	'available on the jail is not running'=>'Available when the jail is not running',
 	'IP address'=>'IP address',
 	'Root password'=>'Root password (optional)',
 	'Root password (again)'=>'Root password (again)',
@@ -78,15 +78,15 @@ $lang=array(
 	'Save'=>'Save',
 	
 	'Delete'=>'Delete',
-	'Protected jail'=>'Protected jai',
+	'Protected jail'=>'Protected jail',
 	'Open VNC'=>'Open VNC',
 	'Restart jail'=>'Restart jail',
 	'Restart bhyve'=>'Restart VM',
 
 	//err_messages
-	'Can not be empty. Name must begin with a letter / a-z / and not have any special symbols: -,.=%'=>'Can not be empty. Name must begin with a letter / a-z / and not have any special symbols: -,.=%',
-	'This field can not be empty'=>'This field can not be empty',
-	'Write correct ip address, e.g: 10.0.0.2'=>'Write correct ip address, e.g: 10.0.0.2',
+	'Can not be empty. Name must begin with a letter / a-z / and not have any special symbols: -,.=%'=>'Can not be empty. Name must begin with a letter / a-z / and may not have any special symbols: -,.=%',
+	'This field can not be empty'=>'This field cannot be empty',
+	'Write correct ip address, e.g: 10.0.0.2'=>'Write the correct ip address, e.g: 10.0.0.2',
 	'Password can not be less than 3 symbols'=>'Password can not be less than 3 symbols',
 	'Please retype password correctly'=>'Please retype password correctly',
 	
@@ -121,36 +121,36 @@ $lang=array(
 	
 	'Updating'=>'Updating',
 	'Version'=>'Version',
-	'Version number'=>'Version number (e.g:: 12.2, 13)',
+	'Version number'=>'Version number (e.g: 12.2, 13)',
 	
 	'Source'=>'Source',
 	
-	'@clone_warning@'=>'<strong>ATTENTION!</strong> Cloning of the running container can lead to data inconsistency in clones (eg environment with active database). Stop the container for safe cloning or continue, if you are confident in the security operation!',
+	'@clone_warning@'=>'<strong>ATTENTION!</strong> Cloning a running container can lead into data inconsistency in clones (e.g. environments with active databases). Stop the container for safe cloning or continue, if you are confident in the security operation!',
 	
 	'edit_title'=>'Edit',
 	'delete_title'=>'Delete',
 	
-	'Please, wait for initialize Virtual Machine'=>'Please, wait for initialize Virtual Machine',
+	'Please, wait for initialize Virtual Machine'=>'Please, wait for initializing the Virtual Machine',
 	'You can click here, or wait'=>'You can click here, or wait',
 	'some time'=>'some time',
 
 	'host_hostname'=>'Jail Fully Qualified Domain Name',
-	'ip4_addr'=>'ail IPv4 and/or IPv6 address',
-	'allow_mount'=>'Allow privileged users inside the jail mount and unmount file system',
-	'allow_nullfs'=>'Allow privileged users inside the jail mount and unmount NULLFS file system',
+	'ip4_addr'=>'Jail IPv4 and/or IPv6 address',
+	'allow_mount'=>'Allow privileged users inside the jail to mount and unmount file system',
+	'allow_nullfs'=>'Allow privileged users inside the jail to mount and unmount NULLFS file system',
 	'allow_fdescfs'=>'Jail may mount the fdescfs file system',
 	'interface'=>'Auto create and auto remove IP on selected NICs. 0 for disable',
-	'baserw'=>'Jail have personal copy of base system with write access, no NULLFS mount',
-	'mount_ports'=>'Jail have /usr/ports /usr/ports tree in read-only',
-	'astart'=>'Automatically start Jail when system boot',
+	'baserw'=>'Jail has personal copy of base system with write access, no NULLFS mount',
+	'mount_ports'=>'Jail has /usr/ports /usr/ports tree in read-only',
+	'astart'=>'Autostart jail at system startup',
 	'vnet'=>'Enable virtual network stack (VNET/VIMAGE)',
 	'mount_fdescfs'=>'Mount a FDESCFS filesystem on the chrooted',
 	'allow_tmpfs'=>'Allow privileged users inside the jail mount and unmount TMPFS file system',
 	'allow_zfs'=>'Privileged users inside the jail will be able to mount and unmount the ZFS file system',
-	'protected'=>'Prevent modification or deletion of a environment',
-	'allow_reserved_ports'=>'Allow the jail root may bind to ports lower than 1024',
-	'allow_raw_sockets'=>'The jail root is allowed to create raw sockets',
-	'allow_fusefs'=>'Allow privileged users inside the jail mount and unmount fuse-based file systems',
+	'protected'=>'Prevent modification or deletion of an environment',
+	'allow_reserved_ports'=>'Allow the jail root user to bind to ports lower than 1024',
+	'allow_raw_sockets'=>'The jail root user is allowed to create raw sockets',
+	'allow_fusefs'=>'Allow privileged users inside the jail to mount and unmount fuse-based file systems',
 	'allow_read_msgbuf'=>'Allow an unprivileged user to read the kernel message buffer',
 	'allow_vmm'=>'The jail may access vmm(4)',
 	'allow_unprivileged_proc_debug'=>'Unprivileged processes in the jail may use debugging facilities',

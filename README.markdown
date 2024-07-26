@@ -25,16 +25,16 @@ We like existing Linux-only solutions such as OpenStack (https://www.openstack.o
 
 ## Usage
 
-For installing from ISO: Use downloads pages https://clonos.tekroutine.com/download.html to obtain latest .ISO image
-For installing on FreeBSD: https://clonos.tekroutine.com/installation_on_freebsd.html
+For installing from ISO: Use downloads pages https://clonos.convectix.com/download.html to obtain latest .ISO image
+For installing on FreeBSD: https://clonos.convectix.com/installation_on_freebsd.html
 
 ## Limitations
 
 Tested with following OSes and distribution:
 
-- FreeBSD 13x, 14x
+- FreeBSD 14x, 15x
 
-Errata: https://clonos.tekroutine.com/errata.html
+Errata: https://clonos.convectix.com/errata.html
 
 ## Contributing
 

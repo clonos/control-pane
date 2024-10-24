@@ -3493,6 +3493,7 @@ graphs={
 		
 		if(typeof msg.__all!='undefined')
 		{
+			//if(msg.__all.length==0){alert('no data');}
 			for(a in msg.__all)
 			{
 				var items=msg.__all[a];

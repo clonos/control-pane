@@ -1,5 +1,4 @@
 <?php
-
 require_once("cbsd.php");
 require_once('config.php');
 require_once('localization.php');
@@ -2317,11 +2316,15 @@ class ClonOS {
 //		$form=$this->form;
 		$db=new Db('base','storage_media');
 		$res=$db->select('select * from media where type="iso"', array());
+		
+		//var_dump($res);exit;
 		if($res===false || empty($res)) return;
 
 		$html='';
-		foreach($res as $r){
-			$html.='<option value="'.$r['idx'].'">'.$r['name'].'.'.$r['type'].'</option>';
+		if(is_array($res)){
+			foreach($res as $r){
+				$html.='<option value="'.$r['idx'].'">'.$r['name'].'.'.$r['type'].'</option>';
+			}
 		}
 		return $html;
 	}

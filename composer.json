@@ -1,5 +1,11 @@
 {
     "require": {
-        "sentry/sdk": "^3.1"
+        "sentry/sdk": "^3.1",
+        "sentry/sentry": "^3.22"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     }
 }

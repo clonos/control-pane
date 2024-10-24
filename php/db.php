@@ -129,6 +129,7 @@ class Db {
 
 	# TODO once tested $values can have a default value of an empty array
 	function select($sql, $values, $single = false){
+		$sql=str_replace('"',"'",$sql);
 		if ($this->error){
 			return array('error' => $this->error, 'info' => $this->error_message);
 		}
@@ -151,7 +152,7 @@ class Db {
 			}
 			return $res;
 		} catch(PDOException $e) {
-			return array('error' => $this->error, 'info' => $this->error_message);
+			return array('error' => true, 'info' => 'Catch exception: ' . $e->getMessage());	//$this->error
 		}
 	}
 

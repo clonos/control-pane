@@ -1248,7 +1248,7 @@ class ClonOS {
 		$db=new Db('base','storage_media');
 		if(!$db->isConnected()) return(false); // TODO: Fix return
 
-		$res=$db->selectOne('SELECT * FROM media WHERE jname=? AND type="iso"', array([$jname]));
+		$res=$db->selectOne('SELECT * FROM media WHERE jname=? AND type=\'iso\'', array([$jname]));
 		if($res!==false && !empty($res)){
 			CBSD::run(
 				'cbsd media mode=unregister name="%s" path="%s" jname=%s type=%s',
@@ -2315,7 +2315,7 @@ class ClonOS {
 	function media_iso_list_html(){
 //		$form=$this->form;
 		$db=new Db('base','storage_media');
-		$res=$db->select('select * from media where type="iso"', array());
+		$res=$db->select('select * from media where type=\'iso\'', array());
 		
 		//var_dump($res);exit;
 		if($res===false || empty($res)) return;
@@ -2331,7 +2331,7 @@ class ClonOS {
 
 	function ccmd_updateBhyveISO($iso=''){
 		$db=new Db('base','storage_media');
-		$res=$db->select('SELECT * FROM media WHERE type="iso"', array());
+		$res=$db->select('SELECT * FROM media WHERE type=\'iso\'', array());
 		if($res===false || empty($res)) return array(); //array('error'=>true,'error_message'=>'Profile ISO is not find!');
 
 		$sel='';

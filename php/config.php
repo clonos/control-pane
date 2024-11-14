@@ -232,6 +232,7 @@ class Config
 		if ($vm_profile_list_file_size > 0 ) {
 			Utils::clonos_syslog("config.php: (cached) found vm_profile cache file/size: $vm_profile_list_file exist/$vm_profile_list_file_size");
 			$res['message']=file_get_contents($vm_profile_list_file);
+//echo $res['message'];exit;
 			$this->os_types=$this->create_bhyve_profiles($res);
 		} else {
 			Utils::clonos_syslog("config.php: vm_profile cache file not found: $vm_profile_list_file");
@@ -292,6 +293,7 @@ class Config
 	}
 
 	function os_types_create($obtain='new'){
+//print_r($this->os_types);exit;
 		$obtain=($obtain=='obtain');
 		if($obtain)
 			$info=$this->os_types_obtain;
@@ -317,6 +319,19 @@ class Config
 			$html.=$html_tmp;
 		}
 		return $html;
+	}
+	function os_types_getOne($name='first')
+	{
+		$res=array();
+		$info=$this->os_types;
+		if($name='first')
+		{
+			$res=current($info)['items'][0];
+		}else{
+			
+		}
+		
+		return $res;
 	}
 
 	function authkeys_list(){

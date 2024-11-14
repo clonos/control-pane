@@ -4,7 +4,7 @@
 //if($hres!==false) $thead=$hres[1];
 
 $db = new Db('base','nodes');
-$res = $db->select('select nodename from nodelist', []);
+$res = $db->select("select nodename from nodelist", []);
 $nodes = ['local'];
 foreach($res as $val){
 	$nodes[] = $val['nodename'];

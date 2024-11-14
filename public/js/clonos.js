@@ -877,6 +877,29 @@ var clonos={
 		{
 			$('dialog #bhyveSettings select[name="vm_iso_image"]').html(data.iso_list);
 		}
+		if(typeof data.form_items!='undefined')
+		{
+			var fi=data.form_items;
+			$('#bhyveSettings input[name="vm_name"]').val(fi.jname);
+			
+			$('#bhyveSettings input[name="vm_cpus"]').prop({
+				'min':fi.vm_cpus.min,
+				'max':fi.vm_cpus.max
+			}).val(fi.vm_cpus.cur);
+			$('#bhyveSettings input[name="vm_cpus_show"]').val(fi.vm_cpus.cur);
+			
+			$('#bhyveSettings input[name="vm_ram"]').prop({
+				'min':fi.vm_ram.min,
+				'max':fi.vm_ram.max
+			}).val(fi.vm_ram.cur);
+			$('#bhyveSettings input[name="vm_ram_show"]').val(fi.vm_ram.cur);
+
+			$('#bhyveSettings input[name="vm_imgsize"]').prop({
+				'min':fi.imgsize.min,
+				'max':fi.imgsize.max
+			}).val(fi.imgsize.cur);
+			$('#bhyveSettings input[name="vm_imgsize_show"]').val(fi.imgsize.cur);
+		}
 	},
 	getFreeJname:function()
 	{
@@ -2152,10 +2175,18 @@ var clonos={
 		{
 			var par=$(obj).closest('form');
 			$('input[name="vm_cpus"]',par).val(res[1]);
-			$('input[name="vm_cpus_show"]',par).val(res[1]);
-			$('input[name="vm_ram"]',par).val(res[2]);
-			$('input[name="vm_size"]',par).val(res[3]);
+				$('input[name="vm_cpus_show"]',par).val(res[1]);
+			$('input[name="vm_ram"]',par).val(parseInt(res[2]));
+				$('input[name="vm_ram_show"]',par).val(res[2]);
+			$('input[name="vm_imgsize"]',par).val(parseInt(res[3]));
+				$('input[name="vm_imgsize_show"]',par).val(res[3]);
 		}
+	},
+	onChangeOsProfile:function(obj,event)
+	{
+		var a=event.target;
+		var i=a.selectedIndex;
+		debugger;
 	},
 	
 	loginAction:function(event)
@@ -2301,9 +2332,10 @@ var clonos={
 		var tpad=parseInt($(td).css('padding-top'),10);
 		if(menu.length>0)
 		{
+			/* # пересмотреть расчёт верхнего левого угла меню */
 			$(menu).css({
 				'left':coords.left+lpad/2-3,
-				'top':coords.top+$('div#content').scrollTop()+tpad/2,
+				'top':coords.top+$('div#content').scrollTop()+tpad+$('.tsimple').position().top,
 				'display':'block',
 			});
 		}

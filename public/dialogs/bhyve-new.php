@@ -4,6 +4,9 @@ err_messages.add({
 	'vm_size':'You need type «g» char after numbers',
 	'vm_ram':'You need type «g» char after numbers',
 });
+<?php
+//print_r($this->config->os_types);exit;
+?>
 </script>
 <dialog id="bhyve-new" class="window-box">
 	<h1>
@@ -15,8 +18,8 @@ err_messages.add({
 		<div class="window-content">
 			<p class="new">
 				<span class="field-name"><?php echo $this->translate('VM OS profile');?>:</span>
-				<select name="vm_os_profile">
-<?php echo $this->config->os_types_create(); ?>
+				<select name="vm_os_profile" onchange="clonos.onChangeOsProfile(this,event);">
+					<?php echo $this->config->os_types_create(); ?>
 				</select>
 			</p>
 			<p>
@@ -26,7 +29,7 @@ err_messages.add({
 			<p class="new">
 				<span class="field-name"><?php echo $this->translate('VM template (cpu, ram, hdd)');?>:</span>
 				<select name="vm_packages" onchange="clonos.onChangePkgTemplate(this,event);">
-<?php $vm_res=$this->config->vm_packages_list(); echo $vm_res['html']; ?>
+					<?php $vm_res=$this->config->vm_packages_list(); echo $vm_res['html']; ?>
 				</select>
 				<script type="text/javascript">clonos.vm_packages_new_min_id=<?php echo $vm_res['min_id']; ?>;</script>
 			</p>
@@ -40,18 +43,28 @@ err_messages.add({
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('VM RAM');?>:</span>
-				<input type="text" name="vm_ram" value="" pattern="^[0-9]+\s*(g|gb|mb|m|t|tb)$" placeholder="1g" required="required" />
+<!--				<input type="text" name="vm_ram" value="" pattern="^[0-9]+\s*(g|gb|mb|m|t|tb)$" placeholder="1g" required="required" /> -->
+				<span class="range">
+					<input type="range" name="vm_ram" class="vHorizon" min="1" max="64" value="1" style="margin:6px 0;" id="rngRam" oninput="rngRamShow.value=rngRam.value+'g'" />
+					<input type="text" disabled="disabled" id="rngRamShow" value="1" name="vm_ram_show" />
+					<!-- input type="text" name="vm_cpus" value="" pattern="[0-9]+" placeholder="1" required="required" / -->
+				</span>
 			</p>
 			<p class="new">
 				<span class="field-name"><?php echo $this->translate('VM Image size');?>:</span>
-				<input type="text" name="vm_size" value="" pattern="^[0-9]+(g|gb|t|tb)$" placeholder="10g" required="required" class="edit-disable" />
+<!--				<input type="text" name="vm_size" value="" pattern="^[0-9]+(g|gb|t|tb)$" placeholder="10g" required="required" class="edit-disable" /> -->
+				<span class="range">
+					<input type="range" name="vm_imgsize" class="vHorizon" min="20" max="866" value="20" style="margin:6px 0;" id="rngImgsize" oninput="rngImgsizeShow.value=rngImgsize.value+'g'" />
+					<input type="text" disabled="disabled" id="rngImgsizeShow" value="1" name="vm_imgsize_show" />
+					<!-- input type="text" name="vm_cpus" value="" pattern="[0-9]+" placeholder="1" required="required" / -->
+				</span>
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('Attached boot ISO image');?>:</span>
 				<select name="vm_iso_image">
 					<option value="-2"></option>
 					<option value="-1" selected>Profile default ISO</option>
-<?php echo $this->media_iso_list_html(); ?>
+					<?php echo $this->media_iso_list_html(); ?>
 				</select>
 			</p>
 			<p>

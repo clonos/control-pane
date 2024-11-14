@@ -137,7 +137,7 @@ dialog .panel {
 }
 
 .window-box {
-	border:1px solid #337ab7;
+	/*border:1px solid #337ab7;*/
 }
 .window-box .close-but {
 	background-color:#f3f3f3;
@@ -198,8 +198,15 @@ form.win input[type="password"]:valid {
 
 form.win input[type="email"]:invalid,
 form.win input[type="password"]:invalid {
-	background-color:#fef7f7;
+	background-color:#ffd5d5;
 	border:1px solid #d7a0a0;
+}
+
+form.win input:invalid:focus {
+	outline-color:red;
+}
+form.win input:valid:focus {
+	outline-color:green;
 }
 
 input[type=checkbox]:checked + label,
@@ -244,7 +251,7 @@ td.error {
 
 #config-menu ul
 {
-	border:1px solid gray;
+	/*border:1px solid gray;*/
 	background-color:white;
 }
 #config-menu li:hover {
@@ -252,7 +259,8 @@ td.error {
 }
 #config-menu .menu-cog {
 	color:#337ab7;
-	border:1px solid gray;
+	/*border:1px solid gray;*/
+	border-bottom-width: 0px;
 	background-color:white;
 }
 

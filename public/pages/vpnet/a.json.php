@@ -1,7 +1,7 @@
 <?php
 
 $db = new Db('base','vpnet');
-$res = $db->select('SELECT idx,name,vpnet FROM vpnet', []);
+$res = $db->select("SELECT idx,name,vpnet FROM vpnet", []);
 $html = '';
 
 if(!$db->error){

@@ -14,7 +14,7 @@ $res_array = [
 
 $nodenames = ['local'];
 $db = new Db('base','nodes');
-$nodes = $db->select('select nodename,ip from nodelist', []);
+$nodes = $db->select("select nodename,ip from nodelist", []);
 foreach($nodes as $node){
 	$idle = $this->check_locktime($node['ip']);
 	if($idle == 0){
@@ -37,10 +37,10 @@ foreach($nodenames as $name){
 		exit;
 	}
 
-	$jcounts = $ndb->selectOne('SELECT COUNT(*) as count FROM jails;', []);
+	$jcounts = $ndb->selectOne("SELECT COUNT(*) as count FROM jails;", []);
 	$res_array['num-jails'] += $jcounts['count'];
 
-	$counts = $ndb->select('SELECT ncpu,physmem,cpufreq FROM local;', []);
+	$counts = $ndb->select("SELECT ncpu,physmem,cpufreq FROM local;", []);
 	foreach($counts as $cel){
 		$res_array['num-cores'] += $cel['ncpu'];
 		$res_array['sum-ram'] += $cel['physmem'];

@@ -138,7 +138,7 @@ dialog .panel {
 }
 
 .window-box {
-	border:1px solid #6f7579;
+	/*border:1px solid #6f7579;*/
 	color: white;
 }
 .window-box .close-but {
@@ -249,7 +249,7 @@ td.error {
 
 #config-menu ul
 {
-	border:1px solid gray;
+	/*border:1px solid gray;*/
 	background-color:black;
 }
 #config-menu li:hover {
@@ -258,7 +258,7 @@ td.error {
 }
 #config-menu .menu-cog {
 	color:#337ab7;
-	border:1px solid gray;
+	/*border:1px solid gray;*/
 	background-color:black;
 }
 

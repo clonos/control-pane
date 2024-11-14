@@ -1,7 +1,7 @@
 <?php
 
 $db = new Db('base', 'storage_media');
-$res = $db->select('SELECT idx,name,path,jname FROM media where type=\'iso\'', []);
+$res = $db->select("SELECT idx,name,path,jname FROM media where type='iso'", []);
 
 $html = '';
 if($res !== false){

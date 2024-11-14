@@ -1,7 +1,7 @@
 <?php
 
 $db = new Db('base','nodes');
-$nodes = $db->select('select nodename,ip from nodelist order by nodename desc', []);
+$nodes = $db->select("select nodename,ip from nodelist order by nodename desc", []);
 $nodes[] = ['nodename' => 'local'];
 $nodes = array_reverse($nodes);
 

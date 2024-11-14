@@ -408,7 +408,7 @@ class ClonOS {
 
 /*
 	function getProjectsListOnStart(){
-		$query='SELECT * FROM projects';
+		$query="SELECT * FROM projects";
 		$res=$this->_db->select($query, array());
 		echo '	var projects=',json_encode($res),PHP_EOL;
 	}
@@ -1248,14 +1248,14 @@ class ClonOS {
 		$db=new Db('base','storage_media');
 		if(!$db->isConnected()) return(false); // TODO: Fix return
 
-		$res=$db->selectOne('SELECT * FROM media WHERE jname=? AND type=\'iso\'', array([$jname]));
+		$res=$db->selectOne("SELECT * FROM media WHERE jname=? AND type='iso'", array([$jname]));
 		if($res!==false && !empty($res)){
 			CBSD::run(
 				'cbsd media mode=unregister name="%s" path="%s" jname=%s type=%s',
 				array($res['name'], $res['path'], $jname, $res['type'])
 			);
 			$res=$db->selectOne(
-				'SELECT * FROM media WHERE idx=?',
+				"SELECT * FROM media WHERE idx=?",
 				array([(int)$form['vm_iso_image']])
 			); 
 			if($res!==false && !empty($res) && $form['vm_iso_image']!=-2){
@@ -1318,7 +1318,7 @@ class ClonOS {
 			if($iso_id>0){
 				$db=new Db('base','storage_media');
 				if(!$db->isConnected()) return(false); // TODO: return error
-				$res=$db->selectOne('SELECT name,path FROM media WHERE idx= ?', array([$iso_id])); // OK, $iso_id is casted as int above.
+				$res=$db->selectOne("SELECT name,path FROM media WHERE idx= ?", array([$iso_id])); // OK, $iso_id is casted as int above.
 				if($res===false || empty($res)) $iso=false;
 			}
 			
@@ -1421,8 +1421,8 @@ class ClonOS {
 			$db=new Db('base','authkey');
 			if(!$db->isConnected())  return array('error'=>true,'errorMessage'=>'Database error!');
 			if($nres['name']!==false) $key_name=$nres['name'];
-			Utils::clonos_syslog("clonos.php:". 'SELECT authkey FROM authkey WHERE idx=?'. array([$key_id, PDO::PARAM_INT]));
-			$nres=$db->selectOne('SELECT authkey FROM authkey WHERE idx=?', array([$key_id, PDO::PARAM_INT]));
+			Utils::clonos_syslog("clonos.php:". "SELECT authkey FROM authkey WHERE idx=?". array([$key_id, PDO::PARAM_INT]));
+			$nres=$db->selectOne("SELECT authkey FROM authkey WHERE idx=?", array([$key_id, PDO::PARAM_INT]));
 			//var_dump($nres);exit;
 
 	//		[22-Jul-2022 13:15:19 UTC] PHP Warning:  Trying to access array offset on value of type bool in /usr/local/www/clonos/php/clonos.php on line 1416
@@ -1611,7 +1611,7 @@ class ClonOS {
 		if(!$db->isConnected()) return array('error'=>true,'res'=>'Database error');
 
 		//$res=$db->update('DELETE FROM media WHERE idx=?', array([$this->form['media_id']]));
-		$res=$db->selectOne('SELECT * FROM media WHERE idx=?', array([(int)$this->form['media_id'], PDO::PARAM_INT]));
+		$res=$db->selectOne("SELECT * FROM media WHERE idx=?", array([(int)$this->form['media_id'], PDO::PARAM_INT]));
 		if($res===false || empty($res)) return array('error'=>true,'res'=>print_r($res,true));
 
 		//if($res['jname']=='-')	// если медиа отвязана, то про�
@@ -2315,7 +2315,7 @@ class ClonOS {
 	function media_iso_list_html(){
 //		$form=$this->form;
 		$db=new Db('base','storage_media');
-		$res=$db->select('select * from media where type=\'iso\'', array());
+		$res=$db->select("select * from media where type='iso'", array());
 		
 		//var_dump($res);exit;
 		if($res===false || empty($res)) return;
@@ -2330,8 +2330,10 @@ class ClonOS {
 	}
 
 	function ccmd_updateBhyveISO($iso=''){
+//echo $this->config->os_types_getOne('first');exit;
 		$db=new Db('base','storage_media');
-		$res=$db->select('SELECT * FROM media WHERE type=\'iso\'', array());
+		$res=$db->select("SELECT * FROM media WHERE type='iso'", array());
+		
 		if($res===false || empty($res)) return array(); //array('error'=>true,'error_message'=>'Profile ISO is not find!');
 
 		$sel='';
@@ -2350,8 +2352,52 @@ class ClonOS {
 			$html=str_replace('#sel1#','',$html);
 			$html=str_replace('#sel#',' selected="selected"',$html);
 		}
+		
+		$form_items=$this->getBhyve_formItems();
 
-		return $html;
+		return array('iso_list'=>$html,'form_items'=>$form_items);
+	}
+	
+	function getBhyve_formItems($os_name='')
+	{
+		if($os_name!='')
+		{
+			$res=array();
+		}else{
+			$arr=$this->config->os_types_getOne('first');
+//return $res;exit;
+			$jname='undefined';
+			$jres=$this->ccmd_getFreeJname(false,$arr['default_jname']);
+			if(!$jres['error'])
+			{
+				$jname=$jres['freejname'];
+			}
+			//print_r($jres);exit;
+			//$res['jname']=$jname;
+			//var_dump($res);exit;
+			
+		}
+		
+		$res=array(
+			'jname'=>$jname,	//$arr['jname'],
+			'imgsize'=>array(
+				'min'=>intval($arr['imgsize_min']),
+				'max'=>intval($arr['imgsize_max']),
+				'cur'=>intval($arr['imgsize'])
+			),
+			'vm_cpus'=>array(
+				'min'=>intval($arr['vm_cpus_min']),
+				'max'=>intval($arr['vm_cpus_max']),
+				'cur'=>intval($arr['vm_cpus'])
+			),
+			'vm_ram'=>array(
+				'min'=>intval($arr['vm_ram_min']),
+				'max'=>intval($arr['vm_ram_max']),
+				'cur'=>intval($arr['vm_ram'])
+			),
+		);
+
+		return $res;
 	}
 
 	function get_interfaces_html(){

@@ -47,7 +47,6 @@ err_messages.add({
 				<span class="range">
 					<input type="range" name="vm_ram" class="vHorizon" min="1" max="64" value="1" style="margin:6px 0;" id="rngRam" oninput="rngRamShow.value=rngRam.value+'g'" />
 					<input type="text" disabled="disabled" id="rngRamShow" value="1" name="vm_ram_show" />
-					<!-- input type="text" name="vm_cpus" value="" pattern="[0-9]+" placeholder="1" required="required" / -->
 				</span>
 			</p>
 			<p class="new">
@@ -56,7 +55,6 @@ err_messages.add({
 				<span class="range">
 					<input type="range" name="vm_imgsize" class="vHorizon" min="20" max="866" value="20" style="margin:6px 0;" id="rngImgsize" oninput="rngImgsizeShow.value=rngImgsize.value+'g'" />
 					<input type="text" disabled="disabled" id="rngImgsizeShow" value="1" name="vm_imgsize_show" />
-					<!-- input type="text" name="vm_cpus" value="" pattern="[0-9]+" placeholder="1" required="required" / -->
 				</span>
 			</p>
 			<p>

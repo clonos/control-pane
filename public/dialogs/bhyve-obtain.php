@@ -5,7 +5,7 @@
 		<div class="window-content">
 			<p>
 				<span class="field-name"><?php echo $this->translate('VM OS profile');?>:</span>
-				<select name="vm_os_profile">
+				<select name="vm_os_profile" onchange="clonos.onChangeOsProfile(this,event);">
 <?php echo $this->config->os_types_create('obtain'); ?>
 				</select>
 			</p>
@@ -29,11 +29,20 @@
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('VM RAM');?>:</span>
-				<input type="text" name="vm_ram" value="" pattern="^[0-9]+(g|gb|mb|m)$" placeholder="1g" required="required" />
+				<!-- <input type="text" name="vm_ram" value="" pattern="^[0-9]+(g|gb|mb|m)$" placeholder="1g" required="required" /> -->
+				<span class="range">
+					<input type="range" name="vm_ram" class="vHorizon" min="1" max="64" value="1" style="margin:6px 0;" id="rngRam1" oninput="rngRamShow1.value=rngRam1.value+'g'" />
+					<input type="text" disabled="disabled" id="rngRamShow1" value="1" name="vm_ram_show" />
+				</span>
+
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('VM Image size');?>:</span>
-				<input type="text" name="vm_size" value="" pattern="^[0-9]+(g|gb|mb|m|t|tb)$" placeholder="10g" required="required" />
+				<!-- <input type="text" name="vm_size" value="" pattern="^[0-9]+(g|gb|mb|m|t|tb)$" placeholder="10g" required="required" /> -->
+				<span class="range">
+					<input type="range" name="vm_size" class="vHorizon" min="20" max="866" value="20" style="margin:6px 0;" id="rngImgsize1" oninput="rngImgsizeShow1.value=rngImgsize1.value+'g'" />
+					<input type="text" disabled="disabled" id="rngImgsizeShow1" value="1" name="vm_imgsize_show" />
+				</span>
 			</p>
 			<p>
 				<span class="field-name"><?php echo $this->translate('IP address');?>:</span>

@@ -94,7 +94,8 @@ class ClonOS {
 		$this->config=new Config();
 
 		$this->_locale = new Localization($this->realpath_public);
-
+		$this->_translate = new Translate($this->_locale,$this->realpath_page);
+		
 		$this->_client_ip=$_SERVER['REMOTE_ADDR'];
 
 		if(isset($this->_vars['path'])){
@@ -103,11 +104,22 @@ class ClonOS {
 			$this->json_name=$this->realpath_page.'a.json.php';
 			//echo $this->realpath_page;
 		}else if($_SERVER['REQUEST_URI']){
+
+			if($this->uri_chunks[0]=='overview1')
+			{
+				$this->uri_chunks[0]='overview';
+				$this->realpath_page=$this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
+				$this->_translate->translate($this->realpath_page,'index.php');
+				//break 1;
+			}
+
 			//$this->realpath_page=$this->realpath_public.'pages/'.trim($_SERVER['REQUEST_URI'],'/').'/';
 			if(isset($this->uri_chunks[0])){
 				$this->realpath_page=$this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
 			}
 		}
+
+
 
 		if(isset($this->_vars['hash'])) $this->url_hash=preg_replace('/^#/','',$this->_vars['hash']);
 
@@ -1614,7 +1626,7 @@ class ClonOS {
 		$res=$db->selectOne("SELECT * FROM media WHERE idx=?", array([(int)$this->form['media_id'], PDO::PARAM_INT]));
 		if($res===false || empty($res)) return array('error'=>true,'res'=>print_r($res,true));
 
-		//if($res['jname']=='-')	// если медиа отвязана, то про�
+		//if($res['jname']=='-')	// если медиа отвязана, то про
 
 		$res=CBSD::run(
 			'media mode=remove name="%s" path="%s" jname="%s" type="%s"', //.$res['name']
@@ -2353,31 +2365,33 @@ class ClonOS {
 			$html=str_replace('#sel#',' selected="selected"',$html);
 		}
 		
-		$form_items=$this->getBhyve_formItems();
+		$form_items=$this->getBhyveFormItems();
 
 		return array('iso_list'=>$html,'form_items'=>$form_items);
 	}
 	
-	function getBhyve_formItems($os_name='')
+	
+	function ccmd_vmOsInfo()	//getVMOSListInfo
 	{
+		return array('form_items'=>$this->getBhyveFormItems($this->form['vmOsProfile'],$this->form['obtain']));
+	}
+	
+	function getBhyveFormItems($os_name='',$obtain='')
+	{
+		$jname='undefined';
 		if($os_name!='')
 		{
-			$res=array();
+			$arr=$this->config->os_types_getOne($os_name,$obtain);
 		}else{
-			$arr=$this->config->os_types_getOne('first');
-//return $res;exit;
-			$jname='undefined';
-			$jres=$this->ccmd_getFreeJname(false,$arr['default_jname']);
-			if(!$jres['error'])
-			{
-				$jname=$jres['freejname'];
-			}
-			//print_r($jres);exit;
-			//$res['jname']=$jname;
-			//var_dump($res);exit;
-			
+			$arr=$this->config->os_types_getOne('first',$obtain);
 		}
-		
+
+		$jres=$this->ccmd_getFreeJname(false,$arr['default_jname']);
+		if(!$jres['error'])
+		{
+			$jname=$jres['freejname'];
+		}
+
 		$res=array(
 			'jname'=>$jname,	//$arr['jname'],
 			'imgsize'=>array(
@@ -2395,10 +2409,21 @@ class ClonOS {
 				'max'=>intval($arr['vm_ram_max']),
 				'cur'=>intval($arr['vm_ram'])
 			),
+			'obtain'=>$obtain,
 		);
 
 		return $res;
 	}
+	
+	function ccmd_getObtainFormItems($os_name='')
+	{
+		$res=array('form_items'=>$this->getBhyveFormItems($os_name,'obtain'));
+		return $res;
+	}
+	
+	
+	
+	
 
 	function get_interfaces_html(){
 		$if=$this->config->os_interfaces;
@@ -2501,7 +2526,7 @@ class ClonOS {
 			if($db->isConnected()) {
 				$res=$db->selectOne("SELECT username FROM auth_user WHERE username=?", array([$user_info['username']]));
 				if(!empty($res)){
-					$res['user_exsts']=true;
+					$res['user_exists']=true;	// было user_exsts, похоже была опечатка
 					return $res;
 				}
 

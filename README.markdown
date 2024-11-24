@@ -17,7 +17,7 @@ ClonOS is a free open-source FreeBSD-based platform for virtual environments cre
   + https://man.freebsd.org/vale/4 :: vale(4) as Virtual Ethernet Switch
   + http://man.freebsd.org/jail/8 :: jail(8) as container engine
 
-- https://www.bsdstore.ru/en/ :: CBSD Project as management tools
+- https://github.com/cbsd/cbsd :: CBSD Project as management tools
 
 - https://puppet.com/ :: Puppet as configuration management
 

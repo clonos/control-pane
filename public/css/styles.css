@@ -920,6 +920,15 @@ dialog.fullscreen #vnc-iframe {
 .window-box .mrow.installed small {
 	color:silver;
 }
+
+form.loading {
+	pointer-events: none;
+}
+form.loading input,
+form.loading select {
+	color:#AAA;
+	background:#F5F5F5;
+}
 form.win .field-name {
 	display:block;
 	text-transform:uppercase;

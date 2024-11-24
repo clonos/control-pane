@@ -320,17 +320,32 @@ class Config
 		}
 		return $html;
 	}
-	function os_types_getOne($name='first')
+	function os_types_getOne($name='first',$obtain='')
 	{
 		$res=array();
-		$info=$this->os_types;
-		if($name='first')
+		if($obtain=='obtain')
+		{
+			$info=$this->os_types_obtain;
+		}else{
+			$info=$this->os_types;
+		}
+
+		if($name=='first')
 		{
 			$res=current($info)['items'][0];
 		}else{
-			
+			foreach($info as $type)
+			{
+				foreach($type['items'] as $arr)
+				{
+					if($arr['name']==$name)
+					{
+						$res=$arr;
+						break 2;
+					}
+				}
+			}
 		}
-		
 		return $res;
 	}
 

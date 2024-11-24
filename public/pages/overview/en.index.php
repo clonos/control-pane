@@ -33,7 +33,7 @@
 
 <p>It is an open source and free product which powered by other project (major importance list):</p>
 <ul>
-	<li><a href="https://www.bsdstore.ru/" target="_blank">CBSD Project</a> — — FreeBSD OS virtual environment management framework</li>
+	<li><a href="https://github.com/cbsd/cbsd" target="_blank">CBSD Project</a> — — FreeBSD OS virtual environment management framework</li>
 	<li><a href="https://www.freebsd.org/" target="_blank">FreeBSD Project</a> —  FreeBSD  is a free and open source Unix-like operating system descended from Research Unix created in <a href="https://en.wikipedia.org/wiki/Berkeley_Software_Distribution">University of California, Berkeley, U.S.</li>
 	<li><a href="https://puppet.com/" target="_blank">Puppet</a> — Puppet is an open-source configuration management tool.</li>
 	<li>and many other..</li>

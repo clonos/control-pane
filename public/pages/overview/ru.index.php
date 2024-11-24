@@ -33,7 +33,7 @@
 
 <p>Это открытый и свободный проект, использующий в своей работе такие проекты, как (наиболее значимые):</p>
 <ul>
-	<li><a href="https://www.bsdstore.ru/" target="_blank">CBSD Project</a> — Фреймворк для управления виртуальными окружениями FreeBSD ОС</li>
+	<li><a href="https://github.com/cbsd/cbsd" target="_blank">CBSD Project</a> — Фреймворк для управления виртуальными окружениями FreeBSD ОС</li>
 	<li><a href="https://www.freebsd.org/" target="_blank">FreeBSD Project</a> —  свободная Unix-подобная операционная система, потомок AT&T Unix по линии BSD, созданной в <a href="https://en.wikipedia.org/wiki/Berkeley_Software_Distribution">Калифорнийском университете Беркли, США</a></li>
 	<li><a href="https://puppet.com/" target="_blank">Puppet</a> — Система управления конфигурациями</li>
 	<li>и много остального..</li>

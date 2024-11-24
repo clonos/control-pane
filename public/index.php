@@ -140,7 +140,7 @@ echo $menu->html;
 <header>
 	<div class="top-right">
 		<span class="txt">
-			<a href="https://www.bsdstore.ru/ru/donate.html" target="_blank"><?php echo $locale->translate('DONATE'); ?></a>
+			<a href="https://www.patreon.com/clonos" target="_blank"><?php echo $locale->translate('DONATE'); ?></a>
 			<span class="space"></span>
 			<?php echo $locale->translate('VERSION'),': ',file_get_contents($clonos->realpath.'version'); ?>
 			<span class="space"></span>

@@ -1,20 +1,20 @@
 user www;
 
-load_module /usr/local/libexec/nginx/ngx_stream_module.so;
+load_module	/usr/local/libexec/nginx/ngx_stream_module.so;
 
 events {
-	use kqueue;
+	use	kqueue;
 }
 
 http {
-	include       /usr/local/etc/nginx/mime.types;
-	default_type  application/octet-stream;
+	include		/usr/local/etc/nginx/mime.types;
+	default_type	application/octet-stream;
 
-	client_max_body_size    1m;
-	include /usr/local/etc/nginx/sites-enabled/*.conf;
+	client_max_body_size	1m;
+	include			/usr/local/etc/nginx/sites-enabled/*.conf;
 }
 
 stream {
-	include /usr/local/etc/nginx/conf.stream.d/*.conf;
-	include /usr/local/etc/nginx/streams-enabled/*;
+	include	/usr/local/etc/nginx/conf.stream.d/*.conf;
+	include	/usr/local/etc/nginx/streams-enabled/*;
 }

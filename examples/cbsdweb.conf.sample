@@ -7,48 +7,50 @@ server {
 
 	server_name _;
 
-	root /usr/local/www/clonos/public;
-	set $php_root $document_root;
-	client_max_body_size 0;
+	root	/usr/local/www/clonos/public;
+	set	$php_root	$document_root;
 
-	index  index.php;
+	client_max_body_size	0;		# upload ISO/VM
 
-	access_log            /var/log/nginx/cbsdweb.acc combined;
-	error_log             /var/log/nginx/cbsdweb.err;
+	index	index.php;
+
+	access_log	/var/log/nginx/cbsdweb.acc combined;
+	error_log	/var/log/nginx/cbsdweb.err;
 
 	location ~* \.(jpg|jpeg|gif|png|swf|tiff|swf|flv|zip|rar|bz2|iso|xz|img|css|txt|html|js|xsl|eot|svg|ttf|woff|woff2)$ {
-		index     index.php;
-		try_files $uri $uri/ =404;
+		index	index.php;
+		try_files	$uri	$uri/ =404;
 	}
 
 	location /shell/ {
-		proxy_pass            http://ttyd_back/;
-		proxy_read_timeout    90s;
-		proxy_connect_timeout 90s;
-		proxy_send_timeout    90s;
-		proxy_http_version    1.1;
-		proxy_set_header      Host $http_host;
-		proxy_set_header      X-Forwarded-Proto $scheme;
-		proxy_set_header      X-Forwarded-For $proxy_add_x_forwarded_for;
-		proxy_set_header      Upgrade $http_upgrade;
-		proxy_set_header      Connection "upgrade";
+		proxy_pass		http://ttyd_back/;
+		proxy_read_timeout	90s;
+		proxy_connect_timeout	90s;
+		proxy_send_timeout	90s;
+		proxy_http_version	1.1;
+		proxy_set_header	Host $http_host;
+		proxy_set_header	X-Forwarded-Proto	$scheme;
+		proxy_set_header	X-Forwarded-For		$proxy_add_x_forwarded_for;
+		proxy_set_header	Upgrade			$http_upgrade;
+		proxy_set_header	Connection		"upgrade";
 	}
 
 	location ~ \.php$ {
-		root          /usr/local/www/clonos/public;
-		include       /usr/local/etc/nginx/fastcgi_params;
+		root	/usr/local/www/clonos/public;
+		include	/usr/local/etc/nginx/fastcgi_params;
 
-		allow all;
-		fastcgi_keep_conn on;
-		fastcgi_param  SCRIPT_FILENAME    $php_root$fastcgi_script_name;
-		fastcgi_pass  unix:/tmp/php-fpm.sock;
-		fastcgi_param WORKDIR /usr/jails;
-		# fastcgi_param APPLICATION_ENV development;
-		fastcgi_read_timeout 1200;	# keep in sync with PHP max_execution_time = 1200
+		allow	all;
+		fastcgi_keep_conn	on;
+		fastcgi_param	SCRIPT_FILENAME		$php_root$fastcgi_script_name;
+		fastcgi_pass	unix:/tmp/php-fpm.sock;
+		fastcgi_param	WORKDIR			/usr/jails;
+
+		fastcgi_param		APPLICATION_ENV		development;	# comment to disable DEVELOPER mode:
+		fastcgi_read_timeout	1200;					# keep in sync with PHP max_execution_time = 1200
 	}
 
 	location / {
-		index     index.php;
-		try_files $uri/index.html /index.php$is_args$args;
+		index		index.php;
+		try_files	$uri/index.html		/index.php$is_args$args;
 	}
 }

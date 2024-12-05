@@ -52,6 +52,13 @@ var clonos={
 			*/
 			//this.route(res);
 		}
+		$('ul.menu a').removeClass('sel');
+		var p=window.location.pathname.split('/');
+		$('ul.menu a[href="/'+p[1]+'/"]').addClass('sel');
+		if(isset(page_titles))
+		{
+			$('div.header #title').html(page_titles[p[1]]);
+		}
 	},
 	route:function(args)
 	{
@@ -2268,6 +2275,7 @@ var clonos={
 	loginGo:function()
 	{
 		$('.login-wait').show();
+		$('main').addClass('blur');
 		this.loadData('login',$.proxy(this.onLogin,this),
 				[{'name':'login','value':$('#loginData input[name="login"]').val()},
 				 {'name':'password','value':$('#loginData input[name="password"]').val()}]
@@ -2289,6 +2297,7 @@ var clonos={
 			{
 				$('.login-area').fadeOut(200);
 				$('#user-login').html(data.username);
+				$('main').removeClass('blur');
 				this.dataReload();
 			}
 		}
@@ -2329,6 +2338,7 @@ var clonos={
 		
 		$('#user-login').html('guest');
 		this.loginFadeIn();
+		$('main').addClass('blur');
 		this.dataReload();
 	},
 	clearPageInfo:function()

@@ -150,6 +150,7 @@ class Db {
 			} else {
 				$res = $query->fetchAll(PDO::FETCH_ASSOC);
 			}
+			
 			return $res;
 		} catch(PDOException $e) {
 			return array('error' => true, 'info' => 'Catch exception: ' . $e->getMessage());	//$this->error
@@ -213,7 +214,7 @@ class Db {
 		}
 		return array('rowCount'=>$rowCount);
 	}
-
+	
 	function isConnected(){ return !is_null($this->_pdo); }
 	function getWorkdir(){  return $this->_workdir;    }
 	function getFileName(){ return $this->_filename;   }

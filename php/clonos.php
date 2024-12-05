@@ -109,7 +109,15 @@ class ClonOS {
 			{
 				$this->uri_chunks[0]='overview';
 				$this->realpath_page=$this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
-				$this->_translate->translate($this->realpath_page,'index.php');
+				$trres=$this->_translate->translate('pages',$this->uri_chunks[0],'index.php');
+				
+				$incfile=$this->_translate->get_translated_filename();
+				if(file_exists($incfile))
+				{
+					include($incfile);
+				}
+				if(isset($trres['message'])) echo $trres['message'],"<br>";
+				echo 'incfile: ',$incfile;exit;
 				//break 1;
 			}
 
@@ -1308,9 +1316,9 @@ class ClonOS {
 			'ver'=>'native',
 			'astart'=>0,
 			'interface'=>$form['interface'],
-			'vm_size'=>$form['vm_size'],
+			'vm_size'=>$form['vm_imgsize']*1024*1024*1024,
 			'vm_cpus'=>$form['vm_cpus'],
-			'vm_ram'=>$form['vm_ram'],
+			'vm_ram'=>$form['vm_ram']*1024*1024*1024,
 			'vm_os_type'=>$os_items['type'],
 			'vm_efi'=>'uefi',
 			'vm_os_profile'=>$os_items['profile'],
@@ -1454,9 +1462,9 @@ class ClonOS {
 				$this->_user_info['username'],
 				$form['vm_name'],
 				$os_profile,
-				$form['vm_size'],
+				$form['vm_size']*1024*1024*1024,
 				$form['vm_cpus'],
-				$form['vm_ram'],
+				$form['vm_ram']*1024*1024*1024,
 				$os_type,
 				$form['mask'],
 				$form['ip4_addr'],
@@ -2063,11 +2071,22 @@ class ClonOS {
 		if(empty($this->_dialogs)) return;
 		echo PHP_EOL;
 		foreach($this->_dialogs as $dialog_name){
+			/*
 			$file_name=$this->realpath_public.'dialogs/'.$dialog_name.'.php';
 			if(file_exists($file_name)){
 				include($file_name);
 				echo PHP_EOL,PHP_EOL;
 			}
+			*/
+			
+			$trres=$this->_translate->translate('dialogs','dialogs/',$dialog_name.'.php');
+			
+			$incfile=$this->_translate->get_translated_filename();
+			if(file_exists($incfile))
+			{
+				include($incfile);
+			}
+			//if(isset($trres['message'])) echo $trres['message'],"<br>";
 		}
 	}
 

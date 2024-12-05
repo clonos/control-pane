@@ -1,88 +1,3 @@
-<?php
-if(preg_match('/(?i)msie [5-9]/',$_SERVER['HTTP_USER_AGENT']))
-{
-	echo '<!DOCTYPE html><div style="margin-top:10%;text-align:center;font-size:large;color:darkred;"><p>Sorry, your browser is not supported!</p><p>Please, use last version of any browser.</p></html>';
-	exit;
-}
-
-$_real_path=realpath('../');
-$uri=trim($_SERVER['REQUEST_URI'],'/');
-require_once($_real_path.'/php/clonos.php');
-require_once($_real_path.'/php/menu.php');
-$chunks=Utils::gen_uri_chunks($uri);
-$clonos=new ClonOS($_real_path, $chunks);
-$locale = new Localization($_real_path.'/public/'); # /usr/home/web/cp/clonos/public/
-$menu=new Menu($locale, $chunks, $_real_path.'/public/pages/');
-
-if(isset($_GET['upload'])){
-	include('upload.php');
-	CBSD::register_media($path,$file,$ext);
-	exit;
-}
-if(isset($_GET['download'])){
-	include('download.php');
-	CBSD::register_media($path,$file,$ext);
-	exit;
-}
-
-$lang=$locale->get_lang();
-$_ds=DIRECTORY_SEPARATOR;
-$root=trim($_SERVER['DOCUMENT_ROOT'], $_ds);
-
-if(!empty($chunks)) $uri=$chunks[0];
-
-$file_path=$_ds.$root.$_ds.'pages'.$_ds.$uri.$_ds;
-$file_name=$file_path.$lang.'.index.php';
-$json_name=$file_path.'a.json.php';
-
-if(empty($uri)){
-	header('Location: /'.$menu->first_key.'/',true);
-	exit;
-}
-
-error_reporting(E_ALL);
-
-$user_info=$clonos->userAutologin();
-if(!$user_info['error']){
-	$user_info_txt="user_id='${user_info['id']}';user_login='${user_info['username']}';";
-}else{
-	$user_info['username']='guest';
-}
-
-/*
-<!--place(...)-->
-menu->title
----
-if(isset($user_info_txt)) echo $user_info_txt
----
-<!--place(body)-->
-if(file_exists($file_name)){
-	include($file_name);
-} else {
-	echo '<h1>'.$locale->translate('Not implemented yet').'!</h1>';
-}
-<!--place(dialogs)-->
-$clonos->placeDialogs();
----
-<!--place(config::language)-- >
-foreach(Config::$languages as $lng=>$lngname){
-	$sel = ($lang==$lng) ? ' selected="selected"' : '';
-	echo '				<option value="'.$lng.'"'.$sel.'>'.$lngname.'</option>'.PHP_EOL;
-}
----
-<!--place(username)-->
-<?php echo $user_info['username']; ?>
----
-<!--place(login-area-hide)-->
-<?php if(!$user_info['error']) echo ' hide'; ?>
---
-<!--place(dialog:system-login)-->
-<?php echo $clonos->placeDialogByName('system-login'); ?>
-*/
-
-
-#include($_real_path.'/public/pages/index.php'); exit;
-?>
 <!DOCTYPE html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -123,14 +38,14 @@ foreach(Config::$languages as $lng=>$lngname){
 </script>
 <body class="gadget1 login <?php echo $uri;?>">
 
-<main<?php if($user_info['error']) echo ' class="blur"';?>>
+<main>
 <div class="main"><div id="content">
 <div id="ctop">
 <?php
 if(file_exists($file_name)){
 	include($file_name);
 } else {
-	echo '<h1>'.$locale->translate('Not implemented yet').'!</h1>';
+	echo '<h1><translate>Not implemented yet</translate>!</h1>';
 }
 $clonos->placeDialogs();
 ?>
@@ -144,16 +59,16 @@ $clonos->placeDialogs();
 			</dl>
 		</div>
 		<div class="right">
-			<h2><?php echo $locale->translate('CPU usage');?>, %:</h2>
+			<h2><translate>CPU usage</translate>, %:</h2>
 			<div class="graph v-black g--summary-cpu l-cpu"></div>
 			<br />
-			<h2><?php echo $locale->translate('Memory usage');?>, %:</h2>
+			<h2><translate>Memory usage</translate>, %:</h2>
 			<div class="graph v-black g--summary-mem l-mem"></div>
 			<br />
-			<h2><?php echo $locale->translate('I/O storage');?>, iops:</h2>
+			<h2><translate>I/O storage</translate>, iops:</h2>
 			<div class="graph v-black g--summary-iops l-read,write pr-no te-iops"></div>
 			<br />
-			<h2><?php echo $locale->translate('I/O storage');?>, bit per seconds:</h2>
+			<h2><translate>I/O storage</translate>, bit per seconds:</h2>
 			<div class="graph v-black g--summary-bps l-read,write pr-no te-bps"></div>
 		</div>
 </div>
@@ -174,11 +89,11 @@ echo $menu->html;
 <header>
 	<div class="top-right">
 		<span class="txt">
-			<a href="https://www.patreon.com/clonos" target="_blank"><?php echo $locale->translate('DONATE'); ?></a>
+			<a href="https://www.patreon.com/clonos" target="_blank"><translate>DONATE</translate></a>
 			<span class="space"></span>
-			<?php echo $locale->translate('VERSION'),': ',file_get_contents($clonos->realpath.'version'); ?>
+			<translate>VERSION</translate>: <?php file_get_contents($clonos->realpath.'version'); ?>
 			<span class="space"></span>
-			<?php echo $locale->translate('THEMES'); ?>:
+			<translate>THEMES</translate>:
 		</span>
 		<span class="ch_theme">
 			 <span class="light"></span><span class="dark"></span>
@@ -189,13 +104,13 @@ echo $menu->html;
 	<ul>
 		<li class="mhome"><a href="/">Home</a></li>
 <?php // if($clonos->environment=='development') { ?>
-		<li><a href="/settings/"><?php echo $locale->translate('Settings'); ?></a></li>
+		<li><a href="/settings/"><translate>Settings</translate></a></li>
 <?php // } ?>
-		<li><a href="/users/"><?php echo $locale->translate('Users'); ?></a></li>
-		<li><a target="_blank" href="/shell/">&gt;&gt;<?php echo $locale->translate('Console'); ?></a></li>
+		<li><a href="/users/"><translate>Users</translate></a></li>
+		<li><a target="_blank" href="/shell/">&gt;&gt;<translate>Console</translate></a></li>
 <!--
-		<li><a href="/profile/"><?php echo $locale->translate('Profile'); ?></a></li>
-		<li><a href="/support/"><?php echo $locale->translate('Support'); ?></a></li>
+		<li><a href="/profile/"><translate>Profile</translate></a></li>
+		<li><a href="/support/"><translate>Support</translate></a></li>
 -->
 		<li><a name="">
 			<select id="lng-sel">

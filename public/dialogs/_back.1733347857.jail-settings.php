@@ -64,7 +64,7 @@ err_messages.add({
 	<div class="buttons">
 		<input type="button" value="<translate id="40">Create</translate>" class="new button ok-but" />
 		<input type="button" value="<translate id="41">Save</translate>" class="edit button ok-but" />
-		<input type="button" value="<translate id="42">Cancel</translate>" class="button red cancel-but" />
+		<input type="button" value="<translate>Cancel</translate>" class="button red cancel-but" />
 	</div>
 </dialog>
 <?php

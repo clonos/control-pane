@@ -8,11 +8,60 @@ class Localization
 
 	function __construct($realpath_public)
 	{
+#$_COOKIE['lang']='ru';
 		$this->realpath=$realpath_public;
 		(isset($_COOKIE['lang'])) AND $this->language=$_COOKIE['lang'];
 		(!array_key_exists($this->language, Config::$languages)) AND $this->language='en';
 		include($realpath_public.'/lang/'.$this->language.'.php');
 		$this->translate_arr=$lang;
+		
+		/*
+		$n=1;
+		foreach($lang as $eng=>$rus)
+		{
+			echo $n,' — ',$eng,"<br>";
+			$n++;
+		}
+		exit;
+		*/
+		
+		# Если нужно наполнить базу, то нужно убрать комментарий и запустить страницу
+		# с параметром /?go=go
+		/*
+		if($_GET['go']=='go')
+		{
+			#var_dump($lang);
+			#exit;
+			
+			$db=new Db('clonos');
+			if(!$db->isConnected())
+			{
+				print_r(['error'=>true,'error_message'=>'db connection lost!']);
+				exit;
+			}
+
+			foreach($lang as $eng=>$rus)
+			{
+				$dbres=$db->insert("insert into lang_en (text) values (?)",[[$eng, PDO::PARAM_STR]]);
+				if($dbres['error'])
+				{
+					print_r(['error'=>true,'error_message'=>$dbres['info']]);
+					exit;
+				}
+				
+				$new_id=$dbres['lastID'];
+				$dbres=$db->insert("insert into lang_other (en_id,text,lang) values (?,?,?)",[[$new_id],[$rus],['ru']]);
+				if($dbres['error'])
+				{
+					print_r(['error'=>true,'error_message'=>$dbres['info']]);
+					exit;
+				}
+				
+			}
+		}
+		echo 'all ok';
+		exit;
+		*/
 	}
 
 	public function get_lang()
@@ -32,7 +81,9 @@ class Localization
 }
 
 
-
+# для отключения ссылок в меню, чтобы можно было его перевести:
+# $('ul.menu').on('click',function(event){return false;});
+# доделать со временем
 class Translate
 {
 	private $locale='';
@@ -57,19 +108,27 @@ class Translate
 	public function translate($path,$page,$file_name)
 	{
 		$translate_cache='_translate.cache';
+		$backup_dir='back';
 		switch($path)
 		{
 			case 'pages':
 				$full_path=$this->realpath.$path.DIRECTORY_SEPARATOR.$page.DIRECTORY_SEPARATOR;
 				$translate_cache_path=$full_path.$translate_cache.DIRECTORY_SEPARATOR;
+				$backup_path=$full_path.$backup_dir.DIRECTORY_SEPARATOR;
 				$this->translated_file=$translate_cache_path.$this->language.'.index.php';
+				//echo $this->translated_file;exit;
 				break;
 			case 'dialogs':
 				$full_path=$this->realpath.$path.DIRECTORY_SEPARATOR;
 				$translate_cache_path=$full_path.$translate_cache.DIRECTORY_SEPARATOR;
+				$backup_path=$full_path.$backup_dir.DIRECTORY_SEPARATOR;
 				$this->translated_file=$translate_cache_path.$this->language.'.'.$file_name;
 				break;
+			default:
+				$path='system';
 		}
+		
+		if(!is_dir($full_path)) return;
 		
 		if(!is_dir($translate_cache_path))
 		{
@@ -82,8 +141,10 @@ class Translate
 		
 		$file=$full_path.$file_name;
 
+		$mtime_translate=0;
 		$mtime_orig=filemtime($file);
-		$mtime_translate=filemtime($this->translated_file);
+		if(file_exists($this->translated_file))
+			$mtime_translate=filemtime($this->translated_file);
 		# $mtime_db_update — дата последней модификации перевода в БД
 		
 		if($mtime_orig<$mtime_translate)
@@ -101,8 +162,8 @@ class Translate
 		{
 			$is_changed=false;
 			$txt=file_get_contents($file);
-			preg_match_all('#<translate([^>]*)>(.*)</translate>#',$txt,$res,PREG_SET_ORDER);
-//			var_dump($res);exit;
+			preg_match_all('#<translate([^>]*)>(.*)</translate>#U',$txt,$res,PREG_SET_ORDER);
+			//echo '<pre>';var_dump($res);exit;
 			
 			$ids_arr=[];
 			
@@ -120,6 +181,7 @@ class Translate
 				{
 					// если у тэга есть ID, то проверяем текст и формируем шаблон
 					preg_match_all('#((id)="?([\d]+)"?|update)#',$attrs,$params,PREG_SET_ORDER);
+
 					if(is_array($params))	// && $this->language!='en'
 					{
 						// ИЗМЕНИТЬ КОММЕНТАРИЙ! --- если у пользователя язык интерфейса не английский, то переводим
@@ -131,13 +193,20 @@ class Translate
 								if(is_numeric($p[3]))
 								{
 									$id=$p[3];
-									$dbres=$db->selectOne("select text from lang_en where id=?",[[$id,PDO::PARAM_INT]]);
+									$dbres=$db->selectOne("select text from lang_en where id=? and type in (?,?)",[
+										[$id,PDO::PARAM_INT],
+										[$path,PDO::PARAM_STR],
+										['system',PDO::PARAM_STR]
+									]);
+									//var_dump($dbres);
 									if(!empty($dbres))
 									{
 										if($text!=$dbres['text'])
 										{
 											// если оригинальный текст изменился, то обновляем его в базе
-											$dbres1=$db->update('update lang_en set text=? where id=?',[[$text,PDO::PARAM_STR],[$id,PDO::PARAM_INT]]);
+											# временно отключил, пока наполняется основная база. Потом нужно вернуть обратно
+											/*
+											$dbres1=$db->update('update lang_en set text=? where id=? and type=?',[[$text,PDO::PARAM_STR],[$id,PDO::PARAM_INT],[$path,PDO::PARAM_STR]]);
 											if(isset($dbres1['rowCount']))
 											{
 												if($dbres1['rowCount']>0)
@@ -145,11 +214,14 @@ class Translate
 													$is_changed=true;
 												}
 											}
+											*/
 										}
+										
 									}
 									$ids_arr[]=$id;
 								}
 							}
+							//print_r($ids_arr);exit;
 /*							
 							if($p[0]=='update' && $id>0)
 							{
@@ -170,13 +242,20 @@ delete FROM "lang_en";
 VACUUM;
 UPDATE SQLITE_SEQUENCE SET seq = 0 WHERE name = 'lang_en'
 */
-					
-					$dbres=$db->selectOne("select id from lang_en where text=?",[[$text, PDO::PARAM_STR]]);	//,[[$text, PDO::PARAM_STR]]);
+					$dbres=$db->selectOne("select id from lang_en where text=? and type in (?,?)",[
+						[$text,PDO::PARAM_STR],
+						[$path,PDO::PARAM_STR],
+						['system',PDO::PARAM_STR]
+					]);
 					if(isset($dbres['error']) && $dbres['error'])
 					{
 						echo 'error db: ',$dbres['info'];
 						exit;
 					}
+					//echo $text;
+					//var_dump($dbres);
+					//echo '<br>';
+					
 					if(is_numeric($dbres['id']))
 					{
 						// если фраза есть в базе, то вписываем её ID в тэг
@@ -187,7 +266,7 @@ UPDATE SQLITE_SEQUENCE SET seq = 0 WHERE name = 'lang_en'
 						if($dbres===false)
 						{
 							// если фразы нет в базе, то добавляем её туда и вписываем новый ID в тэг
-							$dbres=$db->insert("insert into lang_en (text) values (?)",[[$text, PDO::PARAM_STR]]);
+							$dbres=$db->insert("insert into lang_en (text,type) values (?,?)",[[$text, PDO::PARAM_STR],[$path, PDO::PARAM_STR]]);
 							
 							if($dbres['error'])
 								return array('error'=>true,'error_message'=>$dbres['info']);
@@ -195,18 +274,29 @@ UPDATE SQLITE_SEQUENCE SET seq = 0 WHERE name = 'lang_en'
 							$new_text='<translate id="'.$dbres['lastID'].'">'.$text."</translate>";
 							$txt=str_replace($tag,$new_text,$txt);
 							$is_changed=true;
-							
+							//echo $txt;
 							$ids_arr[]=$dbres['lastID'];
 						}
 					}
+					
 				}
 			}
 			
 			// бэкапим предыдущий файл и сохраняем видоизменённый
 			if($is_changed)
 			{
-				rename($full_path.$file_name,$full_path.'_back.'.time().'.'.$file_name);
+				if(!is_dir($backup_path))
+				{
+					mkdir($backup_path);
+				}
+
+				//rename($full_path.$file_name,$full_path.
+				//	$backup_dir.DIRECTORY_SEPARATOR.time().'.'.$file_name);
+				rename($full_path.$file_name,$backup_path.time().'.'.$file_name);
 				file_put_contents($full_path.$file_name,$txt);
+				#echo 'save';
+				#echo $txt;
+				#exit;
 			}
 			
 			// переводим на другие языки
@@ -222,14 +312,28 @@ UPDATE SQLITE_SEQUENCE SET seq = 0 WHERE name = 'lang_en'
 			
 			foreach($res as $item)
 			{
-				$pat='#<translate id="'.$item['en_id'].'"[^>]*>(.*)</translate>#';
-				$txt=preg_replace($pat,$item['text'],$txt);
+				$pat='#<translate id="'.$item['en_id'].'"[^>]*>(.*)</translate>#U';
+				$txtChg='<span id="trlt-'.$item['en_id'].'">'.$item['text'].'</span>';
+				$txt=preg_replace($pat,$txtChg,$txt);	//'<span id="trlt-'.$item['en_id'].'">'.	//.'</span>'
 			}
 			
-			$txt=preg_replace('#(<translate([^>]*)>|</translate>)#','',$txt);
+			//$txt=preg_replace('#(<translate([^>]*)>|</translate>)#','',$txt);
+			$txt=preg_replace('#<translate id="([\d]+)">#U','<span id="trlt-$1">',$txt);
+			$txt=str_replace('</translate>','</span>',$txt);
+			
+			$txt=preg_replace("#title='<span.+>([^\']+)</span>'#U","$1",$txt);
+			
+			$txt=preg_replace("#(<option[^>]+>)<span[^>]+>(.*)</span>#U","$1$2",$txt);
+			
+			# чистим кнопки от лишних тэгов
+			$txt=preg_replace('#<input type="button" value="(<span[^>]+)>(.*?)</span>"#U','<input type="button" value="$2"',$txt);
+			//echo $txt;
+			//exit;
 			
 			//$this->tanslated_file=$translate_cache_path.$this->language.'.index.php';
 			file_put_contents($this->translated_file,$txt);
+			#echo $txt;
+			#exit;
 
 			//var_dump($res);
 			//echo $ids_txt;

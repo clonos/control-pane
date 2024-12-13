@@ -387,7 +387,7 @@ class Config
 			$res1=$cpu+$ram1;
 			if($min>$res1 || $min==0) {$min=$res1;$min_id=$item['id'];}
 
-			$name='<strong>'.$item['name'].'</strong> (cpu: '.$cpu.'; ram: '.$ram.'; hdd: '.$item['pkg_vm_disk'].')';
+			$name=$item['name'].' (cpu: '.$cpu.'; ram: '.$ram.'; hdd: '.$item['pkg_vm_disk'].')';	# '<strong>'.	</strong>
 			$html.='					<option value="'.$item['id'].'" title="'.$item['description'].'">'.$name.'</option>'.PHP_EOL;
 		}
 		return array('html'=>$html,'min_id'=>$min_id);

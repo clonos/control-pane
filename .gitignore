@@ -9,3 +9,7 @@ public/media/*.size
 composer.lock
 php/sentry.php
 php/vendor
+_translate.cache
+media_import
+__pycache__
+vendor

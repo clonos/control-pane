@@ -10,8 +10,8 @@
 	<div class="vnc-wait">
 		<div class="outer">
 			<div class="inner">
-				<span class="icon-spin5 animate-spin"></span><?php echo $this->translate('Please, wait for initialize Virtual Machine');?>
-				<br /><small style="display: block;font-size: small;margin-top: 20px;"><?php echo $this->translate('You can click here, or wait');?>: <span id="vnc-countdown"><?php echo $this->translate('some time');?></span></small>
+				<span class="icon-spin5 animate-spin"></span><translate id="129">Please, wait for initialize Virtual Machine</translate>
+				<br /><small style="display: block;font-size: small;margin-top: 20px;"><translate id="130">You can click here, or wait</translate>: <span id="vnc-countdown"><translate id="131">some time</translate></span></small>
 			</div>
 		</div>
 	</div>

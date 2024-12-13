@@ -57,7 +57,9 @@ var clonos={
 		$('ul.menu a[href="/'+p[1]+'/"]').addClass('sel');
 		if(isset(page_titles))
 		{
-			$('div.header #title').html(page_titles[p[1]]);
+			var title=page_titles[p[1]];
+			$('div.header #title').html(title);
+			$('title').html('ClonOS — ' + title);
 		}
 	},
 	route:function(args)
@@ -78,10 +80,18 @@ var clonos={
 		}
 		this.loadData('getJsonPage',$.proxy(this.onLoadData,this));
 	},
+	onBackHistory:function(event)
+	{
+		if(!$('body').hasClass('translate'))
+		{
+			$('input#trlt-chk').prop('checked',false);
+		}
+	},
 	
 	addEvents:function()
 	{
 		$(window).on('hashchange',$.proxy(this.onHashChange,this));
+		$(window).on('pageshow',$.proxy(this.onBackHistory,this));
 		$('#lng-sel').on('change',$.proxy(this.setLang,this));	//function(){document.cookie="lang="+$(this).val()+";path=/;";location.reload();});
 		$('#content').on('click',$.proxy(this.bodyClick,this));
 		$('#login').on('click',$.proxy(this.loginAction,this));
@@ -196,6 +206,63 @@ var clonos={
 		}
 		return phrase;
 	},
+	trltGo:function(id,el)
+	{
+		var lang=this.getLang();
+		var dlgname='';
+		if(lang=='en')
+		{
+			alert('There is no need to translate into English, since all the phrases of the project are written in it.\nPlease select the interface language you want to translate English phrases into.');
+			return;
+		}
+		if($('body').hasClass('translate'))
+		{
+			var type='system';
+			var dialog=$(el).parents('dialog');
+			if(dialog.length>0)
+			{
+				type='dialog';
+				dlgname=$(dialog).attr('id');
+			}else{
+				var pages=$(el).parents('div#ctop');
+				if(pages.length>0) type='pages';
+			}
+			
+			var posts=$('form#transtlates').serializeArray();
+			posts.push({'name':'type','value':type});
+			posts.push({'name':'dialog','value':dlgname});
+			posts.push({'name':'phraseID','value':id});
+			this.loadData('trltGo',$.proxy(this.onTrltGo,this),posts);
+			
+			this.dialogShow1('translates','new');
+			return;
+		}
+	},
+	trltOn:function()
+	{
+		if($('input#trlt-chk').is(':checked'))
+			$('body').addClass('translate');
+		else
+			$('body').removeClass('translate');
+	},
+	onTrltGo:function(data)
+	{
+		$('form#translate textarea#origPhrase').val(data.eng);
+		$('form#translate textarea#translPhrase').val(data.oth);
+		$('form#translate input#trlt-phID').val(data.phraseID);
+		$('form#translate input#trlt-type').val(data.type);
+		$('form#translate input#trlt-dlgname').val(data.dialog);
+	},
+	onTrltUpdate:function(data)
+	{
+		//debugger;
+		if(typeof data.error!='undefined' && !data.error)
+		{
+			$('body span#trlt-'+data.phraseID).html(data.phrase).css({backgroundColor: '#ffdddd'});
+			setTimeout(function(id){$('span#trlt-'+id).css({backgroundColor:''})},200,data.phraseID);
+			this.dialogClose('translates');
+		}
+	},
 	
 	getTrIdsForCheck:function(table_id)
 	{
@@ -213,6 +280,10 @@ var clonos={
 	dialogOpen:function(event)
 	{
 		var tg=event.target;
+		if(tg.id.substr(0,5)=='trlt-')
+		{
+			tg=$(event.target).parent();
+		}
 		var cl=$(tg).attr('class');
 		var res=new RegExp(/id:([^ ]+)/);
 		if(res=cl.match(res))
@@ -352,22 +423,25 @@ var clonos={
 		if(!$(dialog).hasClass('fullscreen'))
 			this.dialogSetPosition(dialog);
 	},
-	dialogClose:function()
+	dialogClose:function(dname)
 	{
 		var dialogs=$('dialog');
 		for(var n=0,nl=dialogs.length;n<nl;n++)
 		{
 			var dialog=dialogs[n];
-			if(typeof $(dialog).get(0).showModal=='function')
+			if(typeof dname=='undefined' || typeof dname!='undefined' && dname==$(dialog).attr('id'))
 			{
-				if($(dialog).attr('open')!='undefined' &&
-					$(dialog).attr('open')=='open')
-						$(dialog).get(0).close();
-			}else{
-				$('div#backdrop').css('display','none');
+				if(typeof $(dialog).get(0).showModal=='function')
+				{
+					if($(dialog).attr('open')!='undefined' &&
+						$(dialog).attr('open')=='open')
+							$(dialog).get(0).close();
+				}else{
+					$('div#backdrop').css('display','none');
+				}
+				$(dialog).css('display','none');
+				if($('form',dialog).length>0) $('form',dialog).get(0).reset();	// Очищаем форму, после нажатия на CANCEL
 			}
-			$(dialog).css('display','none');
-			if($('form',dialog).length>0) $('form',dialog).get(0).reset();	// Очищаем форму, после нажатия на CANCEL
 		}
 	},
 	dialogCloseByKey:function(event)
@@ -628,6 +702,14 @@ var clonos={
 				var fmode='k8sCreate';
 				var posts=$('form#k8sNewSettings').serializeArray();
 				this.loadData(fmode,$.proxy(this.onK8sCreate,this),posts);
+			}
+			
+			if(id=='translates')
+			{
+				var fmode='trltUpdate';
+				//var pr=$()
+				var posts=$('form#translate').serializeArray();
+				this.loadData(fmode,$.proxy(this.onTrltUpdate,this),posts);
 			}
 			
 		}
@@ -1811,6 +1893,20 @@ var clonos={
 		//debugger;
 		if(!this.authorized) {location.reload();return;}
 		var target=event.target;
+		var elid=$(target).attr('id');
+		if(typeof elid=='undefined') elid=$(target)[0].id;
+		
+		if(elid.substr(0,5)=='trlt-')
+		{
+			var trltId=elid.substr(5);
+			this.trltGo(trltId,target);
+			if($('body').hasClass('translate')) return false;
+			var target=$(target).parent();
+			elid=$(target)[0].id;
+			if(typeof elid=='undefined') elid=$(target).attr(id);
+		}
+
+		
 		if($(target).parents('form').length>0)
 		{
 			var cl=$(target).attr('class');
@@ -1857,7 +1953,7 @@ var clonos={
 			
 			return;
 		}
-		var elid=$(target).attr('id');
+		
 		
 		/* ловим клики по выпадающему меню */
 		if(typeof elid!='undefined')
@@ -1872,6 +1968,7 @@ var clonos={
 					this.DDMenuSelect(elid);
 					return;break;
 			}
+			
 		}
 		
 		var outer=$(target).parents('.vnc-wait');
@@ -1926,7 +2023,8 @@ var clonos={
 		var opt='jail';
 		if(tblid=='bhyveslist') opt='bhyve';
 
-		var cl=target.className;
+		var cl=$(target).attr('class');
+		if(typeof cl=='undefined') cl=$(target)[0].className;
 		switch(cl)
 		{
 			case 'icon-cancel':
@@ -3437,6 +3535,11 @@ var clonos={
 		}
 		document.cookie="lang="+lang+";path=/;";
 		location.reload();
+	},
+	getLang:function()
+	{
+		var lang=$('#lng-sel option[selected="selected"]').val();
+		return lang;
 	},
 	
 	graphs:{},

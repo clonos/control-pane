@@ -7,12 +7,16 @@ require_once('forms.php');
 require_once('utils.php');
 
 class ClonOS {
+	const TRANSLATE_CACHE_NAME='_translate.cache';
+	const BACK_FOLDER_NAME='back';
+	
 	public $server_name='';
 	public $workdir='';
 	public $environment='';
 	public $realpath='';
 	public $realpath_php='';
 	public $realpath_public='';
+	public $realpath_dialogs='';
 	public $realpath_page='';
 	public $uri_chunks=array();
 	public $json_name='';
@@ -65,6 +69,7 @@ class ClonOS {
 		$this->realpath=$_real_path.'/'; # /usr/home/web/cp/clonos/
 		$this->realpath_php=$_real_path.'/php/'; # /usr/home/web/cp/clonos/php/
 		$this->realpath_public=$_real_path.'/public/'; # /usr/home/web/cp/clonos/public/
+		$this->realpath_dialogs=$this->realpath_public.'dialogs/'; # /usr/home/web/cp/clonos/public/dialogs/
 		$this->media_import=$_real_path.'/media_import/';
 
 		if($this->environment=='development'){
@@ -104,7 +109,7 @@ class ClonOS {
 			$this->json_name=$this->realpath_page.'a.json.php';
 			//echo $this->realpath_page;
 		}else if($_SERVER['REQUEST_URI']){
-
+			/*
 			if($this->uri_chunks[0]=='overview1')
 			{
 				$this->uri_chunks[0]='overview';
@@ -120,7 +125,7 @@ class ClonOS {
 				echo 'incfile: ',$incfile;exit;
 				//break 1;
 			}
-
+			*/
 			//$this->realpath_page=$this->realpath_public.'pages/'.trim($_SERVER['REQUEST_URI'],'/').'/';
 			if(isset($this->uri_chunks[0])){
 				$this->realpath_page=$this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
@@ -282,6 +287,94 @@ class ClonOS {
 	function translate($phrase)
 	{
 		return $this->_locale->translate($phrase);
+	}
+	
+	function ccmd_trltGo()
+	{
+		$dbres=[];
+		$form=$this->_vars['form_data'];
+		if(isset($form['phraseID']) && is_numeric($form['phraseID']))
+		{
+			$db=new Db('clonos');
+			if(!$db->isConnected())
+				return array('error'=>true,'error_message'=>'translate db connection lost!');
+			
+			$dbres=$db->selectOne(
+				'SELECT e.text as eng, o.text as oth FROM "lang_en" as e left join "lang_other" as o on e.id=o.en_id where e.id=?',
+				[[$form['phraseID'],PDO::PARAM_INT]]
+			);
+			
+			$dbres['phraseID']=$form['phraseID'];
+			$dbres['type']=$form['type'];
+			$dbres['dialog']=$form['dialog'];
+		}
+		return $dbres;
+		
+	}
+	function ccmd_trltUpdate()
+	{
+		$lang=$this->_locale->get_lang();
+		$form=$this->_vars['form_data'];
+
+		switch($form['type'])
+		{
+			case 'dialog':
+				$cache_file_name=$this->realpath_dialogs.ClonOS::TRANSLATE_CACHE_NAME.
+					DIRECTORY_SEPARATOR.$lang.'.'.$form['dialog'].'.php';
+				break;
+			case 'pages':
+				$cache_file_name=$this->realpath_page.ClonOS::TRANSLATE_CACHE_NAME.
+					DIRECTORY_SEPARATOR.$lang.'.index.php';
+				break;
+			default:
+				echo $cache_file_name;
+				exit;
+				break;
+		}
+
+		if(file_exists($cache_file_name)) unlink($cache_file_name);
+		//echo $cache_file_name;
+		//exit;
+		//echo $file_name;exit;
+		$db=new Db('clonos');
+		if(!$db->isConnected())
+			return array('error'=>true,'error_message'=>'translate db connection error!');
+
+		$dbres=$db->update("update lang_other set text=?,lang=? where en_id=?",[
+			[$form['translText'],PDO::PARAM_STR],
+			[$lang,PDO::PARAM_STR],
+			[$form['phraseID'],PDO::PARAM_INT]
+		]);
+		
+		//echo '<pre>';print_r($dbres);
+		
+		if(!isset($dbres['error']))
+		{
+			if($dbres['rowCount']==0)
+			{
+				$dbres=$db->insert("insert into lang_other (en_id,text,lang) values (?,?,?)",[
+					[$form['phraseID'],PDO::PARAM_INT],
+					[$form['translText'],PDO::PARAM_STR],
+					[$lang,PDO::PARAM_STR]
+				]);
+				//print_r($dbres);exit;
+				if($dbres['error'])
+				{
+					return $dbres;
+				}
+				$dbres['phraseID']=$dbres['lastID'];
+			}
+		}
+		
+		
+		//$back_file=
+		
+		return [
+			'error'=>false,
+			'rowCount'=>$dbres['rowCount'],
+			'phraseID'=>$form['phraseID'],
+			'phrase'=>$form['translText']
+		];
 	}
 
 	function ccmd_getJsonPage(){
@@ -2093,7 +2186,10 @@ class ClonOS {
 	function placeDialogByName($dialog_name=null){
 		if(is_null($dialog_name)) return;
 		echo PHP_EOL;
-		$file_name=$this->realpath_public.'dialogs/'.$dialog_name.'.php';
+		//$file_name=$this->realpath_public.'dialogs/'.$dialog_name.'.php';
+		
+		$trres=$this->_translate->translate('dialogs','dialogs/',$dialog_name.'.php');
+		$file_name=$this->_translate->get_translated_filename();
 		if(file_exists($file_name)){
 			include($file_name);
 			echo PHP_EOL,PHP_EOL;

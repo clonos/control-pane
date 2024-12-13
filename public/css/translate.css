@@ -1,0 +1,25 @@
+body.translate span[id*="trlt-"]:hover {
+	background-color:#faafba;
+	cursor:help;
+	color:black;
+}
+
+body.translate span[id*="trlt-"]:hover:before {
+	content:'\01E2';
+	display:block;
+	position:absolute;
+	float:left;
+	background-color:black;
+	font-size:8pt;
+	color:white;
+	padding:2px 4px;
+	
+}
+
+dialog#translates h1 {
+	color:#337ab7;
+	font-size:120%;
+}
+dialog#translates textarea {
+	height:120px;
+}

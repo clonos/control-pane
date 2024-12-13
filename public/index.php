@@ -12,6 +12,7 @@ require_once($_real_path.'/php/menu.php');
 $chunks=Utils::gen_uri_chunks($uri);
 $clonos=new ClonOS($_real_path, $chunks);
 $locale = new Localization($_real_path.'/public/'); # /usr/home/web/cp/clonos/public/
+$translate=new Translate($locale,$_real_path);
 $menu=new Menu($locale, $chunks, $_real_path.'/public/pages/');
 
 if(isset($_GET['upload'])){
@@ -32,7 +33,8 @@ $root=trim($_SERVER['DOCUMENT_ROOT'], $_ds);
 if(!empty($chunks)) $uri=$chunks[0];
 
 $file_path=$_ds.$root.$_ds.'pages'.$_ds.$uri.$_ds;
-$file_name=$file_path.$lang.'.index.php';
+//$file_name=$file_path.$lang.'.index.php';
+$file_name='index.php';
 $json_name=$file_path.'a.json.php';
 
 if(empty($uri)){
@@ -127,8 +129,11 @@ foreach(Config::$languages as $lng=>$lngname){
 <div class="main"><div id="content">
 <div id="ctop">
 <?php
-if(file_exists($file_name)){
-	include($file_name);
+
+$translate->translate('pages',$chunks[0],'index.php');
+$incfile=$translate->get_translated_filename();
+if(file_exists($incfile)){	//$file_name
+	include($incfile);	//$file_name
 } else {
 	echo '<h1>'.$locale->translate('Not implemented yet').'!</h1>';
 }
@@ -158,6 +163,7 @@ $clonos->placeDialogs();
 		</div>
 </div>
 </div>
+<?php echo $clonos->placeDialogByName('translate'); ?>
 </div></div>
 </main>
 
@@ -174,6 +180,8 @@ echo $menu->html;
 <header>
 	<div class="top-right">
 		<span class="txt">
+			<input type="checkbox" name="trlt" id="trlt-chk" onchange="clonos.trltOn();" /><label for="trlt-chk"> Translate ON</label>
+			<span class="space"></span>
 			<a href="https://www.patreon.com/clonos" target="_blank"><?php echo $locale->translate('DONATE'); ?></a>
 			<span class="space"></span>
 			<?php echo $locale->translate('VERSION'),': ',file_get_contents($clonos->realpath.'version'); ?>
@@ -212,7 +220,8 @@ foreach(Config::$languages as $lng=>$lngname){
 	</div>
 </header>
 
-<div class="login-area<?php if(!$user_info['error']) echo ' hide'; ?>"><?php echo $clonos->placeDialogByName('system-login'); ?>
+<div class="login-area<?php if(!$user_info['error']) echo ' hide'; ?>">
+	<?php echo $clonos->placeDialogByName('system-login'); ?>
 	<div class="ccopy">ClonOS — is a powerfull system for&hellip;</div>
 	<div class="ccopy">Cloud computing, Lightweight containerization, Virtualization, etc&hellip;</div>
 </div>

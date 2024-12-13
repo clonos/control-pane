@@ -28,7 +28,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 		!isset($_FILES['file']['error']) ||
 		is_array($_FILES['file']['error'])
 	) {
-		echo json_encode(array('status' => 'Upload Fail: An error occurred!';));
+		echo json_encode(array('status' => 'Upload Fail: An error occurred!'));
 		exit;
 	}
 

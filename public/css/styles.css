@@ -1,3 +1,5 @@
+@import url("translate.css");
+
 html {
 	background:#333;
 	margin:0;
@@ -109,7 +111,7 @@ header {
 	height:52px;
 	background-image: url(/images/main-menu-bg.png);
 	background-repeat: repeat-x;
-	background-position-y: 15px;
+	background-position: 0 15px;
 }
 .header ul {
 	height: 52px;

@@ -7,9 +7,9 @@ err_messages.add({
 </script>
 <dialog id="jail-rename" class="window-box new">
 	<h1>
-		<span class="new"><span id="trlt-214">Rename jail</span></span>
+		<span class="new"><span id="trlt-214">Переименование контейнера</span></span>
 	</h1>
-	<h2><span id="trlt-215">Renamed Jail Settings</span></h2>
+	<h2><span id="trlt-215">Настройки переименования</span></h2>
 	<form class="win" method="post" id="jailRenameSettings" onsubmit="return false;">
 		<div class="window-content">
 			<p class="warning" style="width:400px;">

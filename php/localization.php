@@ -107,7 +107,7 @@ class Translate
 	
 	public function translate($path,$page,$file_name)
 	{
-		$translate_cache='_translate.cache';
+		$translate_cache=ClonOS::TRANSLATE_CACHE_NAME;	//'_translate.cache';
 		$backup_dir='back';
 		switch($path)
 		{
@@ -206,7 +206,11 @@ class Translate
 											// если оригинальный текст изменился, то обновляем его в базе
 											# временно отключил, пока наполняется основная база. Потом нужно вернуть обратно
 											/*
-											$dbres1=$db->update('update lang_en set text=? where id=? and type=?',[[$text,PDO::PARAM_STR],[$id,PDO::PARAM_INT],[$path,PDO::PARAM_STR]]);
+											$dbres1=$db->update('update lang_en set text=? where id=? and type=?',[
+												[$text,PDO::PARAM_STR],
+												[$id,PDO::PARAM_INT],
+												[$path,PDO::PARAM_STR]
+											]);
 											if(isset($dbres1['rowCount']))
 											{
 												if($dbres1['rowCount']>0)
@@ -304,7 +308,7 @@ UPDATE SQLITE_SEQUENCE SET seq = 0 WHERE name = 'lang_en'
 			$sql="select en_id,text from lang_other where lang=? and en_id in ({$ids_txt})";
 			$res=$db->select($sql,[[$this->language,PDO::PARAM_STR]]);
 //			$res=$db->select("select en_id,text from lang_other where lang=? and en_id in (?)",[[$this->language,PDO::PARAM_STR],[[$ids_arr]]]);
-			if($res['error'])
+			if(isset($res['error']) && $res['error'])
 			{
 				echo 'db error';
 				exit;
@@ -323,7 +327,9 @@ UPDATE SQLITE_SEQUENCE SET seq = 0 WHERE name = 'lang_en'
 			
 			$txt=preg_replace("#title='<span.+>([^\']+)</span>'#U","$1",$txt);
 			
-			$txt=preg_replace("#(<option[^>]+>)<span[^>]+>(.*)</span>#U","$1$2",$txt);
+			#$txt=preg_replace("#(<option[^>]+>)<span[^>]+>(.*)</span>#U","$1$2",$txt);
+			$txt=preg_replace("#(<option[^>]+>)<span[^>]+>(.*)</span>(</option>)#U","$1$2$3",$txt);
+			
 			
 			# чистим кнопки от лишних тэгов
 			$txt=preg_replace('#<input type="button" value="(<span[^>]+)>(.*?)</span>"#U','<input type="button" value="$2"',$txt);

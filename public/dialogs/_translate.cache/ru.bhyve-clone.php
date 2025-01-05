@@ -5,9 +5,9 @@ err_messages.add({
 </script>
 <dialog id="bhyve-clone" class="window-box new">
 	<h1>
-		<span class="new"><span id="trlt-255">Clone Virtual Machine</span></span>
+		<span class="new"><span id="trlt-255">Клонирование виртуальной машины</span></span>
 	</h1>
-	<h2><span id="trlt-256">Cloned Virtual Machine Settings</span></h2>
+	<h2><span id="trlt-256">Настройки клонирования ВМ</span></h2>
 	<form class="win" method="post" id="bhyveCloneSettings" onsubmit="return false;">
 		<div class="window-content">
 			<p>

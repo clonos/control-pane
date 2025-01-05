@@ -50,8 +50,8 @@ foreach($images as $item){
 			$size = filesize($filename);
 		}
 		$filesize = $this->fileSizeConvert($size, 1024, true);
-		$query = "select count(*) as busy from taskd where status<2 and jname='".$item['jname']."'";
-		$busy = $this->_db_tasks->selectOne($query, []);
+		$query = "select count(*) as busy from taskd where status<2 and jname=?";
+		$busy = $this->_db_tasks->selectOne($query, [$item['jname'],PDO::PARAM_STR]);
 		$jstatus = '';
 		$jbusy = '';
 		if($busy['busy'] == 1){

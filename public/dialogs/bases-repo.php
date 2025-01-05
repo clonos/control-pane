@@ -6,7 +6,7 @@ src_table_pattern='<?php $res=$this->getTableChunk('baseslist','tbody'); echo st
 </script>
 <dialog id="getrepo" class="window-box">
 	<h1><translate id="324">Compile FreeBSD</translate></h1>
-	<h2><translate id="328">Compile from bases</translate></h2>
+	<h2><translate id="328">Fetch from repository</translate></h2>
 	<form class="win" method="post" id="repoSettings" onsubmit="return false;">
 		<div class="window-content">
 			<p>

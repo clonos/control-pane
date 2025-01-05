@@ -25,6 +25,10 @@ class ClonOS {
 	public $media_import='';
 	public $json_req=false;
 	public $sys_vars=array();
+	public $config=false;
+	public $mode='';
+	public $form='';
+	
 	private $_locale;
 	private $_post=false;
 	private $_db=null;
@@ -46,16 +50,19 @@ class ClonOS {
 		'username'=>'guest',
 		'unregistered'=>true,
 	);
+	private $_vars=array();
+	private $_translate=false;
+	private $_db_tasks=null;
 /*
 	public $projectId=0;
 	public $jailId=0;
 	public $moduleId=0;
 	public $helper='';
-	public $mode='';
-	public $form='';
+	
+	
 
-	private $_vars=array();
-	private $_db_tasks=null;
+	
+	
 	private $_db_jails=null;
 */
 
@@ -368,10 +375,12 @@ class ClonOS {
 		
 		
 		//$back_file=
+		$rowCount=0;
+		if(isset($dbres['rowCount'])) $rowCount=$dbres['rowCount'];
 		
 		return [
 			'error'=>false,
-			'rowCount'=>$dbres['rowCount'],
+			'rowCount'=>$rowCount,
 			'phraseID'=>$form['phraseID'],
 			'phrase'=>$form['translText']
 		];

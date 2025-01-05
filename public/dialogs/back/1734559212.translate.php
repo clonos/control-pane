@@ -22,7 +22,7 @@
 		<input type="hidden" name="dialog" id="trlt-dlgname" />
 	</form>
 	<div class="buttons">
-		<input type="button" value="<translate id="74">Save</translate>" class="new button ok-but" />
-		<input type="button" value="<translate id="73">Cancel</translate>" class="button red cancel-but" />
+		<input type="button" value="<translate>Save</translate>" class="new button ok-but" />
+		<input type="button" value="<translate>Cancel</translate>" class="button red cancel-but" />
 	</div>
 </dialog>

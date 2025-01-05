@@ -1,6 +1,6 @@
 <?php
 if(isset($clonos->uri_chunks[1])){
-	include('helpers.php');
+	include($clonos->realpath_page.'helpers.php');
 	return;
 }
 

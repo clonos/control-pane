@@ -11,7 +11,7 @@ err_messages.add({
 <dialog id="bhyve-new" class="window-box">
 	<h1>
 		<span class="new"><span id="trlt-95">Создание виртуальной машины</span></span>
-		<span class="edit"><span id="trlt-242">Edit Virtual Machine</span></span>
+		<span class="edit"><span id="trlt-242">Правка виртуальной машины</span></span>
 	</h1>
 	<h2><span id="trlt-97">Настройки</span></h2>
 	<form class="win" method="post" id="bhyveSettings" onsubmit="return false;">
@@ -75,8 +75,8 @@ err_messages.add({
 				<input type="text" name="vm_vnc_port" value="" placeholder="0" maxlength="5" />
 			</p>
 			<p>
-				<span class="field-name"><span id="trlt-247">VNC Password</span>:</span>
-				<input type="password" name="vm_vnc_password" value="" placeholder="3-20 symbols" pattern=".{3,20}" maxlength="20"></input> <small>— <span id="trlt-248">use to log in VNC console</span></small>
+				<span class="field-name"><span id="trlt-247">Пароль VNC</span>:</span>
+				<input type="password" name="vm_vnc_password" value="" placeholder="3-20 symbols" pattern=".{3,20}" maxlength="20"></input> <small>— <span id="trlt-248">используется для входа в VNC консоль</span></small>
 			</p>
 <!--			<p>
 				<span class="field-name"><span id="trlt-249">CD-ROM ISO</span>:</span>

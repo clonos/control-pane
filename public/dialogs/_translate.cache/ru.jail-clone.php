@@ -7,9 +7,9 @@ err_messages.add({
 </script>
 <dialog id="jail-clone" class="window-box new">
 	<h1>
-		<span class="new"><span id="trlt-211">Clone jail</span></span>
+		<span class="new"><span id="trlt-211">Клонирование контейнера</span></span>
 	</h1>
-	<h2><span id="trlt-212">Cloned Jail Settings</span></h2>
+	<h2><span id="trlt-212">Настройки клонирования</span></h2>
 	<form class="win" method="post" id="jailCloneSettings" onsubmit="return false;">
 		<div class="window-content">
 			<p class="warning" style="width:400px;">

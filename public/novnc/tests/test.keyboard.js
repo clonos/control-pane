@@ -1,8 +1,6 @@
-const expect = chai.expect;
-
 import Keyboard from '../core/input/keyboard.js';
 
-describe('Key Event Handling', function () {
+describe('Key event handling', function () {
     "use strict";
 
     // The real KeyboardEvent constructor might not work everywhere we
@@ -14,10 +12,14 @@ describe('Key Event Handling', function () {
         }
         e.stopPropagation = sinon.spy();
         e.preventDefault = sinon.spy();
+        e.getModifierState = function (key) {
+            return e[key];
+        };
+
         return e;
     }
 
-    describe('Decode Keyboard Events', function () {
+    describe('Decode keyboard events', function () {
         it('should decode keydown events', function (done) {
             const kbd = new Keyboard(document);
             kbd.onkeyevent = (keysym, code, down) => {
@@ -66,7 +68,7 @@ describe('Key Event Handling', function () {
         });
     });
 
-    describe('Track Key State', function () {
+    describe('Track key state', function () {
         it('should send release using the same keysym as the press', function (done) {
             const kbd = new Keyboard(document);
             kbd.onkeyevent = (keysym, code, down) => {
@@ -99,7 +101,7 @@ describe('Key Event Handling', function () {
             expect(kbd.onkeyevent).to.not.have.been.called;
         });
 
-        describe('Legacy Events', function () {
+        describe('Legacy events', function () {
             it('should track keys using keyCode if no code', function (done) {
                 const kbd = new Keyboard(document);
                 kbd.onkeyevent = (keysym, code, down) => {
@@ -144,18 +146,10 @@ describe('Key Event Handling', function () {
             origNavigator = Object.getOwnPropertyDescriptor(window, "navigator");
 
             Object.defineProperty(window, "navigator", {value: {}});
-            if (window.navigator.platform !== undefined) {
-                // Object.defineProperty() doesn't work properly in old
-                // versions of Chrome
-                this.skip();
-            }
-
             window.navigator.platform = "Mac x86_64";
         });
         afterEach(function () {
-            if (origNavigator !== undefined) {
-                Object.defineProperty(window, "navigator", origNavigator);
-            }
+            Object.defineProperty(window, "navigator", origNavigator);
         });
 
         it('should change Alt to AltGraph', function () {
@@ -197,7 +191,7 @@ describe('Key Event Handling', function () {
         });
     });
 
-    describe('Caps Lock on iOS and macOS', function () {
+    describe('Meta key combination on iOS and macOS', function () {
         let origNavigator;
         beforeEach(function () {
             // window.navigator is a protected read-only property in many
@@ -217,6 +211,60 @@ describe('Key Event Handling', function () {
             if (origNavigator !== undefined) {
                 Object.defineProperty(window, "navigator", origNavigator);
             }
+        });
+
+        it('should send keyup when meta key is pressed on iOS', function () {
+            window.navigator.platform = "iPad";
+            const kbd = new Keyboard(document);
+            kbd.onkeyevent = sinon.spy();
+
+            kbd._handleKeyDown(keyevent('keydown', {code: 'MetaRight', key: 'Meta', location: 2, metaKey: true}));
+            expect(kbd.onkeyevent).to.have.been.calledOnce;
+            kbd.onkeyevent.resetHistory();
+
+            kbd._handleKeyDown(keyevent('keydown', {code: 'KeyA', key: 'a', metaKey: true}));
+            expect(kbd.onkeyevent).to.have.been.calledTwice;
+            expect(kbd.onkeyevent).to.have.been.calledWith(0x61, "KeyA", true);
+            expect(kbd.onkeyevent).to.have.been.calledWith(0x61, "KeyA", false);
+            kbd.onkeyevent.resetHistory();
+
+            kbd._handleKeyUp(keyevent('keyup', {code: 'MetaRight', key: 'Meta', location: 2, metaKey: true}));
+            expect(kbd.onkeyevent).to.have.been.calledOnce;
+        });
+
+        it('should send keyup when meta key is pressed on macOS', function () {
+            window.navigator.platform = "Mac";
+            const kbd = new Keyboard(document);
+            kbd.onkeyevent = sinon.spy();
+
+            kbd._handleKeyDown(keyevent('keydown', {code: 'MetaRight', key: 'Meta', location: 2, metaKey: true}));
+            expect(kbd.onkeyevent).to.have.been.calledOnce;
+            kbd.onkeyevent.resetHistory();
+
+            kbd._handleKeyDown(keyevent('keydown', {code: 'KeyA', key: 'a', metaKey: true}));
+            expect(kbd.onkeyevent).to.have.been.calledTwice;
+            expect(kbd.onkeyevent).to.have.been.calledWith(0x61, "KeyA", true);
+            expect(kbd.onkeyevent).to.have.been.calledWith(0x61, "KeyA", false);
+            kbd.onkeyevent.resetHistory();
+
+            kbd._handleKeyUp(keyevent('keyup', {code: 'MetaRight', key: 'Meta', location: 2, metaKey: true}));
+            expect(kbd.onkeyevent).to.have.been.calledOnce;
+        });
+    });
+
+    describe('Caps Lock on iOS and macOS', function () {
+        let origNavigator;
+        beforeEach(function () {
+            // window.navigator is a protected read-only property in many
+            // environments, so we need to redefine it whilst running these
+            // tests.
+            origNavigator = Object.getOwnPropertyDescriptor(window, "navigator");
+
+            Object.defineProperty(window, "navigator", {value: {}});
+        });
+
+        afterEach(function () {
+            Object.defineProperty(window, "navigator", origNavigator);
         });
 
         it('should toggle caps lock on key press on iOS', function () {
@@ -264,6 +312,50 @@ describe('Key Event Handling', function () {
         });
     });
 
+    describe('Modifier status info', function () {
+        let origNavigator;
+        beforeEach(function () {
+            // window.navigator is a protected read-only property in many
+            // environments, so we need to redefine it whilst running these
+            // tests.
+            origNavigator = Object.getOwnPropertyDescriptor(window, "navigator");
+
+            Object.defineProperty(window, "navigator", {value: {}});
+        });
+
+        afterEach(function () {
+            Object.defineProperty(window, "navigator", origNavigator);
+        });
+
+        it('should provide caps lock state', function () {
+            const kbd = new Keyboard(document);
+            kbd.onkeyevent = sinon.spy();
+            kbd._handleKeyDown(keyevent('keydown', {code: 'KeyA', key: 'A', NumLock: false, CapsLock: true}));
+
+            expect(kbd.onkeyevent).to.have.been.calledOnce;
+            expect(kbd.onkeyevent.firstCall).to.have.been.calledWith(0x41, "KeyA", true, false, true);
+        });
+
+        it('should provide num lock state', function () {
+            const kbd = new Keyboard(document);
+            kbd.onkeyevent = sinon.spy();
+            kbd._handleKeyDown(keyevent('keydown', {code: 'KeyA', key: 'A', NumLock: true, CapsLock: false}));
+
+            expect(kbd.onkeyevent).to.have.been.calledOnce;
+            expect(kbd.onkeyevent.firstCall).to.have.been.calledWith(0x41, "KeyA", true, true, false);
+        });
+
+        it('should have no num lock state on mac', function () {
+            window.navigator.platform = "Mac";
+            const kbd = new Keyboard(document);
+            kbd.onkeyevent = sinon.spy();
+            kbd._handleKeyDown(keyevent('keydown', {code: 'KeyA', key: 'A', NumLock: false, CapsLock: true}));
+
+            expect(kbd.onkeyevent).to.have.been.calledOnce;
+            expect(kbd.onkeyevent.firstCall).to.have.been.calledWith(0x41, "KeyA", true, null, true);
+        });
+    });
+
     describe('Japanese IM keys on Windows', function () {
         let origNavigator;
         beforeEach(function () {
@@ -273,19 +365,11 @@ describe('Key Event Handling', function () {
             origNavigator = Object.getOwnPropertyDescriptor(window, "navigator");
 
             Object.defineProperty(window, "navigator", {value: {}});
-            if (window.navigator.platform !== undefined) {
-                // Object.defineProperty() doesn't work properly in old
-                // versions of Chrome
-                this.skip();
-            }
-
             window.navigator.platform = "Windows";
         });
 
         afterEach(function () {
-            if (origNavigator !== undefined) {
-                Object.defineProperty(window, "navigator", origNavigator);
-            }
+            Object.defineProperty(window, "navigator", origNavigator);
         });
 
         const keys = { 'Zenkaku': 0xff2a, 'Hankaku': 0xff2a,
@@ -314,20 +398,12 @@ describe('Key Event Handling', function () {
             origNavigator = Object.getOwnPropertyDescriptor(window, "navigator");
 
             Object.defineProperty(window, "navigator", {value: {}});
-            if (window.navigator.platform !== undefined) {
-                // Object.defineProperty() doesn't work properly in old
-                // versions of Chrome
-                this.skip();
-            }
-
             window.navigator.platform = "Windows x86_64";
 
             this.clock = sinon.useFakeTimers();
         });
         afterEach(function () {
-            if (origNavigator !== undefined) {
-                Object.defineProperty(window, "navigator", origNavigator);
-            }
+            Object.defineProperty(window, "navigator", origNavigator);
             if (this.clock !== undefined) {
                 this.clock.restore();
             }
@@ -402,6 +478,22 @@ describe('Key Event Handling', function () {
             expect(kbd.onkeyevent).to.not.have.been.called;
         });
 
+        it('should release ControlLeft on blur', function () {
+            const kbd = new Keyboard(document);
+            kbd.onkeyevent = sinon.spy();
+            kbd._handleKeyDown(keyevent('keydown', {code: 'ControlLeft', key: 'Control', location: 1}));
+            expect(kbd.onkeyevent).to.not.have.been.called;
+            kbd._allKeysUp();
+            expect(kbd.onkeyevent).to.have.been.calledTwice;
+            expect(kbd.onkeyevent.firstCall).to.have.been.calledWith(0xffe3, "ControlLeft", true);
+            expect(kbd.onkeyevent.secondCall).to.have.been.calledWith(0xffe3, "ControlLeft", false);
+
+            // Check that the timer is properly dead
+            kbd.onkeyevent.resetHistory();
+            this.clock.tick(100);
+            expect(kbd.onkeyevent).to.not.have.been.called;
+        });
+
         it('should generate AltGraph for quick Ctrl+Alt sequence', function () {
             const kbd = new Keyboard(document);
             kbd.onkeyevent = sinon.spy();
@@ -426,6 +518,37 @@ describe('Key Event Handling', function () {
             expect(kbd.onkeyevent).to.have.been.calledTwice;
             expect(kbd.onkeyevent.firstCall).to.have.been.calledWith(0xffe3, "ControlLeft", true);
             expect(kbd.onkeyevent.secondCall).to.have.been.calledWith(0xffea, "AltRight", true);
+
+            // Check that the timer is properly dead
+            kbd.onkeyevent.resetHistory();
+            this.clock.tick(100);
+            expect(kbd.onkeyevent).to.not.have.been.called;
+        });
+
+        it('should generate AltGraph for quick Ctrl+AltGraph sequence', function () {
+            const kbd = new Keyboard(document);
+            kbd.onkeyevent = sinon.spy();
+            kbd._handleKeyDown(keyevent('keydown', {code: 'ControlLeft', key: 'Control', location: 1, timeStamp: Date.now()}));
+            this.clock.tick(20);
+            kbd._handleKeyDown(keyevent('keydown', {code: 'AltRight', key: 'AltGraph', location: 2, timeStamp: Date.now()}));
+            expect(kbd.onkeyevent).to.have.been.calledOnce;
+            expect(kbd.onkeyevent).to.have.been.calledWith(0xfe03, 'AltRight', true);
+
+            // Check that the timer is properly dead
+            kbd.onkeyevent.resetHistory();
+            this.clock.tick(100);
+            expect(kbd.onkeyevent).to.not.have.been.called;
+        });
+
+        it('should generate Ctrl, AltGraph for slow Ctrl+AltGraph sequence', function () {
+            const kbd = new Keyboard(document);
+            kbd.onkeyevent = sinon.spy();
+            kbd._handleKeyDown(keyevent('keydown', {code: 'ControlLeft', key: 'Control', location: 1, timeStamp: Date.now()}));
+            this.clock.tick(60);
+            kbd._handleKeyDown(keyevent('keydown', {code: 'AltRight', key: 'AltGraph', location: 2, timeStamp: Date.now()}));
+            expect(kbd.onkeyevent).to.have.been.calledTwice;
+            expect(kbd.onkeyevent.firstCall).to.have.been.calledWith(0xffe3, "ControlLeft", true);
+            expect(kbd.onkeyevent.secondCall).to.have.been.calledWith(0xfe03, "AltRight", true);
 
             // Check that the timer is properly dead
             kbd.onkeyevent.resetHistory();
@@ -459,20 +582,12 @@ describe('Key Event Handling', function () {
             origNavigator = Object.getOwnPropertyDescriptor(window, "navigator");
 
             Object.defineProperty(window, "navigator", {value: {}});
-            if (window.navigator.platform !== undefined) {
-                // Object.defineProperty() doesn't work properly in old
-                // versions of Chrome
-                this.skip();
-            }
-
             window.navigator.platform = "Windows x86_64";
 
             this.clock = sinon.useFakeTimers();
         });
         afterEach(function () {
-            if (origNavigator !== undefined) {
-                Object.defineProperty(window, "navigator", origNavigator);
-            }
+            Object.defineProperty(window, "navigator", origNavigator);
             if (this.clock !== undefined) {
                 this.clock.restore();
             }

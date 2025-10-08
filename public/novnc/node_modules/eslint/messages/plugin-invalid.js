@@ -1,9 +1,9 @@
 "use strict";
 
-module.exports = function(it) {
-    const { configName, importerName } = it;
+module.exports = function (it) {
+	const { configName, importerName } = it;
 
-    return `
+	return `
 "${configName}" is invalid syntax for a config specifier.
 
 * If your intention is to extend from a configuration exported from the plugin, add the configuration name after a slash: e.g. "${configName}/myConfig".
@@ -11,6 +11,6 @@ module.exports = function(it) {
 
 "${configName}" was referenced from the config file in "${importerName}".
 
-If you still can't figure out the problem, please stop by https://eslint.org/chat/help to chat with the team.
+If you still can't figure out the problem, please see https://eslint.org/docs/latest/use/troubleshooting.
 `.trimStart();
 };

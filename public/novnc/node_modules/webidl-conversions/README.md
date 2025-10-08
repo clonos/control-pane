@@ -56,11 +56,11 @@ Conversions for all of the basic types from the Web IDL specification are implem
 - [`DOMString`](https://heycam.github.io/webidl/#es-DOMString), which can additionally be provided the boolean option `{ treatNullAsEmptyString }` as a second parameter
 - [`ByteString`](https://heycam.github.io/webidl/#es-ByteString), [`USVString`](https://heycam.github.io/webidl/#es-USVString)
 - [`object`](https://heycam.github.io/webidl/#es-object)
-- [Buffer source types](https://heycam.github.io/webidl/#es-buffer-source-types), which can additionally be provided with the boolean option `{ allowShared }` as a second parameter
+- [Buffer source types](https://heycam.github.io/webidl/#es-buffer-source-types), which can additionally be provided with the boolean option bag `{ allowShared, allowResizable }` as a second parameter
 
 Additionally, for convenience, the following derived type definitions are implemented:
 
-- [`ArrayBufferView`](https://heycam.github.io/webidl/#ArrayBufferView), which can additionally be provided with the boolean option `{ allowShared }` as a second parameter
+- [`ArrayBufferView`](https://heycam.github.io/webidl/#ArrayBufferView), which can additionally be provided with the boolean option bag `{ allowShared, allowResizable }` as a second parameter
 - [`BufferSource`](https://heycam.github.io/webidl/#BufferSource)
 - [`DOMTimeStamp`](https://heycam.github.io/webidl/#DOMTimeStamp)
 

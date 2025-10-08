@@ -108,6 +108,24 @@ test('circles and proto option – deep circular array', async ({
   is(c.nest[2], c, 'circular references point to copied parent')
   isNot(c.nest[2], o, 'circular references do not point to original parent')
 })
+test('custom constructor handler', async ({ same, ok, isNot }) => {
+  class Foo {
+    constructor (s) {
+      this.s = s
+    }
+  }
+  const data = { foo: new Foo('foo') }
+  const cloned = rfdc({ constructorHandlers: [[Foo, (o) => new Foo(o.s)]] })(data)
+  ok(cloned.foo instanceof Foo)
+  same(cloned.foo.s, data.foo.s, 'same values')
+  isNot(cloned.foo, data.foo, 'different objects')
+})
+test('custom RegExp handler', async ({ same, ok, isNot }) => {
+  const data = { regex: /foo/ }
+  const cloned = rfdc({ constructorHandlers: [[RegExp, (o) => new RegExp(o)]] })(data)
+  isNot(cloned.regex, data.regex, 'different objects')
+  ok(cloned.regex.test('foo'))
+})
 
 function types (clone, label) {
   test(label + ' – number', async ({ is }) => {
@@ -223,7 +241,7 @@ function types (clone, label) {
   })
   test(`${label} copies TypedArrays from object correctly`, async ({ ok, is, isNot }) => {
     const [input1, input2] = [rnd(10), rnd(10)]
-    var buffer = new ArrayBuffer(8)
+    const buffer = new ArrayBuffer(8)
     const int32View = new Int32Array(buffer)
     int32View[0] = input1
     int32View[1] = input2
@@ -235,7 +253,7 @@ function types (clone, label) {
   })
   test(`${label} copies TypedArrays from array correctly`, async ({ ok, is, isNot }) => {
     const [input1, input2] = [rnd(10), rnd(10)]
-    var buffer = new ArrayBuffer(16)
+    const buffer = new ArrayBuffer(16)
     const int32View = new Int32Array(buffer)
     int32View[0] = input1
     int32View[1] = input2
@@ -247,7 +265,7 @@ function types (clone, label) {
   })
   test(`${label} copies complex TypedArrays`, async ({ ok, deepEqual, is, isNot }) => {
     const [input1, input2, input3] = [rnd(10), rnd(10), rnd(10)]
-    var buffer = new ArrayBuffer(4)
+    const buffer = new ArrayBuffer(4)
     const view1 = new Int8Array(buffer, 0, 2)
     const view2 = new Int8Array(buffer, 2, 2)
     const view3 = new Int8Array(buffer)

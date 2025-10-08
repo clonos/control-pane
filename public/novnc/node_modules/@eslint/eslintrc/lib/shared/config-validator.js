@@ -3,16 +3,23 @@
  * @author Brandon Mills
  */
 
-/* eslint class-methods-use-this: "off" */
+/* eslint class-methods-use-this: "off" -- not needed in this file */
+
+//------------------------------------------------------------------------------
+// Typedefs
+//------------------------------------------------------------------------------
+
+/** @typedef {import("../shared/types").Rule} Rule */
 
 //------------------------------------------------------------------------------
 // Requirements
 //------------------------------------------------------------------------------
 
-import util from "util";
+import util from "node:util";
 import * as ConfigOps from "./config-ops.js";
 import { emitDeprecationWarning } from "./deprecation-warnings.js";
 import ajvOrig from "./ajv.js";
+import { deepMergeArrays } from "./deep-merge-arrays.js";
 import configSchema from "../../conf/config-schema.js";
 import BuiltInEnvironments from "../../conf/environments.js";
 
@@ -33,10 +40,20 @@ const severityMap = {
 
 const validated = new WeakSet();
 
+// JSON schema that disallows passing any options
+const noOptionsSchema = Object.freeze({
+    type: "array",
+    minItems: 0,
+    maxItems: 0
+});
+
 //-----------------------------------------------------------------------------
 // Exports
 //-----------------------------------------------------------------------------
 
+/**
+ * Validator for configuration objects.
+ */
 export default class ConfigValidator {
     constructor({ builtInRules = new Map() } = {}) {
         this.builtInRules = builtInRules;
@@ -44,17 +61,36 @@ export default class ConfigValidator {
 
     /**
      * Gets a complete options schema for a rule.
-     * @param {{create: Function, schema: (Array|null)}} rule A new-style rule object
-     * @returns {Object} JSON Schema for the rule's options.
+     * @param {Rule} rule A rule object
+     * @throws {TypeError} If `meta.schema` is specified but is not an array, object or `false`.
+     * @returns {Object|null} JSON Schema for the rule's options.
+     *      `null` if rule wasn't passed or its `meta.schema` is `false`.
      */
     getRuleOptionsSchema(rule) {
         if (!rule) {
             return null;
         }
 
-        const schema = rule.schema || rule.meta && rule.meta.schema;
+        if (!rule.meta) {
+            return { ...noOptionsSchema }; // default if `meta.schema` is not specified
+        }
 
-        // Given a tuple of schemas, insert warning level at the beginning
+        const schema = rule.meta.schema;
+
+        if (typeof schema === "undefined") {
+            return { ...noOptionsSchema }; // default if `meta.schema` is not specified
+        }
+
+        // `schema:false` is an allowed explicit opt-out of options validation for the rule
+        if (schema === false) {
+            return null;
+        }
+
+        if (typeof schema !== "object" || schema === null) {
+            throw new TypeError("Rule's `meta.schema` must be an array or object");
+        }
+
+        // ESLint-specific array form needs to be converted into a valid JSON Schema definition
         if (Array.isArray(schema)) {
             if (schema.length) {
                 return {
@@ -64,22 +100,20 @@ export default class ConfigValidator {
                     maxItems: schema.length
                 };
             }
-            return {
-                type: "array",
-                minItems: 0,
-                maxItems: 0
-            };
 
+            // `schema:[]` is an explicit way to specify that the rule does not accept any options
+            return { ...noOptionsSchema };
         }
 
-        // Given a full schema, leave it alone
-        return schema || null;
+        // `schema:<object>` is assumed to be a valid JSON Schema definition
+        return schema;
     }
 
     /**
      * Validates a rule's severity and returns the severity value. Throws an error if the severity is invalid.
      * @param {options} options The given options for the rule.
      * @returns {number|string} The rule's severity value
+     * @throws {Error} If the severity is invalid.
      */
     validateRuleSeverity(options) {
         const severity = Array.isArray(options) ? options[0] : options;
@@ -98,20 +132,32 @@ export default class ConfigValidator {
      * @param {{create: Function}} rule The rule to validate
      * @param {Array} localOptions The options for the rule, excluding severity
      * @returns {void}
+     * @throws {Error} If the options are invalid.
      */
     validateRuleSchema(rule, localOptions) {
         if (!ruleValidators.has(rule)) {
-            const schema = this.getRuleOptionsSchema(rule);
+            try {
+                const schema = this.getRuleOptionsSchema(rule);
 
-            if (schema) {
-                ruleValidators.set(rule, ajv.compile(schema));
+                if (schema) {
+                    ruleValidators.set(rule, ajv.compile(schema));
+                }
+            } catch (err) {
+                const errorWithCode = new Error(err.message, { cause: err });
+
+                errorWithCode.code = "ESLINT_INVALID_RULE_OPTIONS_SCHEMA";
+
+                throw errorWithCode;
             }
         }
 
         const validateRule = ruleValidators.get(rule);
 
         if (validateRule) {
-            validateRule(localOptions);
+            const mergedOptions = deepMergeArrays(rule.meta?.defaultOptions, localOptions);
+
+            validateRule(mergedOptions);
+
             if (validateRule.errors) {
                 throw new Error(validateRule.errors.map(
                     error => `\tValue ${JSON.stringify(error.data)} ${error.message}.\n`
@@ -128,6 +174,7 @@ export default class ConfigValidator {
      * @param {string|null} source The name of the configuration source to report in any errors. If null or undefined,
      * no source is prepended to the message.
      * @returns {void}
+     * @throws {Error} If the options are invalid.
      */
     validateRuleOptions(rule, ruleId, options, source = null) {
         try {
@@ -137,13 +184,21 @@ export default class ConfigValidator {
                 this.validateRuleSchema(rule, Array.isArray(options) ? options.slice(1) : []);
             }
         } catch (err) {
-            const enhancedMessage = `Configuration for rule "${ruleId}" is invalid:\n${err.message}`;
+            let enhancedMessage = err.code === "ESLINT_INVALID_RULE_OPTIONS_SCHEMA"
+                ? `Error while processing options validation schema of rule '${ruleId}': ${err.message}`
+                : `Configuration for rule "${ruleId}" is invalid:\n${err.message}`;
 
             if (typeof source === "string") {
-                throw new Error(`${source}:\n\t${enhancedMessage}`);
-            } else {
-                throw new Error(enhancedMessage);
+                enhancedMessage = `${source}:\n\t${enhancedMessage}`;
             }
+
+            const enhancedError = new Error(enhancedMessage, { cause: err });
+
+            if (err.code) {
+                enhancedError.code = err.code;
+            }
+
+            throw enhancedError;
         }
     }
 
@@ -151,8 +206,9 @@ export default class ConfigValidator {
      * Validates an environment object
      * @param {Object} environment The environment config object to validate.
      * @param {string} source The name of the configuration source to report in any errors.
-     * @param {function(envId:string): Object} [getAdditionalEnv] A map from strings to loaded environments.
+     * @param {(envId:string) => Object} [getAdditionalEnv] A map from strings to loaded environments.
      * @returns {void}
+     * @throws {Error} If the environment is invalid.
      */
     validateEnvironment(
         environment,
@@ -180,7 +236,7 @@ export default class ConfigValidator {
      * Validates a rules config object
      * @param {Object} rulesConfig The rules config object to validate.
      * @param {string} source The name of the configuration source to report in any errors.
-     * @param {function(ruleId:string): Object} getAdditionalRule A map from strings to loaded rules
+     * @param {(ruleId:string) => Object} getAdditionalRule A map from strings to loaded rules
      * @returns {void}
      */
     validateRules(
@@ -224,8 +280,9 @@ export default class ConfigValidator {
      * Validate `processor` configuration.
      * @param {string|undefined} processorName The processor name.
      * @param {string} source The name of config file.
-     * @param {function(id:string): Processor} getProcessor The getter of defined processors.
+     * @param {(id:string) => Processor} getProcessor The getter of defined processors.
      * @returns {void}
+     * @throws {Error} If the processor is invalid.
      */
     validateProcessor(processorName, source, getProcessor) {
         if (processorName && !getProcessor(processorName)) {
@@ -264,6 +321,7 @@ export default class ConfigValidator {
      * @param {Object} config The config object to validate.
      * @param {string} source The name of the configuration source to report in any errors.
      * @returns {void}
+     * @throws {Error} If the config is invalid.
      */
     validateConfigSchema(config, source = null) {
         validateSchema = validateSchema || ajv.compile(configSchema);
@@ -272,7 +330,7 @@ export default class ConfigValidator {
             throw new Error(`ESLint configuration in ${source} is invalid:\n${this.formatErrors(validateSchema.errors)}`);
         }
 
-        if (Object.hasOwnProperty.call(config, "ecmaFeatures")) {
+        if (Object.hasOwn(config, "ecmaFeatures")) {
             emitDeprecationWarning(source, "ESLINT_LEGACY_ECMAFEATURES");
         }
     }
@@ -281,8 +339,8 @@ export default class ConfigValidator {
      * Validates an entire config object.
      * @param {Object} config The config object to validate.
      * @param {string} source The name of the configuration source to report in any errors.
-     * @param {function(ruleId:string): Object} [getAdditionalRule] A map from strings to loaded rules.
-     * @param {function(envId:string): Object} [getAdditionalEnv] A map from strings to loaded envs.
+     * @param {(ruleId:string) => Object} [getAdditionalRule] A map from strings to loaded rules.
+     * @param {(envId:string) => Object} [getAdditionalEnv] A map from strings to loaded envs.
      * @returns {void}
      */
     validate(config, source, getAdditionalRule, getAdditionalEnv) {

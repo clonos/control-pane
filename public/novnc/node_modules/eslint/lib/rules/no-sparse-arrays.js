@@ -4,47 +4,65 @@
  */
 "use strict";
 
+const astUtils = require("./utils/ast-utils");
+
 //------------------------------------------------------------------------------
 // Rule Definition
 //------------------------------------------------------------------------------
 
-/** @type {import('../shared/types').Rule} */
+/** @type {import('../types').Rule.RuleModule} */
 module.exports = {
-    meta: {
-        type: "problem",
+	meta: {
+		type: "problem",
 
-        docs: {
-            description: "Disallow sparse arrays",
-            recommended: true,
-            url: "https://eslint.org/docs/rules/no-sparse-arrays"
-        },
+		docs: {
+			description: "Disallow sparse arrays",
+			recommended: true,
+			url: "https://eslint.org/docs/latest/rules/no-sparse-arrays",
+		},
 
-        schema: [],
+		schema: [],
 
-        messages: {
-            unexpectedSparseArray: "Unexpected comma in middle of array."
-        }
-    },
+		messages: {
+			unexpectedSparseArray: "Unexpected comma in middle of array.",
+		},
+	},
 
-    create(context) {
+	create(context) {
+		//--------------------------------------------------------------------------
+		// Public
+		//--------------------------------------------------------------------------
 
+		return {
+			ArrayExpression(node) {
+				if (!node.elements.includes(null)) {
+					return;
+				}
 
-        //--------------------------------------------------------------------------
-        // Public
-        //--------------------------------------------------------------------------
+				const { sourceCode } = context;
+				let commaToken;
 
-        return {
+				for (const [index, element] of node.elements.entries()) {
+					if (index === node.elements.length - 1 && element) {
+						return;
+					}
 
-            ArrayExpression(node) {
+					commaToken = sourceCode.getTokenAfter(
+						element ?? commaToken ?? sourceCode.getFirstToken(node),
+						astUtils.isCommaToken,
+					);
 
-                const emptySpot = node.elements.includes(null);
+					if (element) {
+						continue;
+					}
 
-                if (emptySpot) {
-                    context.report({ node, messageId: "unexpectedSparseArray" });
-                }
-            }
-
-        };
-
-    }
+					context.report({
+						node,
+						loc: commaToken.loc,
+						messageId: "unexpectedSparseArray",
+					});
+				}
+			},
+		};
+	},
 };

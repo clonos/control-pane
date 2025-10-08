@@ -11,20 +11,32 @@ function copyBuffer (cur) {
 
 function rfdc (opts) {
   opts = opts || {}
-
   if (opts.circles) return rfdcCircles(opts)
+
+  const constructorHandlers = new Map()
+  constructorHandlers.set(Date, (o) => new Date(o))
+  constructorHandlers.set(Map, (o, fn) => new Map(cloneArray(Array.from(o), fn)))
+  constructorHandlers.set(Set, (o, fn) => new Set(cloneArray(Array.from(o), fn)))
+  if (opts.constructorHandlers) {
+    for (const handler of opts.constructorHandlers) {
+      constructorHandlers.set(handler[0], handler[1])
+    }
+  }
+
+  let handler = null
+
   return opts.proto ? cloneProto : clone
 
   function cloneArray (a, fn) {
-    var keys = Object.keys(a)
-    var a2 = new Array(keys.length)
-    for (var i = 0; i < keys.length; i++) {
-      var k = keys[i]
-      var cur = a[k]
+    const keys = Object.keys(a)
+    const a2 = new Array(keys.length)
+    for (let i = 0; i < keys.length; i++) {
+      const k = keys[i]
+      const cur = a[k]
       if (typeof cur !== 'object' || cur === null) {
         a2[k] = cur
-      } else if (cur instanceof Date) {
-        a2[k] = new Date(cur)
+      } else if (cur.constructor !== Object && (handler = constructorHandlers.get(cur.constructor))) {
+        a2[k] = handler(cur, fn)
       } else if (ArrayBuffer.isView(cur)) {
         a2[k] = copyBuffer(cur)
       } else {
@@ -36,22 +48,18 @@ function rfdc (opts) {
 
   function clone (o) {
     if (typeof o !== 'object' || o === null) return o
-    if (o instanceof Date) return new Date(o)
     if (Array.isArray(o)) return cloneArray(o, clone)
-    if (o instanceof Map) return new Map(cloneArray(Array.from(o), clone))
-    if (o instanceof Set) return new Set(cloneArray(Array.from(o), clone))
-    var o2 = {}
-    for (var k in o) {
+    if (o.constructor !== Object && (handler = constructorHandlers.get(o.constructor))) {
+      return handler(o, clone)
+    }
+    const o2 = {}
+    for (const k in o) {
       if (Object.hasOwnProperty.call(o, k) === false) continue
-      var cur = o[k]
+      const cur = o[k]
       if (typeof cur !== 'object' || cur === null) {
         o2[k] = cur
-      } else if (cur instanceof Date) {
-        o2[k] = new Date(cur)
-      } else if (cur instanceof Map) {
-        o2[k] = new Map(cloneArray(Array.from(cur), clone))
-      } else if (cur instanceof Set) {
-        o2[k] = new Set(cloneArray(Array.from(cur), clone))
+      } else if (cur.constructor !== Object && (handler = constructorHandlers.get(cur.constructor))) {
+        o2[k] = handler(cur, clone)
       } else if (ArrayBuffer.isView(cur)) {
         o2[k] = copyBuffer(cur)
       } else {
@@ -63,21 +71,17 @@ function rfdc (opts) {
 
   function cloneProto (o) {
     if (typeof o !== 'object' || o === null) return o
-    if (o instanceof Date) return new Date(o)
     if (Array.isArray(o)) return cloneArray(o, cloneProto)
-    if (o instanceof Map) return new Map(cloneArray(Array.from(o), cloneProto))
-    if (o instanceof Set) return new Set(cloneArray(Array.from(o), cloneProto))
-    var o2 = {}
-    for (var k in o) {
-      var cur = o[k]
+    if (o.constructor !== Object && (handler = constructorHandlers.get(o.constructor))) {
+      return handler(o, cloneProto)
+    }
+    const o2 = {}
+    for (const k in o) {
+      const cur = o[k]
       if (typeof cur !== 'object' || cur === null) {
         o2[k] = cur
-      } else if (cur instanceof Date) {
-        o2[k] = new Date(cur)
-      } else if (cur instanceof Map) {
-        o2[k] = new Map(cloneArray(Array.from(cur), cloneProto))
-      } else if (cur instanceof Set) {
-        o2[k] = new Set(cloneArray(Array.from(cur), cloneProto))
+      } else if (cur.constructor !== Object && (handler = constructorHandlers.get(cur.constructor))) {
+        o2[k] = handler(cur, cloneProto)
       } else if (ArrayBuffer.isView(cur)) {
         o2[k] = copyBuffer(cur)
       } else {
@@ -89,25 +93,36 @@ function rfdc (opts) {
 }
 
 function rfdcCircles (opts) {
-  var refs = []
-  var refsNew = []
+  const refs = []
+  const refsNew = []
 
+  const constructorHandlers = new Map()
+  constructorHandlers.set(Date, (o) => new Date(o))
+  constructorHandlers.set(Map, (o, fn) => new Map(cloneArray(Array.from(o), fn)))
+  constructorHandlers.set(Set, (o, fn) => new Set(cloneArray(Array.from(o), fn)))
+  if (opts.constructorHandlers) {
+    for (const handler of opts.constructorHandlers) {
+      constructorHandlers.set(handler[0], handler[1])
+    }
+  }
+
+  let handler = null
   return opts.proto ? cloneProto : clone
 
   function cloneArray (a, fn) {
-    var keys = Object.keys(a)
-    var a2 = new Array(keys.length)
-    for (var i = 0; i < keys.length; i++) {
-      var k = keys[i]
-      var cur = a[k]
+    const keys = Object.keys(a)
+    const a2 = new Array(keys.length)
+    for (let i = 0; i < keys.length; i++) {
+      const k = keys[i]
+      const cur = a[k]
       if (typeof cur !== 'object' || cur === null) {
         a2[k] = cur
-      } else if (cur instanceof Date) {
-        a2[k] = new Date(cur)
+      } else if (cur.constructor !== Object && (handler = constructorHandlers.get(cur.constructor))) {
+        a2[k] = handler(cur, fn)
       } else if (ArrayBuffer.isView(cur)) {
         a2[k] = copyBuffer(cur)
       } else {
-        var index = refs.indexOf(cur)
+        const index = refs.indexOf(cur)
         if (index !== -1) {
           a2[k] = refsNew[index]
         } else {
@@ -120,28 +135,24 @@ function rfdcCircles (opts) {
 
   function clone (o) {
     if (typeof o !== 'object' || o === null) return o
-    if (o instanceof Date) return new Date(o)
     if (Array.isArray(o)) return cloneArray(o, clone)
-    if (o instanceof Map) return new Map(cloneArray(Array.from(o), clone))
-    if (o instanceof Set) return new Set(cloneArray(Array.from(o), clone))
-    var o2 = {}
+    if (o.constructor !== Object && (handler = constructorHandlers.get(o.constructor))) {
+      return handler(o, clone)
+    }
+    const o2 = {}
     refs.push(o)
     refsNew.push(o2)
-    for (var k in o) {
+    for (const k in o) {
       if (Object.hasOwnProperty.call(o, k) === false) continue
-      var cur = o[k]
+      const cur = o[k]
       if (typeof cur !== 'object' || cur === null) {
         o2[k] = cur
-      } else if (cur instanceof Date) {
-        o2[k] = new Date(cur)
-      } else if (cur instanceof Map) {
-        o2[k] = new Map(cloneArray(Array.from(cur), clone))
-      } else if (cur instanceof Set) {
-        o2[k] = new Set(cloneArray(Array.from(cur), clone))
+      } else if (cur.constructor !== Object && (handler = constructorHandlers.get(cur.constructor))) {
+        o2[k] = handler(cur, clone)
       } else if (ArrayBuffer.isView(cur)) {
         o2[k] = copyBuffer(cur)
       } else {
-        var i = refs.indexOf(cur)
+        const i = refs.indexOf(cur)
         if (i !== -1) {
           o2[k] = refsNew[i]
         } else {
@@ -156,27 +167,23 @@ function rfdcCircles (opts) {
 
   function cloneProto (o) {
     if (typeof o !== 'object' || o === null) return o
-    if (o instanceof Date) return new Date(o)
     if (Array.isArray(o)) return cloneArray(o, cloneProto)
-    if (o instanceof Map) return new Map(cloneArray(Array.from(o), cloneProto))
-    if (o instanceof Set) return new Set(cloneArray(Array.from(o), cloneProto))
-    var o2 = {}
+    if (o.constructor !== Object && (handler = constructorHandlers.get(o.constructor))) {
+      return handler(o, cloneProto)
+    }
+    const o2 = {}
     refs.push(o)
     refsNew.push(o2)
-    for (var k in o) {
-      var cur = o[k]
+    for (const k in o) {
+      const cur = o[k]
       if (typeof cur !== 'object' || cur === null) {
         o2[k] = cur
-      } else if (cur instanceof Date) {
-        o2[k] = new Date(cur)
-      } else if (cur instanceof Map) {
-        o2[k] = new Map(cloneArray(Array.from(cur), cloneProto))
-      } else if (cur instanceof Set) {
-        o2[k] = new Set(cloneArray(Array.from(cur), cloneProto))
+      } else if (cur.constructor !== Object && (handler = constructorHandlers.get(cur.constructor))) {
+        o2[k] = handler(cur, cloneProto)
       } else if (ArrayBuffer.isView(cur)) {
         o2[k] = copyBuffer(cur)
       } else {
-        var i = refs.indexOf(cur)
+        const i = refs.indexOf(cur)
         if (i !== -1) {
           o2[k] = refsNew[i]
         } else {

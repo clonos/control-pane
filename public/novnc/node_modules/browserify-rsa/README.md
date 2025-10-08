@@ -4,8 +4,6 @@
 [![Build Status](https://img.shields.io/travis/crypto-browserify/browserify-rsa.svg?branch=master&style=flat-square)](https://travis-ci.org/crypto-browserify/browserify-rsa)
 [![Dependency status](https://img.shields.io/david/crypto-browserify/browserify-rsa.svg?style=flat-square)](https://david-dm.org/crypto-browserify/browserify-rsa#info=dependencies)
 
-[![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
-
 RSA private decryption/signing using chinese remainder and blinding.
 
 ## API

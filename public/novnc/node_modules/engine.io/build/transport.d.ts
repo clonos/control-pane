@@ -1,76 +1,124 @@
-/// <reference types="node" />
 import { EventEmitter } from "events";
-import { IncomingMessage } from "http";
-import { Packet } from "engine.io-parser";
+import type { IncomingMessage, ServerResponse } from "http";
+import { Packet, RawData } from "engine.io-parser";
+type ReadyState = "open" | "closing" | "closed";
+export type EngineRequest = IncomingMessage & {
+    _query: Record<string, string>;
+    res?: ServerResponse;
+    cleanup?: Function;
+    websocket?: any;
+};
 export declare abstract class Transport extends EventEmitter {
+    /**
+     * The session ID.
+     */
     sid: string;
+    /**
+     * Whether the transport is currently ready to send packets.
+     */
     writable: boolean;
+    /**
+     * The revision of the protocol:
+     *
+     * - 3 is used in Engine.IO v3 / Socket.IO v2
+     * - 4 is used in Engine.IO v4 and above / Socket.IO v3 and above
+     *
+     * It is found in the `EIO` query parameters of the HTTP requests.
+     *
+     * @see https://github.com/socketio/engine.io-protocol
+     */
     protocol: number;
-    protected _readyState: string;
+    /**
+     * The current state of the transport.
+     * @protected
+     */
+    protected _readyState: ReadyState;
+    /**
+     * Whether the transport is discarded and can be safely closed (used during upgrade).
+     * @protected
+     */
     protected discarded: boolean;
+    /**
+     * The parser to use (depends on the revision of the {@link Transport#protocol}.
+     * @protected
+     */
     protected parser: any;
-    protected req: IncomingMessage & {
-        cleanup: Function;
-    };
+    /**
+     * Whether the transport supports binary payloads (else it will be base64-encoded)
+     * @protected
+     */
     protected supportsBinary: boolean;
-    get readyState(): string;
-    set readyState(state: string);
+    get readyState(): ReadyState;
+    set readyState(state: ReadyState);
     /**
      * Transport constructor.
      *
-     * @param {http.IncomingMessage} request
-     * @api public
+     * @param {EngineRequest} req
      */
-    constructor(req: any);
+    constructor(req: {
+        _query: Record<string, string>;
+    });
     /**
      * Flags the transport as discarded.
      *
-     * @api private
+     * @package
      */
     discard(): void;
     /**
      * Called with an incoming HTTP request.
      *
-     * @param {http.IncomingMessage} request
-     * @api protected
+     * @param req
+     * @package
      */
-    protected onRequest(req: any): void;
+    onRequest(req: any): void;
     /**
      * Closes the transport.
      *
-     * @api private
+     * @package
      */
-    close(fn?: any): void;
+    close(fn?: () => void): void;
     /**
      * Called with a transport error.
      *
-     * @param {String} message error
-     * @param {Object} error description
-     * @api protected
+     * @param {String} msg - message error
+     * @param {Object} desc - error description
+     * @protected
      */
     protected onError(msg: string, desc?: any): void;
     /**
      * Called with parsed out a packets from the data stream.
      *
      * @param {Object} packet
-     * @api protected
+     * @protected
      */
     protected onPacket(packet: Packet): void;
     /**
      * Called with the encoded packet data.
      *
      * @param {String} data
-     * @api protected
+     * @protected
      */
-    protected onData(data: any): void;
+    protected onData(data: RawData): void;
     /**
      * Called upon transport close.
      *
-     * @api protected
+     * @protected
      */
     protected onClose(): void;
-    abstract get supportsFraming(): any;
-    abstract get name(): any;
-    abstract send(packets: any): any;
-    abstract doClose(fn?: any): any;
+    /**
+     * The name of the transport.
+     */
+    abstract get name(): string;
+    /**
+     * Sends an array of packets.
+     *
+     * @param {Array} packets
+     * @package
+     */
+    abstract send(packets: Packet[]): void;
+    /**
+     * Closes the transport.
+     */
+    abstract doClose(fn?: () => void): void;
 }
+export {};

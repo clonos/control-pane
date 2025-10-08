@@ -5,7 +5,7 @@ const xnv = require("xml-name-validator");
 const attributeUtils = require("./attributes");
 const { NAMESPACES, VOID_ELEMENTS, NODE_TYPES } = require("./constants");
 
-const XML_CHAR = /^(\x09|\x0A|\x0D|[\x20-\uD7FF]|[\uE000-\uFFFD]|(?:[\uD800-\uDBFF][\uDC00-\uDFFF]))*$/u;
+const XML_CHAR = /^(\x09|\x0A|\x0D|[\x20-\uD7FF]|[\uE000-\uFFFD]|[\u{10000}-\u{10FFFF}])*$/u;
 const PUBID_CHAR = /^(\x20|\x0D|\x0A|[a-zA-Z0-9]|[-'()+,./:=?;!*#@$_%])*$/u;
 
 function asciiCaseInsensitiveMatch(a, b) {

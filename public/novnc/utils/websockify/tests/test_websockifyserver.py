@@ -17,18 +17,12 @@
 """ Unit tests for websockifyserver """
 import errno
 import os
-import logging
-import select
-import shutil
 import socket
 import ssl
-from unittest.mock import patch, MagicMock, ANY
+from unittest.mock import patch
 import sys
 import tempfile
 import unittest
-import socket
-import signal
-from http.server import BaseHTTPRequestHandler
 from io import StringIO
 from io import BytesIO
 
@@ -39,7 +33,7 @@ def raise_oserror(*args, **kwargs):
     raise OSError('fake error')
 
 
-class FakeSocket(object):
+class FakeSocket:
     def __init__(self, data=b''):
         self._data = data
 
@@ -59,7 +53,7 @@ class FakeSocket(object):
 
 class WebSockifyRequestHandlerTestCase(unittest.TestCase):
     def setUp(self):
-        super(WebSockifyRequestHandlerTestCase, self).setUp()
+        super().setUp()
         self.tmpdir = tempfile.mkdtemp('-websockify-tests')
         # Mock this out cause it screws tests up
         patch('os.chdir').start()
@@ -68,7 +62,7 @@ class WebSockifyRequestHandlerTestCase(unittest.TestCase):
         """Called automatically after each test."""
         patch.stopall()
         os.rmdir(self.tmpdir)
-        super(WebSockifyRequestHandlerTestCase, self).tearDown()
+        super().tearDown()
 
     def _get_server(self, handler_class=websockifyserver.WebSockifyRequestHandler,
                     **kwargs):
@@ -89,6 +83,60 @@ class WebSockifyRequestHandlerTestCase(unittest.TestCase):
         send_error.assert_called_with(405)
 
     @patch('websockify.websockifyserver.WebSockifyRequestHandler.send_error')
+    def test_head_with_only_upgrade_returns_error(self, send_error):
+        server = self._get_server(web=None)
+        handler = websockifyserver.WebSockifyRequestHandler(
+            FakeSocket(b'HEAD /tmp.txt HTTP/1.1'), '127.0.0.1', server)
+
+        handler.do_HEAD()
+        send_error.assert_called_with(405)
+
+    @patch('websockify.websockifyserver.WebSockifyRequestHandler.send_error')
+    def test_post_returns_error(self, send_error):
+        server = self._get_server(web=None)
+        handler = websockifyserver.WebSockifyRequestHandler(
+            FakeSocket(b'POST / HTTP/1.1'), '127.0.0.1', server)
+
+        handler.do_POST()
+        send_error.assert_called_with(405)
+
+    @patch('websockify.websockifyserver.WebSockifyRequestHandler.send_error')
+    def test_put_returns_error(self, send_error):
+        server = self._get_server(web=None)
+        handler = websockifyserver.WebSockifyRequestHandler(
+            FakeSocket(b'PUT / HTTP/1.1'), '127.0.0.1', server)
+
+        handler.do_PUT()
+        send_error.assert_called_with(405)
+
+    @patch('websockify.websockifyserver.WebSockifyRequestHandler.send_error')
+    def test_patch_returns_error(self, send_error):
+        server = self._get_server(web=None)
+        handler = websockifyserver.WebSockifyRequestHandler(
+            FakeSocket(b'PATCH / HTTP/1.1'), '127.0.0.1', server)
+
+        handler.do_PATCH()
+        send_error.assert_called_with(405)
+
+    @patch('websockify.websockifyserver.WebSockifyRequestHandler.send_error')
+    def test_delete_returns_error(self, send_error):
+        server = self._get_server(web=None)
+        handler = websockifyserver.WebSockifyRequestHandler(
+            FakeSocket(b'DELETE / HTTP/1.1'), '127.0.0.1', server)
+
+        handler.do_DELETE()
+        send_error.assert_called_with(405)
+
+    @patch('websockify.websockifyserver.WebSockifyRequestHandler.send_error')
+    def test_options_returns_error(self, send_error):
+        server = self._get_server(web=None)
+        handler = websockifyserver.WebSockifyRequestHandler(
+            FakeSocket(b'OPTIONS / HTTP/1.1'), '127.0.0.1', server)
+
+        handler.do_OPTIONS()
+        send_error.assert_called_with(405)
+
+    @patch('websockify.websockifyserver.WebSockifyRequestHandler.send_error')
     def test_list_dir_with_file_only_returns_error(self, send_error):
         server = self._get_server(file_only=True)
         handler = websockifyserver.WebSockifyRequestHandler(
@@ -101,7 +149,7 @@ class WebSockifyRequestHandlerTestCase(unittest.TestCase):
 
 class WebSockifyServerTestCase(unittest.TestCase):
     def setUp(self):
-        super(WebSockifyServerTestCase, self).setUp()
+        super().setUp()
         self.tmpdir = tempfile.mkdtemp('-websockify-tests')
         # Mock this out cause it screws tests up
         patch('os.chdir').start()
@@ -110,7 +158,7 @@ class WebSockifyServerTestCase(unittest.TestCase):
         """Called automatically after each test."""
         patch.stopall()
         os.rmdir(self.tmpdir)
-        super(WebSockifyServerTestCase, self).tearDown()
+        super().tearDown()
 
     def _get_server(self, handler_class=websockifyserver.WebSockifyRequestHandler,
                     **kwargs):
@@ -181,8 +229,9 @@ class WebSockifyServerTestCase(unittest.TestCase):
             sock, '127.0.0.1')
 
     def test_do_handshake_no_ssl(self):
-        class FakeHandler(object):
+        class FakeHandler:
             CALLED = False
+
             def __init__(self, *args, **kwargs):
                 type(self).CALLED = True
 
@@ -238,12 +287,16 @@ class WebSockifyServerTestCase(unittest.TestCase):
             def __init__(self, purpose):
                 self.verify_mode = None
                 self.options = 0
+
             def load_cert_chain(self, certfile, keyfile, password):
                 pass
+
             def set_default_verify_paths(self):
                 pass
+
             def load_verify_locations(self, cafile):
                 pass
+
             def wrap_socket(self, *args, **kwargs):
                 raise ssl.SSLError(ssl.SSL_ERROR_EOF)
 
@@ -256,11 +309,11 @@ class WebSockifyServerTestCase(unittest.TestCase):
     def test_do_handshake_ssl_sets_ciphers(self):
         test_ciphers = 'TEST-CIPHERS-1:TEST-CIPHER-2'
 
-        class FakeHandler(object):
+        class FakeHandler:
             def __init__(self, *args, **kwargs):
                 pass
 
-        server = self._get_server(handler_class=FakeHandler, daemon=True, 
+        server = self._get_server(handler_class=FakeHandler, daemon=True,
                                   idle_timeout=1, ssl_ciphers=test_ciphers)
         sock = FakeSocket(b"\x16some ssl data")
 
@@ -269,17 +322,23 @@ class WebSockifyServerTestCase(unittest.TestCase):
 
         class fake_create_default_context():
             CIPHERS = ''
+
             def __init__(self, purpose):
                 self.verify_mode = None
                 self.options = 0
+
             def load_cert_chain(self, certfile, keyfile, password):
                 pass
+
             def set_default_verify_paths(self):
                 pass
+
             def load_verify_locations(self, cafile):
                 pass
+
             def wrap_socket(self, *args, **kwargs):
                 pass
+
             def set_ciphers(self, ciphers_to_set):
                 fake_create_default_context.CIPHERS = ciphers_to_set
 
@@ -291,32 +350,39 @@ class WebSockifyServerTestCase(unittest.TestCase):
     def test_do_handshake_ssl_sets_opions(self):
         test_options = 0xCAFEBEEF
 
-        class FakeHandler(object):
+        class FakeHandler:
             def __init__(self, *args, **kwargs):
                 pass
 
-        server = self._get_server(handler_class=FakeHandler, daemon=True, 
+        server = self._get_server(handler_class=FakeHandler, daemon=True,
                                   idle_timeout=1, ssl_options=test_options)
         sock = FakeSocket(b"\x16some ssl data")
 
         def fake_select(rlist, wlist, xlist, timeout=None):
             return ([sock], [], [])
 
-        class fake_create_default_context(object):
+        class fake_create_default_context:
             OPTIONS = 0
+
             def __init__(self, purpose):
                 self.verify_mode = None
                 self._options = 0
+
             def load_cert_chain(self, certfile, keyfile, password):
                 pass
+
             def set_default_verify_paths(self):
                 pass
+
             def load_verify_locations(self, cafile):
                 pass
+
             def wrap_socket(self, *args, **kwargs):
                 pass
+
             def get_options(self):
                 return self._options
+
             def set_options(self, val):
                 fake_create_default_context.OPTIONS = val
             options = property(get_options, set_options)
@@ -332,7 +398,6 @@ class WebSockifyServerTestCase(unittest.TestCase):
 
     def test_start_server_error(self):
         server = self._get_server(daemon=False, ssl_only=1, idle_timeout=1)
-        sock = server.socket('localhost')
 
         def fake_select(rlist, wlist, xlist, timeout=None):
             raise Exception("fake error")
@@ -344,7 +409,6 @@ class WebSockifyServerTestCase(unittest.TestCase):
 
     def test_start_server_keyboardinterrupt(self):
         server = self._get_server(daemon=False, ssl_only=0, idle_timeout=1)
-        sock = server.socket('localhost')
 
         def fake_select(rlist, wlist, xlist, timeout=None):
             raise KeyboardInterrupt
@@ -356,7 +420,6 @@ class WebSockifyServerTestCase(unittest.TestCase):
 
     def test_start_server_systemexit(self):
         server = self._get_server(daemon=False, ssl_only=0, idle_timeout=1)
-        sock = server.socket('localhost')
 
         def fake_select(rlist, wlist, xlist, timeout=None):
             sys.exit()

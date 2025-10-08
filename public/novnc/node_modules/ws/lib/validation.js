@@ -1,5 +1,9 @@
 'use strict';
 
+const { isUtf8 } = require('buffer');
+
+const { hasBlob } = require('./constants');
+
 //
 // Allowed token characters:
 //
@@ -105,19 +109,42 @@ function _isValidUTF8(buf) {
   return true;
 }
 
+/**
+ * Determines whether a value is a `Blob`.
+ *
+ * @param {*} value The value to be tested
+ * @return {Boolean} `true` if `value` is a `Blob`, else `false`
+ * @private
+ */
+function isBlob(value) {
+  return (
+    hasBlob &&
+    typeof value === 'object' &&
+    typeof value.arrayBuffer === 'function' &&
+    typeof value.type === 'string' &&
+    typeof value.stream === 'function' &&
+    (value[Symbol.toStringTag] === 'Blob' ||
+      value[Symbol.toStringTag] === 'File')
+  );
+}
+
 module.exports = {
+  isBlob,
   isValidStatusCode,
   isValidUTF8: _isValidUTF8,
   tokenChars
 };
 
-/* istanbul ignore else  */
-if (!process.env.WS_NO_UTF_8_VALIDATE) {
+if (isUtf8) {
+  module.exports.isValidUTF8 = function (buf) {
+    return buf.length < 24 ? _isValidUTF8(buf) : isUtf8(buf);
+  };
+} /* istanbul ignore else  */ else if (!process.env.WS_NO_UTF_8_VALIDATE) {
   try {
     const isValidUTF8 = require('utf-8-validate');
 
     module.exports.isValidUTF8 = function (buf) {
-      return buf.length < 150 ? _isValidUTF8(buf) : isValidUTF8(buf);
+      return buf.length < 32 ? _isValidUTF8(buf) : isValidUTF8(buf);
     };
   } catch (e) {
     // Continue regardless of the error.

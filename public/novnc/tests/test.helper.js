@@ -1,5 +1,3 @@
-const expect = chai.expect;
-
 import keysyms from '../core/input/keysymdef.js';
 import * as KeyboardUtil from "../core/input/util.js";
 
@@ -71,18 +69,10 @@ describe('Helpers', function () {
                 origNavigator = Object.getOwnPropertyDescriptor(window, "navigator");
 
                 Object.defineProperty(window, "navigator", {value: {}});
-                if (window.navigator.platform !== undefined) {
-                    // Object.defineProperty() doesn't work properly in old
-                    // versions of Chrome
-                    this.skip();
-                }
-
                 window.navigator.platform = "Mac x86_64";
             });
             afterEach(function () {
-                if (origNavigator !== undefined) {
-                    Object.defineProperty(window, "navigator", origNavigator);
-                }
+                Object.defineProperty(window, "navigator", origNavigator);
             });
 
             it('should respect ContextMenu on modern browser', function () {
@@ -116,6 +106,8 @@ describe('Helpers', function () {
         });
         it('should use charCode if no key', function () {
             expect(KeyboardUtil.getKey({charCode: 'Š'.charCodeAt(), keyCode: 0x42, which: 0x43})).to.be.equal('Š');
+            // Broken Oculus browser
+            expect(KeyboardUtil.getKey({charCode: 'Š'.charCodeAt(), keyCode: 0x42, which: 0x43, key: 'Unidentified'})).to.be.equal('Š');
         });
         it('should return Unidentified when it cannot map the key', function () {
             expect(KeyboardUtil.getKey({keycode: 0x42})).to.be.equal('Unidentified');
@@ -196,19 +188,11 @@ describe('Helpers', function () {
                 origNavigator = Object.getOwnPropertyDescriptor(window, "navigator");
 
                 Object.defineProperty(window, "navigator", {value: {}});
-                if (window.navigator.platform !== undefined) {
-                    // Object.defineProperty() doesn't work properly in old
-                    // versions of Chrome
-                    this.skip();
-                }
-
                 window.navigator.platform = "Windows";
             });
 
             afterEach(function () {
-                if (origNavigator !== undefined) {
-                    Object.defineProperty(window, "navigator", origNavigator);
-                }
+                Object.defineProperty(window, "navigator", origNavigator);
             });
 
             const keys = { 'Zenkaku': 0xff2a, 'Hankaku': 0xff2a,

@@ -178,6 +178,7 @@ class PluginConflictError extends Error {
  * @param {Record<string, DependentPlugin>} target The destination to merge
  * @param {Record<string, DependentPlugin>|undefined} source The source to merge.
  * @returns {void}
+ * @throws {PluginConflictError} When a plugin was conflicted.
  */
 function mergePlugins(target, source) {
     if (!isNonNullObject(source)) {
@@ -258,6 +259,7 @@ function mergeRuleConfigs(target, source) {
  * @param {ConfigArray} instance The config elements.
  * @param {number[]} indices The indices to use.
  * @returns {ExtractedConfig} The extracted config.
+ * @throws {Error} When a plugin is conflicted.
  */
 function createConfig(instance, indices) {
     const config = new ExtractedConfig();
@@ -319,29 +321,16 @@ function createConfig(instance, indices) {
  * @param {string} pluginId The plugin ID for prefix.
  * @param {Record<string,T>} defs The definitions to collect.
  * @param {Map<string, U>} map The map to output.
- * @param {function(T): U} [normalize] The normalize function for each value.
  * @returns {void}
  */
-function collect(pluginId, defs, map, normalize) {
+function collect(pluginId, defs, map) {
     if (defs) {
         const prefix = pluginId && `${pluginId}/`;
 
         for (const [key, value] of Object.entries(defs)) {
-            map.set(
-                `${prefix}${key}`,
-                normalize ? normalize(value) : value
-            );
+            map.set(`${prefix}${key}`, value);
         }
     }
-}
-
-/**
- * Normalize a rule definition.
- * @param {Function|Rule} rule The rule definition to normalize.
- * @returns {Rule} The normalized rule definition.
- */
-function normalizePluginRule(rule) {
-    return typeof rule === "function" ? { create: rule } : rule;
 }
 
 /**
@@ -385,7 +374,7 @@ function initPluginMemberMaps(elements, slots) {
 
             collect(pluginId, plugin.environments, slots.envMap);
             collect(pluginId, plugin.processors, slots.processorMap);
-            collect(pluginId, plugin.rules, slots.ruleMap, normalizePluginRule);
+            collect(pluginId, plugin.rules, slots.ruleMap);
         }
     }
 

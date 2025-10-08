@@ -1,6 +1,6 @@
 /*
  * noVNC: HTML5 VNC client
- * Copyright (C) 2019 The noVNC Authors
+ * Copyright (C) 2019 The noVNC authors
  * Licensed under MPL 2.0 or any later version (see LICENSE.txt)
  */
 
@@ -18,6 +18,10 @@ export default class Cursor {
             this._canvas.style.position = 'fixed';
             this._canvas.style.zIndex = '65535';
             this._canvas.style.pointerEvents = 'none';
+            // Safari on iOS can select the cursor image
+            // https://bugs.webkit.org/show_bug.cgi?id=249223
+            this._canvas.style.userSelect = 'none';
+            this._canvas.style.WebkitUserSelect = 'none';
             // Can't use "display" because of Firefox bug #1445997
             this._canvas.style.visibility = 'hidden';
         }
@@ -65,7 +69,9 @@ export default class Cursor {
             this._target.removeEventListener('mousemove', this._eventHandlers.mousemove, options);
             this._target.removeEventListener('mouseup', this._eventHandlers.mouseup, options);
 
-            document.body.removeChild(this._canvas);
+            if (document.contains(this._canvas)) {
+                document.body.removeChild(this._canvas);
+            }
         }
 
         this._target = null;

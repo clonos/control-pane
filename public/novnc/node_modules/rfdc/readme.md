@@ -17,7 +17,7 @@ clone({a: 1, b: {c: 2}}) // => {a: 1, b: {c: 2}}
 
 ## API
 
-### `require('rfdc')(opts = { proto: false, circles: false }) => clone(obj) => obj2`
+### `require('rfdc')(opts = { proto: false, circles: false, constructorHandlers: [] }) => clone(obj) => obj2`
 
 #### `proto` option
 
@@ -47,6 +47,29 @@ Use the `circles` option to detect and preserve circular references in the
 object. If performance is important, try removing the circular reference from
 the object (set to `undefined`) and then add it back manually after cloning
 instead of using this option.
+
+#### `constructorHandlers` option
+
+Sometimes consumers may want to add custom clone behaviour for particular classes
+(for example `RegExp` or `ObjectId`, which aren't supported out-of-the-box).
+
+This can be done by passing `constructorHandlers`, which takes an array of tuples,
+where the first item is the class to match, and the second item is a function that
+takes the input and returns a cloned output:
+
+```js
+const clone = require('rfdc')({
+  constructorHandlers: [
+    [RegExp, (o) => new RegExp(o)],
+  ]
+})
+
+clone({r: /foo/}) // => {r: /foo/}
+```
+
+**NOTE**: For performance reasons, the handlers will only match an instance of the
+*exact* class (not a subclass). Subclasses will need to be added separately if they
+also need special clone behaviour.
 
 ### `default` import
 It is also possible to directly import the clone function with all options set
@@ -103,15 +126,22 @@ npm run bench
 ```
 
 ```
-benchDeepCopy*100: 457.568ms
-benchLodashCloneDeep*100: 1230.773ms
-benchCloneDeep*100: 655.208ms
-benchFastCopy*100: 747.017ms
-benchRfdc*100: 281.018ms
-benchRfdcProto*100: 277.265ms
-benchRfdcCircles*100: 328.148ms
-benchRfdcCirclesProto*100: 323.004ms
+benchDeepCopy*100: 671.675ms
+benchLodashCloneDeep*100: 1.574s
+benchCloneDeep*100: 936.792ms
+benchFastCopy*100: 822.668ms
+benchFastestJsonCopy*100: 363.898ms // See note below
+benchPlainObjectClone*100: 556.635ms
+benchNanoCopy*100: 770.234ms
+benchRamdaClone*100: 2.695s
+benchJsonParseJsonStringify*100: 2.290s // JSON.parse(JSON.stringify(obj))
+benchRfdc*100: 412.818ms
+benchRfdcProto*100: 424.076ms
+benchRfdcCircles*100: 443.357ms
+benchRfdcCirclesProto*100: 465.053ms
 ```
+
+It is true that [fastest-json-copy](https://www.npmjs.com/package/fastest-json-copy) may be faster, BUT it has such huge limitations that it is rarely useful. For example, it treats things like `Date` and `Map` instances the same as empty `{}`. It can't handle circular references. [plain-object-clone](https://www.npmjs.com/package/plain-object-clone) is also really limited in capability.
 
 ## Tests
 
@@ -137,6 +167,14 @@ All files |      100 |      100 |      100 |      100 |                   |
  index.js |      100 |      100 |      100 |      100 |                   |
 ----------|----------|----------|----------|----------|-------------------|
 ```
+
+### `__proto__` own property copying
+
+`rfdc` works the same way as `Object.assign` when it comes to copying `['__proto__']` (e.g. when
+an object has an own property key called '__proto__'). It results in the target object 
+prototype object being set per the value of the `['__proto__']` own property.
+
+For detailed write-up on how a way to handle this security-wise see https://www.fastify.io/docs/latest/Guides/Prototype-Poisoning/.
 
 ## License
 

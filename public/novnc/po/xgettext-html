@@ -1,22 +1,26 @@
 #!/usr/bin/env node
 /*
  * xgettext-html: HTML gettext parser
- * Copyright (C) 2018 The noVNC Authors
+ * Copyright (C) 2018 The noVNC authors
  * Licensed under MPL 2.0 (see LICENSE.txt)
  */
 
-const getopt = require('node-getopt');
-const jsdom = require("jsdom");
-const fs = require("fs");
+import { program } from 'commander';
+import jsdom from 'jsdom';
+import fs from 'fs';
 
-const opt = getopt.create([
-    ['o', 'output=FILE', 'write output to specified file'],
-    ['h', 'help', 'display this help'],
-]).bindHelp().parseSystem();
+program
+    .argument('<INPUT...>')
+    .requiredOption('-o, --output <FILE>', 'write output to specified file')
+    .parse(process.argv);
 
 const strings = {};
 
 function addString(str, location) {
+    // We assume surrounding whitespace, and whitespace around line
+    // breaks, is just for source formatting
+    str = str.split("\n").map(s => s.trim()).join(" ").trim();
+
     if (str.length == 0) {
         return;
     }
@@ -78,13 +82,13 @@ function process(elem, locator, enabled) {
         if (node.nodeType === node.ELEMENT_NODE) {
             process(node, locator, enabled);
         } else if (node.nodeType === node.TEXT_NODE && enabled) {
-            addString(node.data.trim(), locator(node));
+            addString(node.data, locator(node));
         }
     }
 }
 
-for (let i = 0; i < opt.argv.length; i++) {
-    const fn = opt.argv[i];
+for (let i = 0; i < program.args.length; i++) {
+    const fn = program.args[i];
     const file = fs.readFileSync(fn, "utf8");
     const dom = new jsdom.JSDOM(file, { includeNodeLocations: true });
     const body = dom.window.document.body;
@@ -102,7 +106,7 @@ let output = "";
 
 for (let str in strings) {
     output += "#:";
-    for (location in strings[str]) {
+    for (let location in strings[str]) {
         output += " " + location;
     }
     output += "\n";
@@ -112,4 +116,4 @@ for (let str in strings) {
     output += "\n";
 }
 
-fs.writeFileSync(opt.options.output, output);
+fs.writeFileSync(program.opts().output, output);

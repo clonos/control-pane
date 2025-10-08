@@ -1,8 +1,5 @@
-// @ts-check
-
 /**
  * CommanderError class
- * @class
  */
 class CommanderError extends Error {
   /**
@@ -10,7 +7,6 @@ class CommanderError extends Error {
    * @param {number} exitCode suggested exit code which could be used with process.exit
    * @param {string} code an id string representing the error
    * @param {string} message human-readable description of the error
-   * @constructor
    */
   constructor(exitCode, code, message) {
     super(message);
@@ -25,13 +21,11 @@ class CommanderError extends Error {
 
 /**
  * InvalidArgumentError class
- * @class
  */
 class InvalidArgumentError extends CommanderError {
   /**
    * Constructs the InvalidArgumentError class
    * @param {string} [message] explanation of why argument is invalid
-   * @constructor
    */
   constructor(message) {
     super(1, 'commander.invalidArgument', message);

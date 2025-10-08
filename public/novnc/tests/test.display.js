@@ -1,9 +1,7 @@
-const expect = chai.expect;
-
 import Base64 from '../core/base64.js';
 import Display from '../core/display.js';
 
-describe('Display/Canvas Helper', function () {
+describe('Display/Canvas helper', function () {
     const checkedData = new Uint8ClampedArray([
         0x00, 0x00, 0xff, 255, 0x00, 0x00, 0xff, 255, 0x00, 0xff, 0x00, 255, 0x00, 0xff, 0x00, 255,
         0x00, 0x00, 0xff, 255, 0x00, 0x00, 0xff, 255, 0x00, 0xff, 0x00, 255, 0x00, 0xff, 0x00, 255,
@@ -298,14 +296,11 @@ describe('Display/Canvas Helper', function () {
             expect(display).to.have.displayed(checkedData);
         });
 
-        it('should support drawing images via #imageRect', function (done) {
+        it('should support drawing images via #imageRect', async function () {
             display.imageRect(0, 0, 4, 4, "image/png", makeImagePng(checkedData, 4, 4));
             display.flip();
-            display.onflush = () => {
-                expect(display).to.have.displayed(checkedData);
-                done();
-            };
-            display.flush();
+            await display.flush();
+            expect(display).to.have.displayed(checkedData);
         });
 
         it('should support blit images with true color via #blitImage', function () {
@@ -360,12 +355,11 @@ describe('Display/Canvas Helper', function () {
             expect(img.addEventListener).to.have.been.calledOnce;
         });
 
-        it('should call callback when queue is flushed', function () {
-            display.onflush = sinon.spy();
+        it('should resolve promise when queue is flushed', async function () {
             display.fillRect(0, 0, 4, 4, [0, 0xff, 0]);
-            expect(display.onflush).to.not.have.been.called;
-            display.flush();
-            expect(display.onflush).to.have.been.calledOnce;
+            let promise = display.flush();
+            expect(promise).to.be.an.instanceOf(Promise);
+            await promise;
         });
 
         it('should draw a blit image on type "blit"', function () {
@@ -390,10 +384,11 @@ describe('Display/Canvas Helper', function () {
         });
 
         it('should draw an image from an image object on type "img" (if complete)', function () {
+            const img = { complete: true };
             display.drawImage = sinon.spy();
-            display._renderQPush({ type: 'img', x: 3, y: 4, img: { complete: true } });
+            display._renderQPush({ type: 'img', x: 3, y: 4, img: img });
             expect(display.drawImage).to.have.been.calledOnce;
-            expect(display.drawImage).to.have.been.calledWith({ complete: true }, 3, 4);
+            expect(display.drawImage).to.have.been.calledWith(img, 3, 4);
         });
     });
 });

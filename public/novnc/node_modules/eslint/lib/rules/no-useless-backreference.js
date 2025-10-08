@@ -9,8 +9,13 @@
 // Requirements
 //------------------------------------------------------------------------------
 
-const { CALL, CONSTRUCT, ReferenceTracker, getStringIfConstant } = require("eslint-utils");
-const { RegExpParser, visitRegExpAST } = require("regexpp");
+const {
+	CALL,
+	CONSTRUCT,
+	ReferenceTracker,
+	getStringIfConstant,
+} = require("@eslint-community/eslint-utils");
+const { RegExpParser, visitRegExpAST } = require("@eslint-community/regexpp");
 
 //------------------------------------------------------------------------------
 // Helpers
@@ -24,15 +29,15 @@ const parser = new RegExpParser();
  * @returns {regexpp.Node[]} Array that starts with the given node and ends with the root node.
  */
 function getPathToRoot(node) {
-    const path = [];
-    let current = node;
+	const path = [];
+	let current = node;
 
-    do {
-        path.push(current);
-        current = current.parent;
-    } while (current);
+	do {
+		path.push(current);
+		current = current.parent;
+	} while (current);
 
-    return path;
+	return path;
 }
 
 /**
@@ -41,8 +46,10 @@ function getPathToRoot(node) {
  * @returns {boolean} `true` if it is a lookaround node.
  */
 function isLookaround(node) {
-    return node.type === "Assertion" &&
-        (node.kind === "lookahead" || node.kind === "lookbehind");
+	return (
+		node.type === "Assertion" &&
+		(node.kind === "lookahead" || node.kind === "lookbehind")
+	);
 }
 
 /**
@@ -51,142 +58,206 @@ function isLookaround(node) {
  * @returns {boolean} `true` if it is a negative lookaround node.
  */
 function isNegativeLookaround(node) {
-    return isLookaround(node) && node.negate;
+	return isLookaround(node) && node.negate;
 }
 
 //------------------------------------------------------------------------------
 // Rule Definition
 //------------------------------------------------------------------------------
 
-/** @type {import('../shared/types').Rule} */
+/** @type {import('../types').Rule.RuleModule} */
 module.exports = {
-    meta: {
-        type: "problem",
+	meta: {
+		type: "problem",
 
-        docs: {
-            description: "Disallow useless backreferences in regular expressions",
-            recommended: true,
-            url: "https://eslint.org/docs/rules/no-useless-backreference"
-        },
+		docs: {
+			description:
+				"Disallow useless backreferences in regular expressions",
+			recommended: true,
+			url: "https://eslint.org/docs/latest/rules/no-useless-backreference",
+		},
 
-        schema: [],
+		schema: [],
 
-        messages: {
-            nested: "Backreference '{{ bref }}' will be ignored. It references group '{{ group }}' from within that group.",
-            forward: "Backreference '{{ bref }}' will be ignored. It references group '{{ group }}' which appears later in the pattern.",
-            backward: "Backreference '{{ bref }}' will be ignored. It references group '{{ group }}' which appears before in the same lookbehind.",
-            disjunctive: "Backreference '{{ bref }}' will be ignored. It references group '{{ group }}' which is in another alternative.",
-            intoNegativeLookaround: "Backreference '{{ bref }}' will be ignored. It references group '{{ group }}' which is in a negative lookaround."
-        }
-    },
+		messages: {
+			nested: "Backreference '{{ bref }}' will be ignored. It references group '{{ group }}'{{ otherGroups }} from within that group.",
+			forward:
+				"Backreference '{{ bref }}' will be ignored. It references group '{{ group }}'{{ otherGroups }} which appears later in the pattern.",
+			backward:
+				"Backreference '{{ bref }}' will be ignored. It references group '{{ group }}'{{ otherGroups }} which appears before in the same lookbehind.",
+			disjunctive:
+				"Backreference '{{ bref }}' will be ignored. It references group '{{ group }}'{{ otherGroups }} which is in another alternative.",
+			intoNegativeLookaround:
+				"Backreference '{{ bref }}' will be ignored. It references group '{{ group }}'{{ otherGroups }} which is in a negative lookaround.",
+		},
+	},
 
-    create(context) {
+	create(context) {
+		const sourceCode = context.sourceCode;
 
-        /**
-         * Checks and reports useless backreferences in the given regular expression.
-         * @param {ASTNode} node Node that represents regular expression. A regex literal or RegExp constructor call.
-         * @param {string} pattern Regular expression pattern.
-         * @param {string} flags Regular expression flags.
-         * @returns {void}
-         */
-        function checkRegex(node, pattern, flags) {
-            let regExpAST;
+		/**
+		 * Checks and reports useless backreferences in the given regular expression.
+		 * @param {ASTNode} node Node that represents regular expression. A regex literal or RegExp constructor call.
+		 * @param {string} pattern Regular expression pattern.
+		 * @param {string} flags Regular expression flags.
+		 * @returns {void}
+		 */
+		function checkRegex(node, pattern, flags) {
+			let regExpAST;
 
-            try {
-                regExpAST = parser.parsePattern(pattern, 0, pattern.length, flags.includes("u"));
-            } catch {
+			try {
+				regExpAST = parser.parsePattern(pattern, 0, pattern.length, {
+					unicode: flags.includes("u"),
+					unicodeSets: flags.includes("v"),
+				});
+			} catch {
+				// Ignore regular expressions with syntax errors
+				return;
+			}
 
-                // Ignore regular expressions with syntax errors
-                return;
-            }
+			visitRegExpAST(regExpAST, {
+				onBackreferenceEnter(bref) {
+					const groups = [bref.resolved].flat(),
+						brefPath = getPathToRoot(bref);
 
-            visitRegExpAST(regExpAST, {
-                onBackreferenceEnter(bref) {
-                    const group = bref.resolved,
-                        brefPath = getPathToRoot(bref),
-                        groupPath = getPathToRoot(group);
-                    let messageId = null;
+					const problems = groups.map(group => {
+						const groupPath = getPathToRoot(group);
 
-                    if (brefPath.includes(group)) {
+						if (brefPath.includes(group)) {
+							// group is bref's ancestor => bref is nested ('nested reference') => group hasn't matched yet when bref starts to match.
+							return {
+								messageId: "nested",
+								group,
+							};
+						}
 
-                        // group is bref's ancestor => bref is nested ('nested reference') => group hasn't matched yet when bref starts to match.
-                        messageId = "nested";
-                    } else {
+						// Start from the root to find the lowest common ancestor.
+						let i = brefPath.length - 1,
+							j = groupPath.length - 1;
 
-                        // Start from the root to find the lowest common ancestor.
-                        let i = brefPath.length - 1,
-                            j = groupPath.length - 1;
+						do {
+							i--;
+							j--;
+						} while (brefPath[i] === groupPath[j]);
 
-                        do {
-                            i--;
-                            j--;
-                        } while (brefPath[i] === groupPath[j]);
+						const indexOfLowestCommonAncestor = j + 1,
+							groupCut = groupPath.slice(
+								0,
+								indexOfLowestCommonAncestor,
+							),
+							commonPath = groupPath.slice(
+								indexOfLowestCommonAncestor,
+							),
+							lowestCommonLookaround =
+								commonPath.find(isLookaround),
+							isMatchingBackward =
+								lowestCommonLookaround &&
+								lowestCommonLookaround.kind === "lookbehind";
 
-                        const indexOfLowestCommonAncestor = j + 1,
-                            groupCut = groupPath.slice(0, indexOfLowestCommonAncestor),
-                            commonPath = groupPath.slice(indexOfLowestCommonAncestor),
-                            lowestCommonLookaround = commonPath.find(isLookaround),
-                            isMatchingBackward = lowestCommonLookaround && lowestCommonLookaround.kind === "lookbehind";
+						if (groupCut.at(-1).type === "Alternative") {
+							// group's and bref's ancestor nodes below the lowest common ancestor are sibling alternatives => they're disjunctive.
+							return {
+								messageId: "disjunctive",
+								group,
+							};
+						}
+						if (!isMatchingBackward && bref.end <= group.start) {
+							// bref is left, group is right ('forward reference') => group hasn't matched yet when bref starts to match.
+							return {
+								messageId: "forward",
+								group,
+							};
+						}
+						if (isMatchingBackward && group.end <= bref.start) {
+							// the opposite of the previous when the regex is matching backward in a lookbehind context.
+							return {
+								messageId: "backward",
+								group,
+							};
+						}
+						if (groupCut.some(isNegativeLookaround)) {
+							// group is in a negative lookaround which isn't bref's ancestor => group has already failed when bref starts to match.
+							return {
+								messageId: "intoNegativeLookaround",
+								group,
+							};
+						}
 
-                        if (!isMatchingBackward && bref.end <= group.start) {
+						return null;
+					});
 
-                            // bref is left, group is right ('forward reference') => group hasn't matched yet when bref starts to match.
-                            messageId = "forward";
-                        } else if (isMatchingBackward && group.end <= bref.start) {
+					if (
+						problems.length === 0 ||
+						problems.some(problem => !problem)
+					) {
+						// If there are no problems or no problems with any group then do not report it.
+						return;
+					}
 
-                            // the opposite of the previous when the regex is matching backward in a lookbehind context.
-                            messageId = "backward";
-                        } else if (groupCut[groupCut.length - 1].type === "Alternative") {
+					let problemsToReport;
 
-                            // group's and bref's ancestor nodes below the lowest common ancestor are sibling alternatives => they're disjunctive.
-                            messageId = "disjunctive";
-                        } else if (groupCut.some(isNegativeLookaround)) {
+					// Gets problems that appear in the same disjunction.
+					const problemsInSameDisjunction = problems.filter(
+						problem => problem.messageId !== "disjunctive",
+					);
 
-                            // group is in a negative lookaround which isn't bref's ancestor => group has already failed when bref starts to match.
-                            messageId = "intoNegativeLookaround";
-                        }
-                    }
+					if (problemsInSameDisjunction.length) {
+						// Only report problems that appear in the same disjunction.
+						problemsToReport = problemsInSameDisjunction;
+					} else {
+						// If all groups appear in different disjunctions, report it.
+						problemsToReport = problems;
+					}
 
-                    if (messageId) {
-                        context.report({
-                            node,
-                            messageId,
-                            data: {
-                                bref: bref.raw,
-                                group: group.raw
-                            }
-                        });
-                    }
-                }
-            });
-        }
+					const [{ messageId, group }, ...other] = problemsToReport;
+					let otherGroups = "";
 
-        return {
-            "Literal[regex]"(node) {
-                const { pattern, flags } = node.regex;
+					if (other.length === 1) {
+						otherGroups = " and another group";
+					} else if (other.length > 1) {
+						otherGroups = ` and other ${other.length} groups`;
+					}
+					context.report({
+						node,
+						messageId,
+						data: {
+							bref: bref.raw,
+							group: group.raw,
+							otherGroups,
+						},
+					});
+				},
+			});
+		}
 
-                checkRegex(node, pattern, flags);
-            },
-            Program() {
-                const scope = context.getScope(),
-                    tracker = new ReferenceTracker(scope),
-                    traceMap = {
-                        RegExp: {
-                            [CALL]: true,
-                            [CONSTRUCT]: true
-                        }
-                    };
+		return {
+			"Literal[regex]"(node) {
+				const { pattern, flags } = node.regex;
 
-                for (const { node } of tracker.iterateGlobalReferences(traceMap)) {
-                    const [patternNode, flagsNode] = node.arguments,
-                        pattern = getStringIfConstant(patternNode, scope),
-                        flags = getStringIfConstant(flagsNode, scope);
+				checkRegex(node, pattern, flags);
+			},
+			Program(node) {
+				const scope = sourceCode.getScope(node),
+					tracker = new ReferenceTracker(scope),
+					traceMap = {
+						RegExp: {
+							[CALL]: true,
+							[CONSTRUCT]: true,
+						},
+					};
 
-                    if (typeof pattern === "string") {
-                        checkRegex(node, pattern, flags || "");
-                    }
-                }
-            }
-        };
-    }
+				for (const { node: refNode } of tracker.iterateGlobalReferences(
+					traceMap,
+				)) {
+					const [patternNode, flagsNode] = refNode.arguments,
+						pattern = getStringIfConstant(patternNode, scope),
+						flags = getStringIfConstant(flagsNode, scope);
+
+					if (typeof pattern === "string") {
+						checkRegex(refNode, pattern, flags || "");
+					}
+				}
+			},
+		};
+	},
 };

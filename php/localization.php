@@ -142,7 +142,9 @@ class Translate
 		$file=$full_path.$file_name;
 
 		$mtime_translate=0;
-		$mtime_orig=filemtime($file);
+		$mtime_orig=0;
+		if(file_exists($file))
+			$mtime_orig=filemtime($file);
 		if(file_exists($this->translated_file))
 			$mtime_translate=filemtime($this->translated_file);
 		# $mtime_db_update — дата последней модификации перевода в БД
@@ -199,7 +201,7 @@ class Translate
 										['system',PDO::PARAM_STR]
 									]);
 									//var_dump($dbres);
-									if(!empty($dbres))
+									if(!empty($dbres) && is_array($dbres) && isset($dbres['text']))
 									{
 										if($text!=$dbres['text'])
 										{
@@ -260,26 +262,28 @@ UPDATE SQLITE_SEQUENCE SET seq = 0 WHERE name = 'lang_en'
 					//var_dump($dbres);
 					//echo '<br>';
 					
-					if(is_numeric($dbres['id']))
+					if(is_array($dbres) && isset($dbres['id']) && is_numeric($dbres['id']))
 					{
 						// если фраза есть в базе, то вписываем её ID в тэг
 						$new_text='<translate id="'.$dbres['id'].'">'.$text."</translate>";
 						$txt=str_replace($tag,$new_text,$txt);
 						$is_changed=true;
 					}else{
-						if($dbres===false)
+						if($dbres===false || !is_array($dbres) || !isset($dbres['id']))
 						{
 							// если фразы нет в базе, то добавляем её туда и вписываем новый ID в тэг
 							$dbres=$db->insert("insert into lang_en (text,type) values (?,?)",[[$text, PDO::PARAM_STR],[$path, PDO::PARAM_STR]]);
 							
-							if($dbres['error'])
+							if(isset($dbres['error']) && $dbres['error'])
 								return array('error'=>true,'error_message'=>$dbres['info']);
 							
-							$new_text='<translate id="'.$dbres['lastID'].'">'.$text."</translate>";
-							$txt=str_replace($tag,$new_text,$txt);
-							$is_changed=true;
-							//echo $txt;
-							$ids_arr[]=$dbres['lastID'];
+							if(isset($dbres['lastID'])) {
+								$new_text='<translate id="'.$dbres['lastID'].'">'.$text."</translate>";
+								$txt=str_replace($tag,$new_text,$txt);
+								$is_changed=true;
+								//echo $txt;
+								$ids_arr[]=$dbres['lastID'];
+							}
 						}
 					}
 					
@@ -314,11 +318,15 @@ UPDATE SQLITE_SEQUENCE SET seq = 0 WHERE name = 'lang_en'
 				exit;
 			}
 			
-			foreach($res as $item)
-			{
-				$pat='#<translate id="'.$item['en_id'].'"[^>]*>(.*)</translate>#U';
-				$txtChg='<span id="trlt-'.$item['en_id'].'">'.$item['text'].'</span>';
-				$txt=preg_replace($pat,$txtChg,$txt);	//'<span id="trlt-'.$item['en_id'].'">'.	//.'</span>'
+			if(is_array($res)) {
+				foreach($res as $item)
+				{
+					if(is_array($item) && isset($item['en_id']) && isset($item['text'])) {
+						$pat='#<translate id="'.$item['en_id'].'"[^>]*>(.*)</translate>#U';
+						$txtChg='<span id="trlt-'.$item['en_id'].'">'.$item['text'].'</span>';
+						$txt=preg_replace($pat,$txtChg,$txt);	//'<span id="trlt-'.$item['en_id'].'">'.	//.'</span>'
+					}
+				}
 			}
 			
 			//$txt=preg_replace('#(<translate([^>]*)>|</translate>)#','',$txt);

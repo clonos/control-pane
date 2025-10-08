@@ -58,7 +58,7 @@ module.exports.fromURLRecord = urlRecord => {
   let mimeTypeRecord;
   try {
     mimeTypeRecord = new MIMEType(mimeType);
-  } catch (e) {
+  } catch {
     mimeTypeRecord = new MIMEType("text/plain;charset=US-ASCII");
   }
 

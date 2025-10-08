@@ -1,3 +1,6 @@
+/* eslint-disable no-var */
+'use strict'
+
 var createHash = require('crypto').createHash
 var stringify = require('fast-safe-stringify')
 

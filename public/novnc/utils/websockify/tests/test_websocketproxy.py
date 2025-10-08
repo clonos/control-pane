@@ -16,8 +16,6 @@
 
 """ Unit tests for websocketproxy """
 
-import sys
-import unittest
 import unittest
 import socket
 from io import StringIO
@@ -29,7 +27,7 @@ from websockify import token_plugins
 from websockify import auth_plugins
 
 
-class FakeSocket(object):
+class FakeSocket:
     def __init__(self, data=b''):
         self._data = data
 
@@ -47,7 +45,7 @@ class FakeSocket(object):
             return StringIO(self._data.decode('latin_1'))
 
 
-class FakeServer(object):
+class FakeServer:
     class EClose(Exception):
         pass
 
@@ -58,18 +56,19 @@ class FakeServer(object):
         self.ssl_target = None
         self.unix_target = None
 
+
 class ProxyRequestHandlerTestCase(unittest.TestCase):
     def setUp(self):
-        super(ProxyRequestHandlerTestCase, self).setUp()
+        super().setUp()
         self.handler = websocketproxy.ProxyRequestHandler(
             FakeSocket(), "127.0.0.1", FakeServer())
         self.handler.path = "https://localhost:6080/websockify?token=blah"
-        self.handler.headers = None
+        self.handler.headers = {}
         patch('websockify.websockifyserver.WebSockifyServer.socket').start()
 
     def tearDown(self):
         patch.stopall()
-        super(ProxyRequestHandlerTestCase, self).tearDown()
+        super().tearDown()
 
     def test_get_target(self):
         class TestPlugin(token_plugins.BasePlugin):
@@ -128,4 +127,3 @@ class ProxyRequestHandlerTestCase(unittest.TestCase):
 
         self.handler.server.target_host = "someotherhost"
         self.handler.auth_connection()
-

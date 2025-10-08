@@ -1,4 +1,4 @@
-# 1. Internal Modules
+# 1. Internal modules
 
 The noVNC client is composed of several internal modules that handle
 rendering, input, networking, etc. Each of the modules is designed to
@@ -9,7 +9,7 @@ stable, and this documentation is not maintained as well as the
 official external API.
 
 
-## 1.1 Module List
+## 1.1 Module list
 
 * __Keyboard__ (core/input/keyboard.js): Keyboard input event handler with
 non-US keyboard support. Translates keyDown and keyUp events to X11
@@ -32,9 +32,9 @@ callback event name, and the callback function.
 
 ## 2. Modules
 
-## 2.1 Keyboard Module
+## 2.1 Keyboard module
 
-### 2.1.1 Configuration Attributes
+### 2.1.1 Configuration attributes
 
 None
 
@@ -52,9 +52,9 @@ None
 | onkeypress | (keysym, code, down) | Handler for key press/release
 
 
-## 2.2 Display Module
+## 2.2 Display module
 
-### 2.2.1 Configuration Attributes
+### 2.2.1 Configuration attributes
 
 | name         | type  | mode | default | description
 | ------------ | ----- | ---- | ------- | ------------
@@ -81,9 +81,3 @@ None
 | blitImage          | (x, y, width, height, arr, offset, from_queue)          | Blit pixels (of R,G,B,A) to the display
 | drawImage          | (img, x, y)                                             | Draw image and track damage
 | autoscale          | (containerWidth, containerHeight)                       | Scale the display
-
-### 2.2.3 Callbacks
-
-| name    | parameters | description
-| ------- | ---------- | ------------
-| onflush | ()         | A display flush has been requested and we are now ready to resume FBU processing

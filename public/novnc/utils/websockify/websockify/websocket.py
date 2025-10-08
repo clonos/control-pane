@@ -31,12 +31,16 @@ except ImportError:
     warnings.warn("no 'numpy' module, HyBi protocol will be slower")
     numpy = None
 
+
 class WebSocketWantReadError(ssl.SSLWantReadError):
     pass
+
+
 class WebSocketWantWriteError(ssl.SSLWantWriteError):
     pass
 
-class WebSocket(object):
+
+class WebSocket:
     """WebSocket protocol socket like class.
 
     This provides access to the WebSocket protocol by behaving much
@@ -118,7 +122,7 @@ class WebSocket(object):
         connect() must retain the same arguments.
         """
 
-        self.client = True;
+        self.client = True
 
         uri = urlparse(uri)
 
@@ -139,7 +143,9 @@ class WebSocket(object):
             self.socket = socket.create_connection((uri.hostname, port))
 
             if uri.scheme in ("wss", "https"):
-                self.socket = ssl.wrap_socket(self.socket)
+                context = ssl.create_default_context()
+                self.socket = context.wrap_socket(self.socket,
+                                                  server_hostname=uri.hostname)
                 self._state = "ssl_handshake"
             else:
                 self._state = "headers"
@@ -204,7 +210,7 @@ class WebSocket(object):
 
             accept = headers.get('Sec-WebSocket-Accept')
             if accept is None:
-                raise Exception("Missing Sec-WebSocket-Accept header");
+                raise Exception("Missing Sec-WebSocket-Accept header")
 
             expected = sha1((self._key + self.GUID).encode("ascii")).digest()
             expected = b64encode(expected).decode("ascii")
@@ -212,7 +218,7 @@ class WebSocket(object):
             del self._key
 
             if accept != expected:
-                raise Exception("Invalid Sec-WebSocket-Accept header");
+                raise Exception("Invalid Sec-WebSocket-Accept header")
 
             self.protocol = headers.get('Sec-WebSocket-Protocol')
             if len(protocols) == 0:
@@ -256,7 +262,7 @@ class WebSocket(object):
 
             ver = headers.get('Sec-WebSocket-Version')
             if ver is None:
-                raise Exception("Missing Sec-WebSocket-Version header");
+                raise Exception("Missing Sec-WebSocket-Version header")
 
             # HyBi-07 report version 7
             # HyBi-08 - HyBi-12 report version 8
@@ -268,7 +274,7 @@ class WebSocket(object):
 
             key = headers.get('Sec-WebSocket-Key')
             if key is None:
-                raise Exception("Missing Sec-WebSocket-Key header");
+                raise Exception("Missing Sec-WebSocket-Key header")
 
             # Generate the hash value for the accept header
             accept = sha1((key + self.GUID).encode("ascii")).digest()
@@ -666,7 +672,7 @@ class WebSocket(object):
                             continue
 
                 if code is None:
-                    self.close_code = code = 1005
+                    self.close_code = 1005
                     self.close_reason = "No close status code specified by peer"
                 else:
                     self.close_code = code
@@ -731,7 +737,7 @@ class WebSocket(object):
         if self.client:
             mask = b''
             for i in range(4):
-                mask += random.randrange(256)
+                mask += random.randrange(256).to_bytes()
             frame = self._encode_hybi(opcode, msg, mask)
         else:
             frame = self._encode_hybi(opcode, msg)
@@ -751,25 +757,22 @@ class WebSocket(object):
         # Unmask a frame
         if numpy:
             plen = len(buf)
-            pstart = 0
-            pend = plen
             b = c = b''
             if plen >= 4:
-                dtype=numpy.dtype('<u4')
+                dtype = numpy.dtype('<u4')
                 if sys.byteorder == 'big':
                     dtype = dtype.newbyteorder('>')
                 mask = numpy.frombuffer(mask, dtype, count=1)
                 data = numpy.frombuffer(buf, dtype, count=int(plen / 4))
-                #b = numpy.bitwise_xor(data, mask).data
                 b = numpy.bitwise_xor(data, mask).tobytes()
 
             if plen % 4:
-                dtype=numpy.dtype('B')
+                dtype = numpy.dtype('B')
                 if sys.byteorder == 'big':
                     dtype = dtype.newbyteorder('>')
                 mask = numpy.frombuffer(mask, dtype, count=(plen % 4))
                 data = numpy.frombuffer(buf, dtype,
-                        offset=plen - (plen % 4), count=(plen % 4))
+                                        offset=plen - (plen % 4), count=(plen % 4))
                 c = numpy.bitwise_xor(data, mask).tobytes()
             return b + c
         else:
@@ -823,11 +826,11 @@ class WebSocket(object):
              'payload'      : decoded_buffer}
         """
 
-        f = {'fin'          : 0,
-             'opcode'       : 0,
-             'masked'       : False,
-             'length'       : 0,
-             'payload'      : None}
+        f = {'fin': 0,
+             'opcode': 0,
+             'masked': False,
+             'length': 0,
+             'payload': None}
 
         blen = len(buf)
         hlen = 2
@@ -865,10 +868,9 @@ class WebSocket(object):
 
         if f['masked']:
             # unmask payload
-            mask_key = buf[hlen-4:hlen]
-            f['payload'] = self._unmask(buf[hlen:(hlen+length)], mask_key)
+            mask_key = buf[hlen - 4:hlen]
+            f['payload'] = self._unmask(buf[hlen:(hlen + length)], mask_key)
         else:
-            f['payload'] = buf[hlen:(hlen+length)]
+            f['payload'] = buf[hlen:(hlen + length)]
 
         return f
-

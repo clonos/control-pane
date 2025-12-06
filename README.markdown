@@ -2,7 +2,7 @@
 
 ClonOS is a free and open-source platform for managing NAS and virtual environments.
 
-ClonOS is developed as part of the [/cbsd/cbsd](CBSD project), a framework for Linux and FreeBSD for managing virtual environments.
+ClonOS is developed as part of the <a href="https://github.com/cbsd/cbsd">CBSD Project</a>, a framework for Linux and FreeBSD for managing virtual environments.
 
 
 <img src="https://convectix.com/img/clonos1.png" width="1024" title="ClonOS screenshot 1" alt="ClonOS screenshot 1"/>

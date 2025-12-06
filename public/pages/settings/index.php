@@ -1,5 +1,5 @@
 <?php
-$clonos->useDialogs(['settings-getupdate']);
+$this->useDialogs(['settings-getupdate']);
 ?>
 
 <h1><translate id="1">Settings</translate></h1>

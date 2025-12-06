@@ -7,8 +7,8 @@ require_once('forms.php');
 require_once('utils.php');
 
 class ClonOS {
-	const TRANSLATE_CACHE_NAME='_translate.cache';
-	const BACK_FOLDER_NAME='back';
+	const TRANSLATE_CACHE_DIR='assets/translate.cache';
+	const BACK_FOLDER_NAME='assets/back';
 	
 	public $server_name='';
 	public $workdir='';
@@ -18,6 +18,7 @@ class ClonOS {
 	public $realpath_public='';
 	public $realpath_dialogs='';
 	public $realpath_page='';
+	public $realpath_assets='';
 	public $uri_chunks=array();
 	public $json_name='';
 	public $table_templates=array();
@@ -28,8 +29,12 @@ class ClonOS {
 	public $config=false;
 	public $mode='';
 	public $form='';
+	public $language='en';
+	public $default_lang='en';
 	
-	private $_locale;
+	public $_locale=false;
+	public $_translate=false;
+
 	private $_post=false;
 	private $_db=null;
 	private $_client_ip='';
@@ -51,8 +56,9 @@ class ClonOS {
 		'unregistered'=>true,
 	);
 	private $_vars=array();
-	private $_translate=false;
 	private $_db_tasks=null;
+	
+	private $_uri_chunks=null;
 /*
 	public $projectId=0;
 	public $jailId=0;
@@ -70,15 +76,27 @@ class ClonOS {
 
 		$this->_post=($_SERVER['REQUEST_METHOD']=='POST');
 		$this->_vars=$_POST;
+		$this->_uri_chunks=$uri_chunks;
 
 		$this->workdir=getenv('WORKDIR'); # // /usr/jails
 		$this->environment=getenv('APPLICATION_ENV');
+		$tmplang=isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])?$_SERVER['HTTP_ACCEPT_LANGUAGE']:'';
+		$this->default_lang=explode(',',$tmplang)[0];
 		$this->realpath=$_real_path.'/'; # /usr/home/web/cp/clonos/
 		$this->realpath_php=$_real_path.'/php/'; # /usr/home/web/cp/clonos/php/
 		$this->realpath_public=$_real_path.'/public/'; # /usr/home/web/cp/clonos/public/
 		$this->realpath_dialogs=$this->realpath_public.'dialogs/'; # /usr/home/web/cp/clonos/public/dialogs/
+		$this->realpath_assets=$_real_path.'/assets/';
 		$this->media_import=$_real_path.'/media_import/';
 
+
+
+
+	}
+	
+	function init()
+	{
+		$uri_chunks=$this->_uri_chunks;
 		if($this->environment=='development'){
 			$sentry_file=$this->realpath_php.'sentry.php';
 			if(file_exists($sentry_file)) include($sentry_file);
@@ -105,11 +123,11 @@ class ClonOS {
 
 		$this->config=new Config();
 
-		$this->_locale = new Localization($this->realpath_public);
-		$this->_translate = new Translate($this->_locale,$this->realpath_page);
+//		$this->_locale = new Localization($this);	//$this->realpath,$this->realpath_public);
+//		$this->_translate = new Translate($this);	//$this->_locale,$this->realpath);	//_page
 		
 		$this->_client_ip=$_SERVER['REMOTE_ADDR'];
-
+		
 		if(isset($this->_vars['path'])){
 			//$this->realpath_page=$this->realpath_public.'pages/'.trim($this->_vars['path'],'/').'/';
 			$this->realpath_page=$this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
@@ -138,8 +156,6 @@ class ClonOS {
 				$this->realpath_page=$this->realpath_public.'pages/'.$this->uri_chunks[0].'/';
 			}
 		}
-
-
 
 		if(isset($this->_vars['hash'])) $this->url_hash=preg_replace('/^#/','',$this->_vars['hash']);
 
@@ -295,6 +311,10 @@ class ClonOS {
 	{
 		return $this->_locale->translate($phrase);
 	}
+	function translateF($path,$page,$file_name)
+	{
+		return $this->_translate->translate($path,$page,$file_name);
+	}
 	
 	function ccmd_trltGo()
 	{
@@ -432,7 +452,7 @@ class ClonOS {
 
 	function check_locktime($nodeip)
 	{
-		$lockfile=$this->workdir."/ftmp/shmux_${nodeip}.lock";
+		$lockfile=$this->workdir."/ftmp/shmux_{$nodeip}.lock";
 		if (file_exists($lockfile)){
 			$cur_time = time();
 			$difftime=(($cur_time - filemtime($lockfile)) / 60);

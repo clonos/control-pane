@@ -1,40 +1,19 @@
-# ClonOS Project
+# Welcome to ClonOS Project
 
-#### Table of Contents
+ClonOS is a free and open-source platform for managing NAS and virtual environments.
 
-1. [Project Description - What does the project do?](#project-description)
-2. [Usage - Configuration options and additional functionality](#usage)
-3. [Limitations - OS compatibility, etc.](#limitations)
-4. [Contributing - Contribute the project](#contributing)
+ClonOS is developed as part of the [https://github.com/cbsd/cbsd](CBSD project), a framework for Linux and FreeBSD for managing virtual environments.
 
-## project description
 
-ClonOS is a free open-source FreeBSD-based platform for virtual environments creation and management. In the core:
+<img src="https://convectix.com/img/clonos1.png" width="1024" title="ClonOS screenshot 1" alt="ClonOS screenshot 1"/>
 
-- https://www.freebsd.org :: FreeBSD OS
-  + https://man.freebsd.org/bhyve/8 :: bhyve(8) as hypervisor engine
-  + https://xenproject.org/ :: Xen as hypervisor engine
-  + https://man.freebsd.org/vale/4 :: vale(4) as Virtual Ethernet Switch
-  + http://man.freebsd.org/jail/8 :: jail(8) as container engine
 
-- https://github.com/cbsd/cbsd :: CBSD Project as management tools
+<img src="https://convectix.com/img/clonos2.png" width="1024" title="ClonOS screenshot 2" alt="ClonOS screenshot 2"/>
 
-- https://puppet.com/ :: Puppet as configuration management
 
-We like existing Linux-only solutions such as OpenStack (https://www.openstack.org/), OpenNebula (http://opennebula.org/), Amazon AWS (https://aws.amazon.com/) and we believe that FreeBSD OS is able to give something similar.
+## Installation
 
-## Usage
-
-For installing from ISO: Use downloads pages https://clonos.convectix.com/download.html to obtain latest .ISO image
-For installing on FreeBSD: https://clonos.convectix.com/installation_on_freebsd.html
-
-## Limitations
-
-Tested with following OSes and distribution:
-
-- FreeBSD 14x, 15x
-
-Errata: https://clonos.convectix.com/errata.html
+// section will be updated soon //
 
 ## Contributing
 

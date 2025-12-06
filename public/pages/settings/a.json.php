@@ -1,5 +1,5 @@
 <?php
-require_once("../php/cbsd.php");
+//require_once("../php/cbsd.php");
 
 $html = '';
 $hres = $this->getTableChunk('components','tbody');
@@ -33,7 +33,7 @@ if($res['retval']==0)
 	{
 		$html_tpl1 = $hres[1];
 		list($component, $version) = explode(":", $item);
-//		printf("${component} - ${version}<br>\n");
+//		printf("{$component} - {$version}<br>\n");
 		$vars = [
 			'component' => $component,
 			'version'   => $version,

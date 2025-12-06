@@ -32,6 +32,7 @@ var clonos={
 		'removebase':{stat:['Remove','Removing','Removed'],cmd:'baseRemove'},
 		'imgremove':{stat:['Remove','Removing','Removed'],cmd:'imageRemove'},
 	},
+	translateOn:false,
 	
 	start:function()
 	{
@@ -241,9 +242,13 @@ var clonos={
 	trltOn:function()
 	{
 		if($('input#trlt-chk').is(':checked'))
+		{
 			$('body').addClass('translate');
-		else
+			this.translateOn=true;
+		}else{
 			$('body').removeClass('translate');
+			this.translateOn=false;
+		}
 	},
 	onTrltGo:function(data)
 	{
@@ -1120,7 +1125,7 @@ var clonos={
 	loadData:function(mode,return_func,arr,spinner)
 	{
 		if(spinner!==false) $('.spinner').show();
-		var path='/json.php';
+		var path='/json/';	//json.php';
 		var db_path=this.getDbPath();
 		var posts={'mode':mode,'path':location.pathname,'hash':window.location.hash,'db_path':db_path};
 		if(typeof arr=='object')
@@ -1218,7 +1223,7 @@ var clonos={
 			for(id in data) $('#'+id).html(data[id]);
 			
 			var razd=location.pathname;
-			if(['/overview/'].indexOf(razd)!=-1)
+			if(['/clonos/overview/'].indexOf(razd)!=-1)
 			{
 				this.createGraphs();
 			}
@@ -1898,8 +1903,11 @@ var clonos={
 		
 		if(elid.substr(0,5)=='trlt-')
 		{
-			var trltId=elid.substr(5);
-			this.trltGo(trltId,target);
+			if(this.translateOn)
+			{
+				var trltId=elid.substr(5);
+				this.trltGo(trltId,target);
+			}
 			if($('body').hasClass('translate')) return false;
 			var target=$(target).parent();
 			elid=$(target)[0].id;
@@ -2993,7 +3001,7 @@ var clonos={
 	wsconnect:function()
 	{
 		this.client_id=Math.random(10000);	// поменять на сессию
-		this.socket = new WebSocket("ws://"+location.hostname+":8023/clonos"+location.pathname);
+		this.socket = new WebSocket("ws://"+location.hostname+":8023"+location.pathname);	// /clonos
 		$(this.socket).on('open',$.proxy(this.wsopen,this))
 			.on('close',$.proxy(this.wsclose,this))
 			.on('error',$.proxy(this.wserror,this))
@@ -3884,7 +3892,7 @@ function graph(name,width,height,el_parent,tooltip1,tooltip2)
 			view:{
 				interpolation:'bezier',
 				grid:{
-					//fillStyle:'rgba(100,100,100,0.02)',
+					fillStyle:'rgba(100,100,100,0.02)',
 					sharpLines:true,
 					//strokeStyle:'transparent',
 					borderVisible:true,
@@ -3894,7 +3902,7 @@ function graph(name,width,height,el_parent,tooltip1,tooltip2)
 				labels:{
 					//fontSize:8,
 					//disabled:true,
-					//fillStyle:'#000000',
+					fillStyle:'#000000',
 					precision:0,
 				},
 				millisPerPixel:250,
@@ -4003,8 +4011,10 @@ function isset(varr){for(a in arguments){if(typeof arguments[a]=='undefined')ret
 function ws_debug(){
 	var res=prompt('Введите JSON строку','');
 	if(res=='' || res==null) return;
-	var data=JSON.parse(res);
-	clonos.onChangeStatus(data);
+	try{
+		var data=JSON.parse(res);
+		clonos.onChangeStatus(data);
+	}catch(e){}
 }
 
 

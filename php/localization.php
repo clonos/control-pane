@@ -2,17 +2,34 @@
 
 class Localization
 {
-	private $language='en';
+	private $parent=null;
+	//private $language='en';
 	private $translate_arr=array();
-	private $realpath='';
+	//private $realpath='';
+	//private $realpath_public='';
 
-	function __construct($realpath_public)
+	function __construct($parent)	//$realpath,$realpath_public)
 	{
+		//$p=get_parent_class($this);
+		//var_dump(parent::$realpath_assets);
+		//echo $parent->realpath_assets;
+		//echo "<pre>";var_dump($this);exit;
 #$_COOKIE['lang']='ru';
-		$this->realpath=$realpath_public;
+		$this->parent=$parent;
+//echo $this->parent->realpath_assets;exit;
+		$this->realpath=$parent->realpath;
+		$this->realpath_public=$parent->realpath_public;
+/*
 		(isset($_COOKIE['lang'])) AND $this->language=$_COOKIE['lang'];
 		(!array_key_exists($this->language, Config::$languages)) AND $this->language='en';
-		include($realpath_public.'/lang/'.$this->language.'.php');
+*/	
+		$file_name=$this->realpath_public.'lang/'.$this->language.'.php';
+		if(!file_exists($file_name))
+		{
+			echo "Including file not found! ".$file_name;
+			exit;
+		}
+		include($file_name);
 		$this->translate_arr=$lang;
 		
 		/*
@@ -86,9 +103,10 @@ class Localization
 # доделать со временем
 class Translate
 {
+	//private $parent=null;
 	private $locale='';
-	private $language='';
-	private $realpath='';
+	//private $language='';
+	//private $realpath='';
 	
 	private $translated_file='';
 	/*
@@ -97,49 +115,65 @@ class Translate
 	private $json_file_name='';
 	*/
 	
-	function __construct($locale)
+	function __construct($parent)	//$locale,$realpath)
 	{
-		
-		$this->locale=$locale;
-		$this->language=$this->locale->get_lang();
-		$this->realpath=$locale->get_path();
+		/*
+		$this->parent=$parent;
+		if(property_exists($parent, '_locale')) {
+            $this->locale = $parent->_locale;
+        } else {
+            $this->locale = null;
+        }
+		*/
+        $this->language = $this->locale ? $this->locale->get_lang() : 'en';
+		//$this->realpath=$locale->get_path();
+		$this->realpath = method_exists($parent, 'get_path') ? $parent->get_path() : (property_exists($parent, 'realpath') ? $parent->realpath : '');
 	}
 	
-	public function translate($path,$page,$file_name)
+	public function translateF($path,$page,$file_name)
 	{
-		$translate_cache=ClonOS::TRANSLATE_CACHE_NAME;	//'_translate.cache';
+		//$translate_cache=ClonOS::TRANSLATE_CACHE_DIR.DIRECTORY_SEPARATOR.$path;	//'_translate.cache';
+		//$translate_cache=$this->parent->realpath_assets.DIRECTORY_SEPARATOR.$page;
+		$translate_cache=$this->realpath_assets.DIRECTORY_SEPARATOR.$page;
+		echo $translate_cache;exit;
 		$backup_dir='back';
+		
 		switch($path)
 		{
 			case 'pages':
-				$full_path=$this->realpath.$path.DIRECTORY_SEPARATOR.$page.DIRECTORY_SEPARATOR;
+				$full_path=$this->realpath.DIRECTORY_SEPARATOR;	//.$path.DIRECTORY_SEPARATOR.$page.DIRECTORY_SEPARATOR
 				$translate_cache_path=$full_path.$translate_cache.DIRECTORY_SEPARATOR;
-				$backup_path=$full_path.$backup_dir.DIRECTORY_SEPARATOR;
+				//$backup_path=$full_path.$backup_dir.DIRECTORY_SEPARATOR;
 				$this->translated_file=$translate_cache_path.$this->language.'.index.php';
 				//echo $this->translated_file;exit;
 				break;
 			case 'dialogs':
-				$full_path=$this->realpath.$path.DIRECTORY_SEPARATOR;
+				$full_path=$this->realpath;	//$full_path=$this->realpath.$path.DIRECTORY_SEPARATOR;
 				$translate_cache_path=$full_path.$translate_cache.DIRECTORY_SEPARATOR;
-				$backup_path=$full_path.$backup_dir.DIRECTORY_SEPARATOR;
+				//$backup_path=$full_path.$backup_dir.DIRECTORY_SEPARATOR;
 				$this->translated_file=$translate_cache_path.$this->language.'.'.$file_name;
 				break;
 			default:
 				$path='system';
 		}
-		
-		if(!is_dir($full_path)) return;
-		
+		//echo $translate_cache_path;exit;
+		//mkdir($translate_cache_path,0770,true);exit;
+		//echo $this->translated_file;echo "<br>";
+		//if(!is_dir($full_path)) return;
+		//return;
 		if(!is_dir($translate_cache_path))
 		{
-			mkdir($translate_cache_path);
-			$ttxt="This files is cache of translated pages, do not translate it!\n".
-				"If you are a translator, please read the documentation on the translation on the website.\n".
-				"Thank you.";
-			file_put_contents($translate_cache_path.'!dont.touch.files',$ttxt);
+			mkdir($translate_cache_path,0770,true);
+			//$ttxt="This files is cache of translated pages, do not translate it!\n".
+			//	"If you are a translator, please read the documentation on the translation on the website.\n".
+			//	"Thank you.";
+			//file_put_contents($translate_cache_path.'!dont.touch.files',$ttxt);
 		}
 		
+		//$file=$full_path.'/public/'.$file_name;
 		$file=$full_path.$file_name;
+		//echo $file;
+		//$file=$this->translated_file;
 
 		$mtime_translate=0;
 		$mtime_orig=0;
@@ -223,6 +257,8 @@ class Translate
 											*/
 										}
 										
+									}else{
+										//print_r($attrs);exit;
 									}
 									$ids_arr[]=$id;
 								}

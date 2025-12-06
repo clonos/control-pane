@@ -33,7 +33,10 @@ foreach($res as $r){
 		'edit_title' => $this->translate('edit_title'),
 		'delete_title' => $this->translate('delete_title'),
 	];
+	//print_r($vars);exit;
 	foreach($vars as $var => $val){
+		//echo $var.': '.$val.'<br>';
+		if(empty($val))$val='';
 		$html_tpl1 = str_replace('#'.$var.'#', $val, $html_tpl1);
 	}
 	$html .= $html_tpl1;

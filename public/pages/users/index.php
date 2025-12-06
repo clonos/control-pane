@@ -1,5 +1,5 @@
 <?php
-$clonos->useDialogs(['users-new']);
+$this->useDialogs(['users-new']);
 ?>
 
 <h1><translate id="358">User management</translate></h1>

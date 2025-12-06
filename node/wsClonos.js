@@ -60,14 +60,15 @@ wss.on('connection', function connection(ws, req) {
 	var url = req.url;
 	//console.log(url);
 	var pres=url.split('/');
+	console.log(url);
 	
 	//var path=url.substring(0,7);
 	//if(path=='/graph/')
 	if(pres[1]=='graph')
 	{
-		graphs_clients.push(pres[1]);
-		var tube={'bhyvevms':'racct-bhyve','jailscontainers':'racct-jail','overview':'racct-system'}[pres[2]];
-		var client=pres[3];
+		graphs_clients.push(pres[2]);
+		var tube={'bhyvevms':'racct-bhyve','jailscontainers':'racct-jail','overview':'racct-system'}[pres[3]];
+		var client=pres[4];
 		clients[client]={};
 		clients[client].name=client;
 		clients[client].ws=ws;

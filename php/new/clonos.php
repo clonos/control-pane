@@ -1,0 +1,220 @@
+<?php
+$clonos_path='../../clonos/';
+
+require_once('../php/new/t.utils.php');
+require_once('../php/new/t.locale.php');
+require_once('../php/new/t.translate.php');
+require_once('../php/new/t.menu.php');
+require_once('../php/new/t.route.php');
+require_once('../php/new/t.user.php');
+require_once('../php/new/t.commands.php');
+require_once('../php/new/t.uri.php');
+
+class ClonOS {
+	use tUtils, tLocale, tTranslate, tMenu, tUser, tRoute, tCommands, tUri;
+	
+	const TRANSLATE_CACHE_DIR='translate.cache';
+	const BACK_FOLDER_NAME='back';
+	
+	public static $workdir;
+	public static $environment;
+	public static $language='en';
+	public static $default_lang='en';
+	public static $server_name;
+	public static $realpath;
+	public static $realpath_php;
+	public static $realpath_public;
+	public static $realpath_pages;
+	public static $realpath_dialogs;
+	public static $realpath_assets;
+	public static $realpath_page;
+	public static $media_import;
+	public static $json_name;
+	
+	public $json_req;
+	public $sys_vars;
+	public $index_file;
+	public $uri1;
+	
+	
+	public $config;
+	
+	private $_uri_chunks;
+	private $_post;
+	private $_db=null;
+	private $_client_ip;
+	private $_dialogs=array();
+	private $_cmd_array=array(
+		'jcreate','jstart','jstop',
+		'jrestart','jedit','jremove',
+		'jexport','jimport','jclone',
+		'jrename','madd','sstart',
+		'sstop','projremove','bcreate',
+		'bstart','bstop','brestart',
+		'bremove','bclone','brename',
+		'vm_obtain','removesrc','srcup',
+		'removebase','world','repo','forms'
+	);
+	private $_vars=array();
+	private $_db_tasks=null;
+	private $_jname;
+	private $_menu;
+	
+	function __construct($realpath)
+	{
+		self::$realpath=$realpath.DIRECTORY_SEPARATOR;
+		self::$realpath_php=self::$realpath.'php/new/';	### После завершения убрать new/
+		self::$realpath_public=self::$realpath.'public/';
+		self::$realpath_pages=self::$realpath_public.'pages/';
+		self::$realpath_dialogs=self::$realpath_public.'dialogs/';
+		self::$realpath_assets=self::$realpath.'assets/';
+		self::$media_import=self::$realpath.'media_import/';
+		
+		self::$workdir=getenv('WORKDIR'); # // /usr/jails
+		self::$environment=getenv('APPLICATION_ENV');
+		$this->lang_init();
+		
+		$this->_post=($_SERVER['REQUEST_METHOD']=='POST');
+		$this->_vars=$_POST;
+
+		$this->_client_ip=$_SERVER['REMOTE_ADDR'];
+		
+		$ures=$this->userAutologin();
+		$this->sys_vars['authorized']=false;
+		if($ures!==false){
+			if(isset($ures['id']) && is_numeric($ures['id']) && $ures['id']>0){
+				$this->_user_info=$ures;
+				$this->_user_info['unregistered']=false;
+				$this->sys_vars['authorized']=true;
+			}else{
+				$this->_user_info['unregistered']=true;
+				if($this->json_req) exit;
+			}
+		}
+
+		$this->config=new Config();
+		if(isset($_SERVER['SERVER_NAME']) && !empty(trim($_SERVER['SERVER_NAME']))){
+			self::$server_name=$_SERVER['SERVER_NAME'];
+		} else {
+			self::$server_name=$_SERVER['SERVER_ADDR'];
+		}
+		
+		$this->_menu=$this->makeMenu(1);
+		//print_r($this->pages_ids);exit;
+
+		$_uri_chunks=$this->get_uri_chunks();
+		$this->_uri_chunks=$_uri_chunks;
+		if(isset($_uri_chunks[0]))$this->route($_uri_chunks[0]);
+		
+		$this->pages_ids=array_merge($this->pages_ids,array(
+			'settings'=>0,
+			'users'=>0,
+			'shell'=>0
+		));
+		
+/*
+    [clonos/overview] => 3
+    [clonos/jailscontainers] => 4
+    [clonos/instance_jail] => 5
+    [clonos/bhyvevms] => 6
+    [clonos/vm_packages] => 7
+    [clonos/vpnet] => 8
+    [clonos/authkey] => 9
+    [clonos/media] => 10
+    [clonos/imported] => 11
+    [clonos/bases] => 13
+    [clonos/sources] => 14
+    [clonos/tasklog] => 15
+    [clonos/sqlite] => 16
+    [settings] => 0
+    [users] => 0
+    [shell] => 0
+*/
+		//echo $_SERVER['REQUEST_URI'].'<br>';
+		//echo '<pre>'.print_r($this->pages_ids,true);exit;
+		
+		if(isset($_uri_chunks[0]))
+		{
+			if(isset($_uri_chunks[1]))
+			{
+				$check_uri=$_uri_chunks[0].'/'.$_uri_chunks[1];
+			}else{
+				$check_uri=$_uri_chunks[0];
+			}
+		}else{
+			$check_uri='';
+		}
+		//echo $check_uri;exit;
+		
+		//if(!isset($_uri_chunks[0]) || !isset($_uri_chunks[1]))
+		if(!isset($this->pages_ids[$check_uri]))
+		{
+			$tmp=array_first($this->menu_tree);
+			
+			if(isset($tmp['default']))
+			{
+				header('Location: /'.$tmp['default'].'/');
+			}else{
+				header("HTTP/1.1 404 Not Found");
+			}
+			exit;
+		}
+		
+		if(self::$environment=='development'){
+			$sentry_file=self::$realpath_php.'sentry.php';
+			if(file_exists($sentry_file)) include($sentry_file);
+		}
+
+	}
+	
+	function route($chunk)	// t.route.php
+	{
+		switch($chunk)
+		{
+			case 'json':
+				$this->route_json();exit;
+				break;
+			case 'donwload':
+				$this->route_download();exit;
+				break;
+			case 'upload':
+				$this->route_upload();exit;
+				break;
+			case 'vnc':
+				$this->route_vnc();exit;
+				break;
+		}
+	}
+	
+	function start()
+	{
+		$res=$this->translateF('index','','index.tpl');
+		
+		if(isset($res['error']))
+		{
+			if($res['error'])
+			{
+				echo $res['message'];
+				exit;
+			}
+		}
+		
+		$this->uri1=$this->_uri_chunks[0].'/'.$this->_uri_chunks[1];
+		$file=$this->get_translated_filename();
+		//echo $file;exit;
+		if(file_exists($file))
+		{
+			$this->index_file=self::$realpath_page.'index.php';
+			//echo $this->index_file;exit;
+			include($file);
+		}else{
+			echo "Index file not found! file: ".__FILE__.", line: ".__LINE__;
+		}
+	}
+	
+}
+
+require_once('../php/new/cbsd.php');
+require_once('../php/new/config.php');
+require_once('../php/new/db.php');
+require_once('../php/new/forms.php');

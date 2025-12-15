@@ -37,9 +37,9 @@ portsnap fetch extract
 ```
 pkg update -f
 
-pkg install -y lang/python311 lang/php85 net/libvncserver security/gnutls sqlite3 shells/bash npm-node23 www/nginx \
-    sysutils/cbsd security/ca_root_nss www/node23 security/sudo net/beanstalkd git devel/pkgconf tmux py311-numpy www/php85-session \
-    archivers/php85-zip databases/php85-sqlite3 databases/php85-pdo_sqlite security/php85-filter www/php85-opcache lang/go
+pkg install -y lang/python311 lang/php85 net/libvncserver security/gnutls sqlite3 shells/bash www/npm-node24 www/nginx \
+    sysutils/cbsd security/ca_root_nss www/node24 security/sudo net/beanstalkd git devel/pkgconf tmux py311-numpy \
+    www/php85-session archivers/php85-zip databases/php85-sqlite3 databases/php85-pdo_sqlite security/php85-filter lang/go
 ```
 
 3) Checkout ClonOS ports tree:

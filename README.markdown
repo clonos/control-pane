@@ -24,15 +24,7 @@ WIP...
 
 This instruction assumes that we are working on an already installed vanilla FreeBSD OS 15.0-RELEASE ( or higher ).
 
-1) Install ClonOS and dependencies
-
-Update ports tree first:
-
-```
-portsnap fetch extract
-```
-
-2) Install ClonOS dependencies:
+1) Install ClonOS dependencies:
 
 ```
 pkg update -f
@@ -40,6 +32,12 @@ pkg update -f
 pkg install -y lang/python311 lang/php85 net/libvncserver security/gnutls sqlite3 shells/bash www/npm-node24 www/nginx \
     sysutils/cbsd security/ca_root_nss www/node24 security/sudo net/beanstalkd git devel/pkgconf tmux py311-numpy \
     www/php85-session archivers/php85-zip databases/php85-sqlite3 databases/php85-pdo_sqlite security/php85-filter lang/go
+```
+
+2) Update FreeBSD ports tree:
+
+```
+git clone --depth 1 --branch main https://git.freebsd.org/ports.git /usr/ports
 ```
 
 3) Checkout ClonOS ports tree:

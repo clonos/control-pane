@@ -46,13 +46,13 @@ git clone --depth 1 --branch main https://git.freebsd.org/ports.git /usr/ports
 git clone https://github.com/clonos/clonos-ports-wip.git /root/clonos-ports
 ```
 
-4) Create overlays vars for ClonOS ports
+4) Create overlays vars for ClonOS ports:
 
 ```
 echo 'OVERLAYS=/root/clonos-ports' >> /etc/make.conf
 ```
 
-5) Build and install ClonOS
+5) Build and install ClonOS:
 
 ```
 env BATCH=no make -C /root/clonos-ports/www/clonos install

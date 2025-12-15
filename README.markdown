@@ -30,7 +30,7 @@ This instruction assumes that we are working on an already installed vanilla Fre
 pkg update -f
 
 pkg install -y lang/python311 lang/php85 net/libvncserver security/gnutls sqlite3 shells/bash www/npm-node24 www/nginx \
-    sysutils/cbsd security/ca_root_nss www/node24 security/sudo net/beanstalkd git devel/pkgconf tmux py311-numpy lang/go
+    sysutils/cbsd security/ca_root_nss www/node24 security/sudo net/beanstalkd git devel/pkgconf tmux py311-numpy lang/go \
     php85-session php85-zip php85-sqlite3 php85-pdo_sqlite php85-filter php85-ctype php85-curl php85-intl php85-mbstring php85-phar php85-zlib
 ```
 

@@ -307,6 +307,7 @@ trait tMenu {
 		$this->mtitles=[];
 		$arr=array_first($this->menu_tree)['node'];
 		//echo "<pre>";print_r($arr);exit;
+		//echo "<pre>";print_r($this->pages_ids);exit;
 		$mk_html = function($arr,$sm) use (&$mk_html) {
 			$html='';
 			foreach($arr as $key=>$val)
@@ -342,6 +343,11 @@ trait tMenu {
 
 		
 		//echo join(','.PHP_EOL,$this->mtitles);exit;
+	}
+	
+	public function getMenuFirstElement()
+	{
+		return array_first(array_first($this->menu_tree)['node']);
 	}
 }
 

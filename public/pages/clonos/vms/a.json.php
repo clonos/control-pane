@@ -31,7 +31,7 @@ foreach($nodes as $node){
 				$vnc_port_status = 'grey';
 
 				if($status == 1){
-					$vnc_port_file = $this->workdir.'/jails-system/'.$bhyve['jname'].'/vnc_port';
+					$vnc_port_file = self::$workdir.'/jails-system/'.$bhyve['jname'].'/vnc_port';
 					if(file_exists($vnc_port_file)){
 						$vnc_port = trim(file_get_contents($vnc_port_file));
 					}

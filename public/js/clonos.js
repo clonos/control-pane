@@ -2598,7 +2598,7 @@ var clonos={
 						break;
 					case 'jddm-helpers':
 						//elid
-						location.href='/jailscontainers/'+id+'/';
+						location.href='/containers/'+id+'/';
 						return;
 						break;
 					case 'jddm-export':
@@ -3104,7 +3104,7 @@ var clonos={
 	},
 	
 	jArr:{},
-	onChangeStatus:function(data)	// publish /clonos/jailscontainers/ '{"cmd":"refresh"}'
+	onChangeStatus:function(data)	// publish /clonos/containers/ '{"cmd":"refresh"}'
 	{
 		var cmd=data.cmd;
 		var id=data.id;

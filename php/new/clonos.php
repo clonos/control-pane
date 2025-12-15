@@ -34,6 +34,7 @@ class ClonOS {
 	public $json_req;
 	public $sys_vars;
 	public $index_file;
+	public $uri;
 	public $uri1;
 	
 	
@@ -100,17 +101,31 @@ class ClonOS {
 		}
 		
 		$this->_menu=$this->makeMenu(1);
-		//print_r($this->pages_ids);exit;
-
-		$_uri_chunks=$this->get_uri_chunks();
-		$this->_uri_chunks=$_uri_chunks;
-		if(isset($_uri_chunks[0]))$this->route($_uri_chunks[0]);
-		
 		$this->pages_ids=array_merge($this->pages_ids,array(
+			# top menus
 			'settings'=>0,
 			'users'=>0,
-			'shell'=>0
+			'shell'=>0,
+			# system pages start
+			'json'=>0,
+			'download'=>0,
+			'upload'=>0,
+			'vnc'=>0,
+			# system pages end
 		));
+		//echo '<pre>';print_r($this->pages_ids);exit;
+
+		$this->get_uri_chunks();
+		$_uri_chunks=$this->uri['path_chunks'];
+//echo '<pre>';print_r($this->uri);exit;
+		//$_uri_chunks=$this->get_uri_chunks();
+		$this->_uri_chunks=$_uri_chunks;
+		if(isset($_uri_chunks[0]))
+		{
+			$this->route($_uri_chunks[0]);
+			//exit;
+		}
+		
 		
 /*
     [clonos/overview] => 3
@@ -150,10 +165,18 @@ class ClonOS {
 		if(!isset($this->pages_ids[$check_uri]))
 		{
 			$tmp=array_first($this->menu_tree);
+			//$rlpath=$tmp['default'];
+			$rlpath=$this->uri['default'];
+			if(empty($rlpath)){echo 'empty path!'; exit;}
 			
-			if(isset($tmp['default']))
+			if(isset($rlpath))
 			{
-				header('Location: /'.$tmp['default'].'/');
+				if($this->uri['need_reload'])
+				{
+					header('Location: /'.$tmp['default'].'/');
+					//echo '<br>Location: /'.$rlpath.'/';
+					//echo '<pre>';print_r($this->uri);
+				}
 			}else{
 				header("HTTP/1.1 404 Not Found");
 			}
@@ -199,13 +222,19 @@ class ClonOS {
 			}
 		}
 		
-		$this->uri1=$this->_uri_chunks[0].'/'.$this->_uri_chunks[1];
+		$this->uri1=$this->_uri_chunks[0];
+		if(isset($this->_uri_chunks[1]) && !empty($this->_uri_chunks[1]))
+		{
+			$this->uri1.='/'.$this->_uri_chunks[1];
+		}
+		//$this->uri1=$this->_uri_chunks[0].'/'.$this->_uri_chunks[1];
 		$file=$this->get_translated_filename();
 		//echo $file;exit;
 		if(file_exists($file))
 		{
 			$this->index_file=self::$realpath_page.'index.php';
 			//echo $this->index_file;exit;
+			//echo '<br>include: '.$file;
 			include($file);
 		}else{
 			echo "Index file not found! file: ".__FILE__.", line: ".__LINE__;

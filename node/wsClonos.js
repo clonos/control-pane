@@ -67,7 +67,7 @@ wss.on('connection', function connection(ws, req) {
 	if(pres[1]=='graph')
 	{
 		graphs_clients.push(pres[2]);
-		var tube={'bhyvevms':'racct-bhyve','jailscontainers':'racct-jail','overview':'racct-system'}[pres[3]];
+		var tube={'vms':'racct-bhyve','containers':'racct-jail','overview':'racct-system'}[pres[3]];
 		var client=pres[4];
 		clients[client]={};
 		clients[client].name=client;

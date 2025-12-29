@@ -1,4 +1,6 @@
 <?php
+session_start();
+if(isset($_GET['section'])){changeSection();}
 $clonos_path='../../clonos/';
 
 require_once('../php/new/t.utils.php');
@@ -44,8 +46,8 @@ class ClonOS {
 	private $_post;
 	private $_db=null;
 	private $_client_ip;
-	private $_dialogs=array();
-	private $_cmd_array=array(
+	private $_dialogs=[];
+	private $_cmd_array=[
 		'jcreate','jstart','jstop',
 		'jrestart','jedit','jremove',
 		'jexport','jimport','jclone',
@@ -55,11 +57,12 @@ class ClonOS {
 		'bremove','bclone','brename',
 		'vm_obtain','removesrc','srcup',
 		'removebase','world','repo','forms'
-	);
-	private $_vars=array();
+	];
+	private $_vars=[];
 	private $_db_tasks=null;
 	private $_jname;
 	private $_menu;
+	private $_css=[];
 	
 	function __construct($realpath)
 	{
@@ -100,7 +103,24 @@ class ClonOS {
 			self::$server_name=$_SERVER['SERVER_ADDR'];
 		}
 		
-		$this->_menu=$this->makeMenu(1);
+		$section=1;
+		if(isset($_SESSION['section']))
+		{
+			$section=$_SESSION['section'];
+		}
+		$this->_menu=$this->makeMenu($section);
+		
+		if($section==2)
+		{
+			$this->addCss('/css/nas.css');
+		}
+
+		if(empty($this->_menu))
+		{
+			echo 'В меню сайта ничего нет. Нужно это исправить!';
+			exit;
+		}
+
 		$this->pages_ids=array_merge($this->pages_ids,array(
 			# top menus
 			'settings'=>0,
@@ -209,6 +229,15 @@ class ClonOS {
 		}
 	}
 	
+	function addCss($css)
+	{
+		$this->_css[]='	<link type="text/css" href="'.$css.'" rel="stylesheet" />';
+	}
+	function putCss()
+	{
+		echo(join("\n",$this->_css)."\n");
+	}
+	
 	function start()
 	{
 		$res=$this->translateF('index','','index.tpl');
@@ -247,3 +276,19 @@ require_once('../php/new/cbsd.php');
 require_once('../php/new/config.php');
 require_once('../php/new/db.php');
 require_once('../php/new/forms.php');
+require_once('../php/new/dialogs.gen.php');
+
+function changeSection()
+{
+	$section=$_GET['section'];
+	if(is_numeric($section))
+	{
+		$_SESSION['section']=$section;
+		$req=$_SERVER['REQUEST_URI'];
+		$pat='#(\?|&)section=[\d]+#i';
+		$req=preg_replace($pat,'',$req);
+		header('Location: '.$req);
+		exit;
+	}
+
+}

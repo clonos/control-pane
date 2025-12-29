@@ -12,6 +12,9 @@
 	<link type="text/css" href="/css/styles.css" rel="stylesheet" />
 	<link type="text/css" href="/font/clonos.css" rel="stylesheet" />
 	<link type="text/css" href="/font/animation.css" rel="stylesheet" />
+<?php
+$this->putCss();
+?>
 	<script src="/lang/<?php echo self::$language; ?>.js" type="text/javascript"></script>
 	<style type="text/css">html{background-color:#aaa;} .hide{display:none;}</style>
 	<meta name="keywords" content="" />

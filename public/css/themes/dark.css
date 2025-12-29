@@ -461,3 +461,8 @@ header .top-right a {
 #menu .icon-wpforms:before {
 	color:rgba(100,100,255,0.7);
 }
+
+
+.svg {
+  filter: brightness(0) saturate(100%) invert(72%);
+}

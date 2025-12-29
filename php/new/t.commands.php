@@ -717,6 +717,24 @@ trait tCommands {
 
 		return $res;
 	}
+	
+	function ccmd_diskInfoSmart(){
+		if(!isset($this->form['mode'])) $this->form['mode']='';
+		$disk=$this->form['disk'];
+		
+		$file='/var/db/cixnas/dsk/'.$disk.'.smartinfo';
+		$html='no data';
+		if(file_exists($file))
+		{
+			//$mtime=filemtime($file);
+			//echo 'Time generated: '.date('d.m.Y H:i:s',$mtime)."\n\n";
+			$html=file_get_contents($file);
+		}
+		
+		$res['disk']=$disk;
+		$res['html']='<pre>'.$html.'</pre>';
+		return $res;
+	}
 
 
 

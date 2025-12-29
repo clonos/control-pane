@@ -8,6 +8,12 @@ if(isset($this->uri_chunks[1])){
 
 $db = new Db('base','nodes');
 $res = $db->select('select nodename from nodelist', []);
+if(isset($res['error']) && $res['error']===true)
+{
+	echo json_encode(['error'=>true,'error_message'=>$res['info']]);
+	exit;
+}
+//echo '<pre>';print_r($res);exit;
 $nodes = ['local'];
 foreach($res as $val){
 	$nodes[] = $val['nodename'];

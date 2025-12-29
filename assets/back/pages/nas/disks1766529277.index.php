@@ -1,13 +1,122 @@
-<?php
-$this->useDialogs([
-	'disk-info',
-]);
-?>
 <h1>Disks list:</h1>
-<!--
-<script>document.write(JSON.stringify({"test":{"a":1,"b":2}}))</script>
--->
+
 <!-- https://angel-rs.github.io/css-color-filter-generator/ -->
+<style>
+	.dblock {
+		border:1px solid black;
+		border-radius:4px;
+		padding:10px;
+		margin-bottom:20px;
+		min-width:470px;
+	}
+	
+	.dheader {
+		position:absolute;
+		margin-top:-20px;
+		background-color:white;
+		padding:0 10px;
+	}
+/*
+	img.svg:hover {
+		opacity:50%;
+	}
+*/
+
+	#s-hdd, #s-hdd1 {
+		width:60px;
+		height:78px;
+		display:block;
+		background:0 0/60px 78px no-repeat url(/images/svg/hdd.svg);
+	}
+/*	
+	.svg {
+	  filter: brightness(0) saturate(100%) invert(72%) sepia(65%) saturate(5061%) hue-rotate(115deg) brightness(107%) contrast(93%);;
+	}
+*/
+/*	
+	.container {
+		display:grid;
+		grid-template-columns: minmax(200px, 50%)1fr;
+		gap:4px;
+	}
+	.cell {
+		border:1px solid red;
+		min-width:200px;
+	}
+*/
+	.container {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+		font: 13px Tahoma, sans-serif;
+	}
+
+	.cnt {
+		flex: 1 1 48%;
+		min-width: 450px;
+		box-sizing: border-box;
+		border: 1px solid #ccc;
+		border-radius: 6px;
+		overflow:hidden;
+	}
+
+	.cell {
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+		word-break: break-all;
+		display:flex;
+		gap:10px;
+		margin:10px;
+	}
+	.cnt.empty {
+		border-width:0;
+		width:48%;
+	}
+	.dinfo {
+		flex-grow: 1;
+	}
+	.dinfo div:hover {
+		background-color:rgba(0,0,0,5%);*/
+	}
+	.dinfo span {
+		display:inline-block;
+		width:100px;
+	}
+	.cnt .ops {
+		background:#f0f0f0;
+		padding:6px;
+		
+	}
+	.cnt .ops .chbx {
+		background:none;
+		border-width:0;
+		display:inline-block;
+		width:48px;
+		text-align:center;
+	}
+	.cnt .ops .chbx:hover {
+		background:none;
+		box-shadow:none;
+	}
+	.cnt .ops span {
+		border:1px solid silver;
+		border-radius:4px;
+		padding:1px 8px;
+		background-color:#1aaee8;
+		color:white;
+		margin-right:6px;
+		cursor:pointer;
+	}
+	.cnt .ops span:hover {
+		box-shadow: 0px 0px 2px 2px rgba(0, 144, 255, 0.2);
+		background-color:#5ac4ed;
+		color:black;
+	}
+	.cnt .ops span:first-child {
+		/* margin-left:70px; */
+	}
+	
+</style>
 
 <!--
 <div class="container">
@@ -35,7 +144,7 @@ $this->useDialogs([
 -->
 <?php
 $patt='
-	<div class="cnt"><!--{"info":{"disk":"#disk#"}}-->
+	<div class="cnt">
 		<div class="cell">
 			<!-- <span class="system">system</span> -->
 			<img src="/images/svg/#type#.svg" alt="HDD" width="60px" height="78px" class="svg">
@@ -148,3 +257,15 @@ if(file_exists($filename))
 	[capacity] => 14000519643136
 	[capacity_human] => 12 Tb
 */
+?>
+
+
+<dialog id="disk-info" class="window-box">
+	<h1>
+		<span><translate>Disk info</translate></span>
+	</h1>
+	<!-- <h2><translate>Virtual Machine Settings</translate></h2> -->
+	<div class="window-content">
+		test
+	</div>
+</dialog>

@@ -1,13 +1,91 @@
-<?php
-$this->useDialogs([
-	'disk-info',
-]);
-?>
 <h1>Disks list:</h1>
-<!--
-<script>document.write(JSON.stringify({"test":{"a":1,"b":2}}))</script>
--->
+
 <!-- https://angel-rs.github.io/css-color-filter-generator/ -->
+<style>
+	.dblock {
+		border:1px solid black;
+		border-radius:4px;
+		padding:10px;
+		margin-bottom:20px;
+	}
+	
+	.dheader {
+		position:absolute;
+		margin-top:-20px;
+		background-color:white;
+		padding:0 10px;
+	}
+/*
+	img.svg:hover {
+		opacity:50%;
+	}
+*/
+
+	#s-hdd, #s-hdd1 {
+		width:60px;
+		height:78px;
+		display:block;
+		background:0 0/60px 78px no-repeat url(/images/svg/hdd.svg);
+	}
+/*	
+	.svg {
+	  filter: brightness(0) saturate(100%) invert(72%) sepia(65%) saturate(5061%) hue-rotate(115deg) brightness(107%) contrast(93%);;
+	}
+*/
+/*	
+	.container {
+		display:grid;
+		grid-template-columns: minmax(200px, 50%)1fr;
+		gap:4px;
+	}
+	.cell {
+		border:1px solid red;
+		min-width:200px;
+	}
+*/
+	.container {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+	}
+
+	.cell {
+		flex: 1 1 48%;
+		min-width: 450px;
+		box-sizing: border-box;
+		border: 1px solid #ccc;
+		border-radius: 6px;
+		padding: 10px;
+	}
+
+	.cell {
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+		word-break: break-all;
+		display:flex;
+		gap:10px;
+		/*line-height:6px;*/
+	}
+	.cell .system {
+		float:left;
+		position:absolute;
+	}
+	.cell.empty {
+		border-width:0;
+	}
+	.dinfo {
+		flex-grow: 1;
+	}
+	.dinfo div:hover {
+		background-color:rgba(0,0,0,5%);*/
+	}
+	.dinfo span {
+		display:inline-block;
+		width:100px;
+	}
+	
+	
+</style>
 
 <!--
 <div class="container">
@@ -35,24 +113,18 @@ $this->useDialogs([
 -->
 <?php
 $patt='
-	<div class="cnt"><!--{"info":{"disk":"#disk#"}}-->
-		<div class="cell">
-			<!-- <span class="system">system</span> -->
-			<img src="/images/svg/#type#.svg" alt="HDD" width="60px" height="78px" class="svg">
-			<div class="dinfo">
-				<div><span>disk:</span> #disk# (#model#)</div>
-				<div><span>parent:</span> #parent#</div>
-				<div><span>businfo:</span> #businfo#</div>
-				<div><span>rpm:</span> #rpm#</div>
-				<div><span>perf / perf4k:</span> #perf# / #perf4k#</div>
-				<div><span>capacity:</span> #capacity_human# (#capacity#)</div>
-				<div><span>serial:</span> #ident#</div>
-			</div>
-		</div>
-		<div class="ops">
-			<span class="chbx"><input type="checkbox" /></span>
-			<span class="diskOps">operations</span>
-			<span class="diskInfo">info</span>
+	<div class="cell">
+		<!-- <span class="system">system</span> -->
+		<img src="/images/svg/#type#.svg" alt="HDD" width="60px" height="78px" class="svg">
+		<div class="dinfo">
+			<div><span>disk:</span> #disk# (#model#)</div>
+<!--			<div><span>raid:</span> #raid#</div> -->
+			<div><span>parent:</span> #parent#</div>
+			<div><span>businfo:</span> #businfo#</div>
+			<div><span>rpm:</span> #rpm#</div>
+			<div><span>perf / perf4k:</span> #perf# / #perf4k#</div>
+			<div><span>capacity:</span> #capacity_human# (#capacity#)</div>
+			<div><span>serial:</span> #ident#</div>
 		</div>
 	</div>
 ';
@@ -113,7 +185,7 @@ if(file_exists($filename))
 				$html.=$pattern;
 				if(count($raid)%2==1)
 				{
-					$html.='<div class="cnt empty"></div>';
+					$html.='<div class="cell empty"></div>';
 				}
 			}
 

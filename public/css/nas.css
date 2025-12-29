@@ -1,0 +1,168 @@
+.dblock {
+	border:1px solid black;
+	border-radius:4px;
+	padding:10px;
+	margin-bottom:20px;
+	min-width:470px;
+}
+
+.dheader {
+	position:absolute;
+	margin-top:-20px;
+	background-color:white;
+	padding:0 10px;
+}
+/*
+img.svg:hover {
+	opacity:50%;
+}
+
+#s-hdd, #s-hdd1 {
+	width:60px;
+	height:78px;
+	display:block;
+	background:0 0/60px 78px no-repeat url(/images/svg/hdd.svg);
+}
+
+.svg {
+  filter: brightness(0) saturate(100%) invert(72%) sepia(65%) saturate(5061%) hue-rotate(115deg) brightness(107%) contrast(93%);;
+}
+
+.container {
+	display:grid;
+	grid-template-columns: minmax(200px, 50%)1fr;
+	gap:4px;
+}
+.cell {
+	border:1px solid red;
+	min-width:200px;
+}
+*/
+.container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	font: 13px Tahoma, sans-serif;
+}
+
+.dblock .cnt {
+	flex: 1 1 48%;
+	min-width: 450px;
+	box-sizing: border-box;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	overflow:hidden;
+}
+
+.dblock .cell {
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+	word-break: break-all;
+	display:flex;
+	gap:10px;
+	margin:10px;
+}
+.dblock .cnt.empty {
+	border-width:0;
+	width:48%;
+}
+.dblock .dinfo {
+	flex-grow: 1;
+}
+.dblock .dinfo div:hover {
+	background-color:rgba(0,0,0,5%);*/
+}
+.dblock .dinfo span {
+	display:inline-block;
+	width:100px;
+}
+.dblock .cnt .ops {
+	background:#f0f0f0;
+	padding:6px;
+	
+}
+.dblock .cnt .ops .chbx {
+	background:none;
+	border-width:0;
+	display:inline-block;
+	width:48px;
+	text-align:center;
+}
+.dblock .cnt .ops .chbx:hover {
+	background:none;
+	box-shadow:none;
+}
+.dblock .cnt .ops span {
+	border:1px solid silver;
+	border-radius:4px;
+	padding:1px 8px;
+	background-color:#1aaee8;
+	color:white;
+	margin-right:6px;
+	cursor:pointer;
+}
+.dblock .cnt .ops span:hover {
+	box-shadow: 0px 0px 2px 2px rgba(0, 144, 255, 0.2);
+	background-color:#5ac4ed;
+	color:black;
+}
+.dblock .cnt .ops span:first-child {
+	/* margin-left:70px; */
+}
+
+
+dialog .tabs h1 {
+	margin:0 !important;
+	height:48px;
+}
+dialog .tabs h1 span {
+	display:inline-block;
+	line-height:48px;
+}
+dialog .tabs_group {
+    height: 20px;
+    position: absolute;
+    margin-top: 1px;
+	font-size:0;	/* remove spaces between tabs */
+}
+dialog .tabs_group .tab {
+	display:inline-block;
+	border:1px solid #337ab7;
+	height:20px;
+	vertical-align:middle;
+	line-height:20px;
+	border-radius:4px 4px 0 0;
+	padding:0 10px;
+	font-size:14px;
+	margin-left:4px;
+}
+dialog .tabs_group .tab {
+	border-bottom:1px solid #337ab7;
+	background-color:#d0d0d0;
+	cursor:pointer;
+}
+dialog .tabs_group .tab.sel {
+    border-bottom:1px solid #f0f0f0;
+	background-color:#f0f0f0;
+}
+
+.window-content.smpad {
+	padding:10px 16px;
+}
+.window-content .tab-cnt.pre {
+	font-family: monospace;
+	font-size:14px;
+}
+
+.info-box .buttons {
+	top:100%;
+    position:absolute;
+    margin-top:-61px;
+    width:calc(100% - 20px);
+}
+.info-box .window-content {
+	max-height:80%;
+}
+.info-box .tab-cnt {
+	user-select:auto;
+}

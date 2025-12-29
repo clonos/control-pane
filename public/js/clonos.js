@@ -36,6 +36,14 @@ var clonos={
 	
 	start:function()
 	{
+		$.fn.getComments = function () {
+			return this.contents().map(function () {
+				if (this.nodeType === 8) {
+					return this.nodeValue;
+				}
+			}).get();
+		};
+		
 		this.addEvents();
 		
 		var r, res, args=[];
@@ -362,7 +370,12 @@ var clonos={
 		$('dialog#'+id+'.edit .new-disable, dialog#'+id+'.new .edit-disable').prop('disabled',false);
 		
 		if($('span.close-but',dlg).length==0)
-			$('h1',dlg).before('<span class="close-but">×</span>');
+		{
+			var a=$('div.tabs',dlg).before('<span class="close-but">×</span>');
+			if(a.length!=1)
+				$('h1',dlg).before('<span class="close-but">×</span>');
+		}
+			
 		/*
 		var wd=$(dlg).width();
 		var hg=$(dlg).height();
@@ -1914,6 +1927,35 @@ var clonos={
 			if(typeof elid=='undefined') elid=$(target).attr(id);
 		}
 
+		var dblk=$(target).parents('div.dblock').get(0);
+		if(typeof dblk!='undefined')
+		{
+			var cl=$(target).attr('class');
+			switch(cl)
+			{
+				case 'diskOps':
+					break;
+				case 'diskInfo':
+					$('#tab-smart-cnt').html('');
+					$('#di-disk-name').html('&hellip;');
+					var comments=$(target).parents('.cnt').getComments();
+					if(isset(comments))
+					{
+						var arr=JSON.parse(comments[0]);
+						var disk=arr.info.disk;
+						var posts=[{'name':'disk','value':disk}];
+						this.loadData('diskInfoSmart',$.proxy(
+							function(data){
+								$('#di-disk-name').html(data.disk);
+								$('#tab-smart-cnt').html(data.html);
+							}
+						,this),posts,true);
+					}
+					this.dialogShow1('disk-info');
+					break;
+			}
+			return;
+		}
 		
 		if($(target).parents('form').length>0)
 		{
@@ -1974,6 +2016,11 @@ var clonos={
 				case 'jddm-helpers':
 				case 'jddm-export':
 					this.DDMenuSelect(elid);
+					return;break;
+				
+				case 'tab-smart':
+				case 'tab-info':
+					this.tabClick(elid);
 					return;break;
 			}
 			
@@ -2301,6 +2348,16 @@ var clonos={
 		}
 		*/
 	},
+	
+	
+	tabClick:function(elid)
+	{
+		$('dialog .tabs_group .tab.sel').removeClass('sel');
+		$('dialog .tabs_group .tab#'+elid).addClass('sel');
+		$('dialog .window-content .tab-cnt').addClass('hide');
+		$('dialog .window-content #'+elid+'-cnt').removeClass('hide');
+	},
+	
 	
 	vnc_countdown:function()
 	{

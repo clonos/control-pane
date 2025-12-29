@@ -817,6 +817,15 @@ dialog.fullscreen #vnc-iframe {
 	width:100%;
 	height:100%;
 }
+dialog:focus {
+	outline:none;
+}
+
+.tabs {
+	height:70px;
+	background-color:#e0e0e0;
+	border-bottom:1px solid #337ab7;
+}
 
 .window-box {
 	/*padding:0 30px 30px 30px;*/
@@ -832,7 +841,7 @@ dialog.fullscreen #vnc-iframe {
 	font-size:30px;
 	font-weight:bold;
 	cursor:pointer;
-	background-color:#f3f3f3;
+	background-color:transparent;	/*#f3f3f3;*/
 	text-align:center;
 	line-height:30px;
 }

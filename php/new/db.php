@@ -17,7 +17,7 @@ class Db extends ClonOS {
 			list($file_name, $connect) = $this->prep_connect($place, $database);
 			if(is_null($file_name) || !file_exists($file_name)){
 				$this->error=true;
-				$this->error_message='DB file name not set or not found!';
+				$this->error_message='DB file name not set or not found: '.$file_name;
 				return;
 			} else {
 				$this->_filename=$file_name;

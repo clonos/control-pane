@@ -58,6 +58,7 @@ if(file_exists($this->index_file)){
 			echo "page not found!";
 		}else{
 			include($incfile);	//$this->index_file
+			//exit;
 		}
 	
 	}

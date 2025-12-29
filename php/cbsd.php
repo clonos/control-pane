@@ -1,5 +1,4 @@
 <?php
-
 class CBSD {
 
 	static function run($cmd, $args){

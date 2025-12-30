@@ -24,6 +24,16 @@ WIP...
 
 This instruction assumes that we are working on an already installed vanilla FreeBSD OS 15.0-RELEASE ( or higher ).
 
+
+0) Adjust time and enable NTP server:
+
+```
+service ntpd onestop
+ntpdate time.google.com
+service ntpd enable
+service ntpd start
+```
+
 1) Install ClonOS dependencies:
 
 ```

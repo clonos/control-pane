@@ -3,17 +3,20 @@ session_start();
 if(isset($_GET['section'])){changeSection();}
 $clonos_path='../../clonos/';
 
-require_once('../php/new/t.utils.php');
-require_once('../php/new/t.locale.php');
-require_once('../php/new/t.translate.php');
-require_once('../php/new/t.menu.php');
-require_once('../php/new/t.route.php');
-require_once('../php/new/t.user.php');
-require_once('../php/new/t.commands.php');
-require_once('../php/new/t.uri.php');
+require_once($_real_path.'/php/new/t.setup.php');
+require_once($_real_path.'/php/new/t.utils.php');
+require_once($_real_path.'/php/new/t.locale.php');
+require_once($_real_path.'/php/new/t.translate.php');
+require_once($_real_path.'/php/new/t.menu.php');
+require_once($_real_path.'/php/new/t.route.php');
+require_once($_real_path.'/php/new/t.user.php');
+require_once($_real_path.'/php/new/t.commands.php');
+require_once($_real_path.'/php/new/t.uri.php');
+
 
 class ClonOS {
 	use tUtils, tLocale, tTranslate, tMenu, tUser, tRoute, tCommands, tUri;
+	use tSetup;
 	
 	const TRANSLATE_CACHE_DIR='translate.cache';
 	const BACK_FOLDER_NAME='back';
@@ -64,7 +67,7 @@ class ClonOS {
 	private $_menu;
 	private $_css=[];
 	
-	function __construct($realpath)
+	function __construct($realpath,$setup=false)
 	{
 		self::$realpath=$realpath.DIRECTORY_SEPARATOR;
 		self::$realpath_php=self::$realpath.'php/new/';	### После завершения убрать new/
@@ -73,6 +76,8 @@ class ClonOS {
 		self::$realpath_dialogs=self::$realpath_public.'dialogs/';
 		self::$realpath_assets=self::$realpath.'assets/';
 		self::$media_import=self::$realpath.'media_import/';
+		
+		if($setup===true) return;
 		
 		self::$workdir=getenv('WORKDIR'); # // /usr/jails
 		self::$environment=getenv('APPLICATION_ENV');
@@ -272,11 +277,11 @@ class ClonOS {
 	
 }
 
-require_once('../php/new/cbsd.php');
-require_once('../php/new/config.php');
-require_once('../php/new/db.php');
-require_once('../php/new/forms.php');
-require_once('../php/new/dialogs.gen.php');
+require_once($_real_path.'/php/new/cbsd.php');
+require_once($_real_path.'/php/new/config.php');
+require_once($_real_path.'/php/new/db.php');
+require_once($_real_path.'/php/new/forms.php');
+require_once($_real_path.'/php/new/dialogs.gen.php');
 
 function changeSection()
 {

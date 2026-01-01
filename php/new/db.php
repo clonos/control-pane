@@ -173,6 +173,20 @@ class Db extends ClonOS {
 		return array('rowCount'=>$rowCount);
 	}
 	
+	function exec($sql)
+	{
+		try {
+			$count=$this->_pdo->exec($sql);
+			if($count===false)
+			{
+				return array('error'=>true,'info'=>$this->_pdo->errorInfo());
+			}
+		}catch(PDOException $e){
+			return array('error' => true, 'info' => 'Catch exception: ' . $e->getMessage());
+		}
+		return array('error'=>false,'count'=>$count);
+	}
+	
 	function isConnected(){ return !is_null($this->_pdo); }
 	function getWorkdir(){  return self::$workdir;    }
 	function getFileName(){ return $this->_filename;   }

@@ -1,14 +1,14 @@
 <?php
 
 //require_once __DIR__ . '../../vendor/autoload.php';
-require_once $clonos_path.'vendor/autoload.php';	//../../clonos/
+//require_once $clonos_path.'vendor/autoload.php';	//../../clonos/
 
-\Sentry\init([
-  'dsn' => 'http://2d223b424e41448123a5f79e2e5d7611@sentry.convectix.com/2',
-  // Add request headers, cookies and IP address,
-  // see https://docs.sentry.io/platforms/php/data-management/data-collected/ for more info
-  'send_default_pii' => true,
-]);
+//\Sentry\init([
+//  'dsn' => 'http://2d223b424e41448123a5f79e2e5d7611@sentry.convectix.com/2',
+//  // Add request headers, cookies and IP address,
+//  // see https://docs.sentry.io/platforms/php/data-management/data-collected/ for more info
+//  'send_default_pii' => true,
+//]);
 
 
 class CBSD extends ClonOS {

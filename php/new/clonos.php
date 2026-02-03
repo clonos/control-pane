@@ -1,22 +1,27 @@
 <?php
 session_start();
 if(isset($_GET['section'])){changeSection();}
-$clonos_path='../../clonos/';
+//$clonos_path='../../clonos/';
 
-require_once($_real_path.'/php/new/t.setup.php');
-require_once($_real_path.'/php/new/t.utils.php');
-require_once($_real_path.'/php/new/t.locale.php');
-require_once($_real_path.'/php/new/t.translate.php');
-require_once($_real_path.'/php/new/t.menu.php');
-require_once($_real_path.'/php/new/t.route.php');
-require_once($_real_path.'/php/new/t.user.php');
-require_once($_real_path.'/php/new/t.commands.php');
-require_once($_real_path.'/php/new/t.uri.php');
+require_once($_real_path_php.'t.setup.php');
+require_once($_real_path_php.'t.utils.php');
+require_once($_real_path_php.'t.locale.php');
+require_once($_real_path_php.'t.translate.php');
+require_once($_real_path_php.'t.menu.php');
+require_once($_real_path_php.'t.route.php');
+require_once($_real_path_php.'t.user.php');
+require_once($_real_path_php.'t.commands.php');
+require_once($_real_path_php.'t.uri.php');
+require_once($_real_path_php.'t.cmd.nas.php');
 
 
 class ClonOS {
 	use tUtils, tLocale, tTranslate, tMenu, tUser, tRoute, tCommands, tUri;
-	use tSetup;
+	use tSetup, tNAS;
+	
+	const filenameNASDisksList='/var/db/cixnas/api/disks.json';
+	const filenameNASRaidsList='/var/db/cixnas/api/raids.json';
+	const filenameNASEnginesList='/var/db/cixnas/api/raids_engine.json';
 	
 	const TRANSLATE_CACHE_DIR='translate.cache';
 	const BACK_FOLDER_NAME='back';
@@ -35,6 +40,7 @@ class ClonOS {
 	public static $realpath_page;
 	public static $media_import;
 	public static $json_name;
+	public static $section;
 	
 	public $json_req;
 	public $sys_vars;
@@ -147,6 +153,7 @@ class ClonOS {
 		$this->_uri_chunks=$_uri_chunks;
 		if(isset($_uri_chunks[0]))
 		{
+			self::$section=$_uri_chunks[0];
 			$this->route($_uri_chunks[0]);
 			//exit;
 		}
@@ -277,11 +284,11 @@ class ClonOS {
 	
 }
 
-require_once($_real_path.'/php/new/cbsd.php');
-require_once($_real_path.'/php/new/config.php');
-require_once($_real_path.'/php/new/db.php');
-require_once($_real_path.'/php/new/forms.php');
-require_once($_real_path.'/php/new/dialogs.gen.php');
+require_once($_real_path_php.'cbsd.php');
+require_once($_real_path_php.'config.php');
+require_once($_real_path_php.'db.php');
+require_once($_real_path_php.'forms.php');
+require_once($_real_path_php.'dialogs.gen.php');
 
 function changeSection()
 {

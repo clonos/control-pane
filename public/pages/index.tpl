@@ -12,6 +12,10 @@
 	<link type="text/css" href="/css/styles.css" rel="stylesheet" />
 	<link type="text/css" href="/font/clonos.css" rel="stylesheet" />
 	<link type="text/css" href="/font/animation.css" rel="stylesheet" />
+<!--
+	<script src="/js/noty3/noty.min.js" type="text/javascript"></script>
+	<link type="text/css" href="/js/noty3/noty.css" rel="stylesheet" />
+-->
 <?php
 $this->putCss();
 ?>
@@ -39,7 +43,7 @@ $this->putCss();
 		}
 	}catch(e){}
 </script>
-<body class="gadget1 login <?php echo $this->uri1;?>">
+<body class="gadget1 login <?php echo $this->uri1;?>" data-section="<?php echo self::$section;?>">
 
 <main>
 <div class="main"><div id="content">

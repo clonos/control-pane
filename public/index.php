@@ -7,7 +7,8 @@ if(preg_match('/(?i)msie [5-9]/',$_SERVER['HTTP_USER_AGENT']))
 
 //$_real_path=realpath('../');
 $_real_path=getenv('HOME').'/clonos';
+$_real_path_php=$_real_path.'/php/new/';
 
-require_once($_real_path.'/php/new/clonos.php');
+require_once($_real_path_php.'clonos.php');
 $clonos=new ClonOS($_real_path);
 $clonos->start();

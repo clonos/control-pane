@@ -753,7 +753,7 @@ tr.busy.maintenance .ops span {
 
 
 dialog {
-	display:none;
+	/*display:none;*/
 	padding:0;
 	border:1px solid rgba(0,0,0,.3);
 	border-radius:2px;
@@ -773,6 +773,7 @@ dialog::backdrop,
 	height:100%;
 	background: rgba(0,0,0,.5);
 	-webkit-backdrop-filter:blur(5px);
+	backdrop-filter:blur(5px);
 	z-index:1000;
 }
 dialog.new .edit,
@@ -784,7 +785,7 @@ dialog.edit .edit {
 	display:inline-block;
 }
 dialog.new p.new {
-	display:block;
+	/*display:block;*/
 }
 .dialog-close:before,
 .dialog-fullscreen:before {
@@ -821,11 +822,6 @@ dialog:focus {
 	outline:none;
 }
 
-.tabs {
-	height:70px;
-	background-color:#e0e0e0;
-	border-bottom:1px solid #337ab7;
-}
 
 .window-box {
 	/*padding:0 30px 30px 30px;*/
@@ -847,7 +843,7 @@ dialog:focus {
 }
 .window-box .window-content {
 	min-height:300px;
-	max-height:500px;
+	/*max-height:500px;*/
 	padding:10px 30px;
 	overflow-y:auto;
 }
@@ -887,6 +883,12 @@ dialog:focus {
 .buttons .button.hidden,
 .top-button.hidden {
 	display:none;
+}
+.buttons .button.disabled {
+	background-color:gray !important;
+    color:silver !important;
+    cursor:default;
+	outline:none;
 }
 
 .window-box h1 {

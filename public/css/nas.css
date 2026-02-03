@@ -1,5 +1,5 @@
 .dblock {
-	border:1px solid black;
+	border:1px solid #337ab7;
 	border-radius:4px;
 	padding:10px;
 	margin-bottom:20px;
@@ -11,6 +11,7 @@
 	margin-top:-20px;
 	background-color:white;
 	padding:0 10px;
+	color:#337ab7;
 }
 /*
 img.svg:hover {
@@ -111,11 +112,17 @@ img.svg:hover {
 }
 
 
-dialog .tabs h1 {
+dialog.window-box {
+	overflow:hidden;
+}
+dialog h1.tabs {
 	margin:0 !important;
 	height:48px;
+	color:#337ab7;
+	line-height:48px;
+	background-color:#e0e0e0;
 }
-dialog .tabs h1 span {
+dialog h1.tabs span {
 	display:inline-block;
 	line-height:48px;
 }
@@ -146,8 +153,16 @@ dialog .tabs_group .tab.sel {
 	background-color:#f0f0f0;
 }
 
+#disk-info .window-content {
+	overflow-y:hidden;
+}
 .window-content.smpad {
+	padding:0;	/*10px 16px;*/
+}
+.window-content .tab-cnt {
 	padding:10px 16px;
+	height:calc(100% - 43px);
+	overflow-y: auto;
 }
 .window-content .tab-cnt.pre {
 	font-family: monospace;
@@ -161,8 +176,316 @@ dialog .tabs_group .tab.sel {
     width:calc(100% - 20px);
 }
 .info-box .window-content {
-	max-height:80%;
+	height: calc(100% - 48px - 61px) !important;
 }
 .info-box .tab-cnt {
 	user-select:auto;
+}
+
+div.tabs {
+	height:22px;
+	background-color:#e0e0e0;
+	border-bottom:1px solid #337ab7;
+}
+
+.grid-wrapper {
+	display:grid;
+	grid-template-columns:200px 1fr;
+	grid-column-gap:0;
+	grid-row-gap:0;
+	height:100%;
+}
+
+.disk-list {
+	background-color: #e0e0e0;
+	overflow:hidden;
+}
+.disk-list ul {
+	margin:0!important;
+	background-color:#e0e0e0;
+/*	padding:30px 10px 10px 10px;*/
+	height:calc(100% - 22px) !important;
+    margin-top:22px !important;
+	border-right:1px solid #337ab7;
+	overflow-y:auto;
+}
+.disk-list ul li {
+	padding:4px 6px !important;
+}
+.disk-list ul li:hover {
+	background-color:rgba(51,122,183,0.7);
+	cursor:pointer;
+}
+.disk-list ul li.sel {
+	background:#337ab7;
+	color:white;
+}
+.disk-list ul li.sel:hover {
+	opacity:0.8;
+}
+
+.disk-info {
+	height:100%;
+	overflow:hidden;
+}
+
+.vblock {
+	display:none;
+}
+#ctop .view {
+	font-size:20px;
+	color:#337ab7;
+	text-align:center;
+}
+
+.raid {
+	width:100%;
+	line-height:22px;
+	margin-top:6px;
+	font-size:100%;
+	background:0 0/60px 78px no-repeat url(/images/svg/nas.svg);
+	background-position: right top;
+}
+div[data-view="raids"] table {
+	font-size:100%;
+}
+.inlblk {
+	display:inline-block;
+}
+
+table {
+	counter-reset:rowNumber;
+}
+table tbody tr td.autonum::before {
+	counter-increment:rowNumber;
+    content:counter(rowNumber);
+	text-align:center;
+	display: table-cell;
+	width:30px;
+}
+
+details summary:hover {
+	cursor:pointer;
+}
+
+
+.buttons.flex2col {
+	display:flex;
+	justify-content:space-between;
+    width:100%;
+	padding:0;
+	line-height:58px;
+}
+.pages {
+    flex:1;
+    text-align:left;
+	color: #337ab7;
+	overflow:hidden;
+}
+.pbuttons {
+    flex:1;
+    text-align:right;
+}
+.buttons .pages .circle {
+	display: inline-block;
+	vertical-align: middle;
+	border-radius: 15px;
+	height: 30px;
+	width: 30px;
+	border: 1px solid #337ab7;
+	color: #337ab7;
+	margin: 0 10px 0 0;
+	line-height: 30px;
+	text-align: center;
+	font-size:20px;
+	font-weight:bold;
+}
+.buttons .pages .circle:first-child {
+	margin-left:30px;
+}
+.buttons .pages .circle.open {
+	background-color:#337ab7;
+	color:white;
+}
+.buttons .pages .open + span {
+	font-weight:bold;
+}
+.buttons .longline {
+	display:inline-block;
+	height:1px;
+	background-color:#337ab7;
+	margin:0 10px 3px 10px;
+	width:30px;
+}
+.buttons .pbuttons:last-child {
+	margin-right:20px;
+}
+.buttons .pbuttons.first [data-btn="prev"],
+.buttons .pbuttons.last [data-btn="next"] {
+	background-color:gray !important;
+    color:silver !important;
+    cursor:default;
+	outline:none;
+}
+.buttons .pbuttons.onepage [data-btn="prev"],
+.buttons .pbuttons.onepage [data-btn="next"] {
+	display:none;
+}
+
+
+
+#raid-add h1 {
+	border-bottom:1px solid silver;
+}
+.window-content .pages {
+    display:flex;
+    height:100%;
+    width:100%;
+}
+.column {
+    box-sizing:border-box;
+    overflow-y:auto;
+    height:100%;
+	overflow-x:hidden;
+}
+.new-raid .raids-types {
+    width:300px !important;
+    background-color:#f1f1f1;
+	border-right:1px solid #337ab7;
+}
+.new-raid .raids-types ul {
+	margin:0 !important;
+	list-style-type:none !important;
+}
+.new-raid .raids-types li {
+	padding:6px 10px !important;
+}
+.new-raid .raids-types li.sel {
+	background-color:#337ab7;
+	color:white;
+}
+.new-raid .raids-types li.sel:hover {
+	opacity:0.8;
+	color:black;
+}
+.new-raid .raids-types li:hover {
+	cursor:pointer;
+	background-color:rgba(51,122,183,0.4);
+}
+.new-raid .description ol {
+	list-style:decimal;
+	padding:0 10px;
+	margin-left:20px;
+}
+.new-raid .description ul {
+	margin-left:20px;
+	padding:0 10px;
+}
+.new-raid .raids-types .avail:before,
+.new-raid .raids-types .notavail:before {
+	display:inline-block;
+	width:20px;
+	height:20px;
+}
+.new-raid .raids-types .avail:before {
+	content:"\2714";
+	color:green;
+}
+.new-raid .raids-types li.sel .avail:before {
+	color:lime;
+}
+.new-raid .raids-types .notavail:before {
+	content:"\2716";
+	color:red;
+}
+.new-raid .disks-list {
+    flex-grow:1;
+    background-color:#ebebeb;
+	padding:10px;
+	border-right:1px solid silver;
+	color:black;
+}
+.new-raid .disks-list h2,
+.new-raid .description h2 {
+	padding-left:0;
+}
+.new-raid .description {
+    width:30%;
+    background-color:#f1f1f1;
+	padding:10px;
+}
+
+#disks-list .dline {
+    white-space:nowrap;
+	margin: 4px 0;
+	line-height:20px;
+}
+#disks-list .dline label {
+	margin-left:8px;
+    white-space:normal;
+	display:inline-block;
+}
+
+.raids-types li.ravail:after {
+	content:"\2714";
+	border:1px solid green;
+	width:20px;
+	height:20px;
+	border-radius:10px;
+	line-height:20px;
+	text-align:center;
+	font-weight:bold;
+	background-color:white;
+	float:right;
+	color:green;
+	margin-top:-3px;
+}
+
+
+sub {
+	vertical-align:sub;
+	font-size:smaller;
+}
+span.red {
+	color:red;
+}
+span.green {
+	color:green;
+}
+
+.hide {
+	display:none !important;
+}
+
+.tsimple th {
+	padding-right:18px;
+	position:relative;
+}
+.tsimple [data-sort="yes"] {
+	cursor:pointer;
+}
+.tsimple [data-dir="asc"]:after,
+.tsimple [data-dir="dsc"]:after,
+.tsimple [data-dir="unk"]:after {
+	border:6px solid transparent;
+	content:"";
+	display:block;
+	height:0;
+	right:5px;
+	top:30%;
+	position:absolute;
+	width:0;
+}
+.tsimple [data-dir="unk"]:after {
+	border-bottom-color:#ddd;
+}
+.tsimple [data-dir="asc"]:after {
+	border-bottom-color:#337ab7;
+}
+.tsimple [data-dir="dsc"]:after {
+	border-top-color:#337ab7;
+	top:50%;
+}
+.tsimple th:hover {
+	background-color:rgba(0,0,0,0.03);
 }

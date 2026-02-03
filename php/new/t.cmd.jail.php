@@ -324,7 +324,7 @@ trait tcJail {
 
 		if($res['error']){
 			$arr['error']=true;
-			$arr['error_message']=$err['error_message'];
+			$arr['error_message']=$res['error_message'];
 		}else{
 			$arr['error']=false;
 			$arr['freejname']=$res['message'];

@@ -1,5 +1,7 @@
 var clonos={
 	
+	taskQueue:[],
+	
 	tmp_jail_info:{},
 	manual_close_menu:false,
 	lastX:0,
@@ -7,6 +9,7 @@ var clonos={
 	authorized:false,
 	updates_exists:false,
 	updates:{},
+	section:'',
 	commands:
 	{
 		'jstart':{stat:['Not launched','Starting','Launched'],cmd:'jailStart'},
@@ -36,6 +39,8 @@ var clonos={
 	
 	start:function()
 	{
+		this.addPlugin('nas.js','nas.start');
+		
 		$.fn.getComments = function () {
 			return this.contents().map(function () {
 				if (this.nodeType === 8) {
@@ -43,6 +48,8 @@ var clonos={
 				}
 			}).get();
 		};
+		
+		this.section=$('body').attr('data-section');
 		
 		this.addEvents();
 		
@@ -70,6 +77,8 @@ var clonos={
 			$('div.header #title').html(title);
 			$('title').html('ClonOS — ' + title);
 		}
+		
+		//this.loadData('getJsonPage',$.proxy(this.onLoadData,this));
 	},
 	route:function(args)
 	{
@@ -105,7 +114,7 @@ var clonos={
 		$('#content').on('click',$.proxy(this.bodyClick,this));
 		$('#login').on('click',$.proxy(this.loginAction,this));
 		$('.closer').on('click',$.proxy(this.closerClick,this));
-		$(window).on('keypress',$.proxy(this.dialogCloseByKey,this))
+		$(window).on('keydown',$.proxy(this.dialogCloseByKey,this))
 			.on('resize',$.proxy(this.onResize,this));
 		$('div.menu').on("touchstart",$.proxy(this.onTouchStart,this))
 			.on("touchend",$.proxy(this.onTouchEnd,this));
@@ -371,7 +380,8 @@ var clonos={
 		
 		if($('span.close-but',dlg).length==0)
 		{
-			var a=$('div.tabs',dlg).before('<span class="close-but">×</span>');
+			//var a=$('div.tabs',dlg).before('<span class="close-but">×</span>');
+			var a=$('.window-box h1',dlg).before('<span class="close-but">×</span>');
 			if(a.length!=1)
 				$('h1',dlg).before('<span class="close-but">×</span>');
 		}
@@ -388,11 +398,13 @@ var clonos={
 			$('dialog#'+id).css('display','block').get(0).showModal();
 			$('dialog#'+id).on('close',$.proxy(this.dialogClose,this));
 		}else{
+			/*
 			var bkg=$('div#backdrop').get(0);
 			if(typeof bkg=='undefined')
 			{
 				$('dialog#'+id).before('<div id="backdrop"></div>');
 			}
+			*/
 			/*
 			$('dialog#'+id).css({
 				'display':'block',
@@ -405,7 +417,7 @@ var clonos={
 			});
 			*/
 			this.dialogSetPosition(dlg);
-			$('div#backdrop').css('display','block');
+			//$('div#backdrop').css('display','block');
 		}
 		$(dlg).find('input[type=text],textarea').filter(':visible:first').focus();
 	},
@@ -449,15 +461,22 @@ var clonos={
 			var dialog=dialogs[n];
 			if(typeof dname=='undefined' || typeof dname!='undefined' && dname==$(dialog).attr('id'))
 			{
+				/*
 				if(typeof $(dialog).get(0).showModal=='function')
 				{
 					if($(dialog).attr('open')!='undefined' &&
 						$(dialog).attr('open')=='open')
+						{
 							$(dialog).get(0).close();
+						}
 				}else{
-					$('div#backdrop').css('display','none');
+					//$('div#backdrop').css('display','none');
+					//$('div#backdrop').hide();
 				}
-				$(dialog).css('display','none');
+				*/
+				//$(dialog).css('display','none');
+				$(dialog).get(0).close();
+				$(dialog).hide();
 				if($('form',dialog).length>0) $('form',dialog).get(0).reset();	// Очищаем форму, после нажатия на CANCEL
 			}
 		}
@@ -1227,11 +1246,28 @@ var clonos={
 		}else{
 			if(isset(data.template)) this.template=data.template;
 			if(isset(data.protected)) this.tpl_protected=data.protected;
-			if(typeof data.func!='undefined')
+			if(typeof data.func==='function')
 			{
 				this[data.func](data);
 				if(isset(data.latest)) this.checkLatestUpdates(data.latest);
 				return;
+			}else{
+				if(typeof data.func!='undefined')
+				{
+					var fres=data.func.split('.');
+					if(fres.length==2)
+					{
+						if(typeof window[fres[0]]=='undefined')
+						{
+							this.taskQueue[data.func]=data;
+						}else{
+							if(Object.hasOwn(window[fres[0]],fres[1]))
+							{
+								window[fres[0]][fres[1]](data);
+							}
+						}
+					}
+				}
 			}
 			for(id in data) $('#'+id).html(data[id]);
 			
@@ -1913,6 +1949,7 @@ var clonos={
 		var target=event.target;
 		var elid=$(target).attr('id');
 		if(typeof elid=='undefined') elid=$(target)[0].id;
+		var attr_btn=$(target).data('btn');
 		
 		if(elid.substr(0,5)=='trlt-')
 		{
@@ -1927,38 +1964,16 @@ var clonos={
 			if(typeof elid=='undefined') elid=$(target).attr(id);
 		}
 
-		var dblk=$(target).parents('div.dblock').get(0);
-		if(typeof dblk!='undefined')
-		{
-			var cl=$(target).attr('class');
-			switch(cl)
-			{
-				case 'diskOps':
-					break;
-				case 'diskInfo':
-					$('#tab-smart-cnt').html('');
-					$('#di-disk-name').html('&hellip;');
-					var comments=$(target).parents('.cnt').getComments();
-					if(isset(comments))
-					{
-						var arr=JSON.parse(comments[0]);
-						var disk=arr.info.disk;
-						var posts=[{'name':'disk','value':disk}];
-						this.loadData('diskInfoSmart',$.proxy(
-							function(data){
-								$('#di-disk-name').html(data.disk);
-								$('#tab-smart-cnt').html(data.html);
-							}
-						,this),posts,true);
-					}
-					this.dialogShow1('disk-info');
-					break;
-			}
-			return;
-		}
-		
 		if($(target).parents('form').length>0)
 		{
+			if($(target).prop('tagName').toLowerCase()=='label') return;
+			if($('body').data('section')=='nas')
+			{
+				try{
+					nas.formClick(target,elid);
+				}catch(e){}
+				return;
+			}
 			var cl=$(target).attr('class');
 			var form=$(target).parents('form').get(0);
 			if($(form).hasClass('helper'))
@@ -2017,11 +2032,12 @@ var clonos={
 				case 'jddm-export':
 					this.DDMenuSelect(elid);
 					return;break;
-				
+/*				
 				case 'tab-smart':
 				case 'tab-info':
 					this.tabClick(elid);
 					return;break;
+*/
 			}
 			
 		}
@@ -2190,7 +2206,7 @@ var clonos={
 				return;break;
 		}
 		
-		if(cl.indexOf('cancel-but')>-1)
+		if(cl.indexOf('cancel-but')>-1 || attr_btn=='cancel')
 		{
 			this.dialogClose();
 			return;
@@ -2272,6 +2288,15 @@ var clonos={
 			var id=res[1];
 		} */
 	//debugger;
+	
+		if(this.section=='nas')
+		{
+			if(typeof nas==='object')
+				nas.bodyClick(target,elid);
+			return;
+		}
+
+	
 		if(!td || typeof td.className=='undefined') return;
 		var tdc=td.className;
 		tdc=tdc.replace(' ','-');
@@ -3498,7 +3523,7 @@ var clonos={
 			//allowedTypes: 'iso/*',
 			extFilter: 'iso;img',	//iso;jpg;jpeg;
 			onInit: function(){
-				clonos.add_log('Penguin initialized :)');
+				//clonos.add_log('Penguin initialized :)');
 			},
 			onBeforeUpload: function(id){
 				//add_log('Starting the upload of #' + id);
@@ -3703,6 +3728,31 @@ var clonos={
 		$('dl#summaryInfo').html('');
 	},
 
+	addPlugin:function(name,callback)
+	{
+		var head=document.getElementsByTagName('head')[0];
+		var script=document.createElement('script');
+		script.type='text/javascript';
+		script.src='/js/'+name;
+		//script.async=true;
+		script.onload=()=>{
+			if(callback){
+				if(typeof callback==='function'){
+					callback();
+				}else if(typeof callback==='string'){
+					eval(callback+'()');
+				}
+			}
+		}
+		head.appendChild(script);
+	},
+	
+	
+	getTemplate:function(tplId)
+	{
+		
+	},
+	
 }
 
 /* --- GRAPH START --- */

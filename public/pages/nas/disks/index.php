@@ -3,7 +3,75 @@ $this->useDialogs([
 	'disk-info',
 ]);
 ?>
+<div class="view">
+	<span class="icon-table" data-view="disks-table"></span>
+	<span class="icon-th-large" data-view="disks-block"></span>
+</div>
 <h1>Disks list:</h1>
+<template id="tplDBlockOuter">
+<div class="dblock" data-raid="#raid#"><div class="dheader">RAID: <strong>#raid#</strong></div><div class="container"></div></div>
+</template>
+<template id="tplDBlockInner">
+<div class="cnt" data-disk="#disk#">
+	<div class="cell">
+		<!-- <span class="system">system</span> -->
+		<img src="/images/svg/#type#.svg" alt="#typeUC#" width="60px" height="78px" class="svg">
+		<div class="dinfo">
+			<div><span>disk:</span> #disk# (#model#)</div>
+			<div><span>parent:</span> #parent#</div>
+			<div><span>businfo:</span> #businfo#</div>
+			<div><span>rpm:</span> #rpm#</div>
+			<div><span>perf / perf4k:</span> #perf# / #perf4k#</div>
+			<div><span>capacity:</span> #capacity_human# (#capacity#)</div>
+			<div><span>serial:</span> #ident#</div>
+		</div>
+	</div>
+	<div class="ops">
+		<span class="chbx"><input type="checkbox" /></span>
+		<span class="diskOps">operations</span>
+		<span class="diskInfo">info</span>
+	</div>
+</div>
+</template>
+<template id="tplDTableTr">
+	<tr id="d-#disk#">
+		<td class=""><input type="checkbox" /></td>
+		<td class="txtleft">#disk#</td>
+		<td class="txtleft">#type#</td>
+		<td class="txtleft">#model#</td>
+		<td class="txtleft">#raid#</td>
+		<td class="txtleft">#businfo#</td>
+		<td class="">#rpm#</td>
+		<td class="">#perf# / #perf4k#</td>
+		<td class="">#capacity_human#</td>
+		<td class="txtleft">#ident#</td>
+	</tr>
+</template>
+
+<div class="vblock" data-view="disks-block">
+
+</div>
+<div class="vblock" data-view="disks-table">
+<table class="tsimple" id="disklist" width="100%">
+	<thead>
+		<tr>
+			<th class="wdt-30"><input type="checkbox" /></th>
+			<th class="txtleft elastic wdt-150" data-sort="yes">Disk name</th>
+			<th class="txtleft wdt-50" data-sort="yes">Type</th>
+			<th class="txtleft elastic" data-sort="yes">Model</th>
+			<th class="wdt-100">RAID</th>
+			<th class="txtleft">Businfo</th>
+			<th class="txtcenter wdt-50">RPM</th>
+			<th class="txtcenter wdt-100">Perf/perf4k</th>
+			<th class="wdt-50" data-sort="yes">Capacity</th>
+			<th class="txtleft wdt-120">Serial</th>
+		</tr>
+	</thead>
+	<tbody></tbody>
+</table>
+</div>
+<?php
+/*
 <!--
 <script>document.write(JSON.stringify({"test":{"a":1,"b":2}}))</script>
 -->
@@ -33,12 +101,13 @@ $this->useDialogs([
 <img src="/images/svg/ssd.svg" alt="SSD" width="60px" height="78px" class="svg">
 <img src="/images/svg/ram.svg" alt="RAM DISK" width="60px" height="78px" class="svg">
 -->
-<?php
+*/
+/*
 $patt='
-	<div class="cnt"><!--{"info":{"disk":"#disk#"}}-->
+	<div class="cnt" data-disk="#disk#">
 		<div class="cell">
 			<!-- <span class="system">system</span> -->
-			<img src="/images/svg/#type#.svg" alt="HDD" width="60px" height="78px" class="svg">
+			<img src="/images/svg/#type#.svg" alt="#type#" width="60px" height="78px" class="svg">
 			<div class="dinfo">
 				<div><span>disk:</span> #disk# (#model#)</div>
 				<div><span>parent:</span> #parent#</div>
@@ -58,11 +127,11 @@ $patt='
 ';
 
 
-$filename='/var/db/cixnas/api/disks.json';
+//$filename='/var/db/cixnas/api/disks.json';
 $html='';
-if(file_exists($filename))
+if(file_exists(self::filenameNASDisksList))
 {
-	$txt=file_get_contents($filename);
+	$txt=file_get_contents(self::filenameNASDisksList);
 	try{
 		$arr=json_decode($txt,true);
 		//echo '<pre>';print_r($arr);exit;
@@ -77,7 +146,7 @@ if(file_exists($filename))
 		
 		//echo '<pre>';print_r($raids);exit;
 
-/*		
+/-*		
 		foreach($arr as $num=>$disk)
 		{
 			$pattern=$patt;
@@ -92,7 +161,7 @@ if(file_exists($filename))
 			}
 			$html.=$pattern;
 		}
-*/
+*-/
 
 		foreach($raids as $key=>$raid)
 		{
@@ -131,7 +200,7 @@ if(file_exists($filename))
 	//echo '</div>';
 	
 }
-
+*/
 
 /*
 	[disk] => ada0

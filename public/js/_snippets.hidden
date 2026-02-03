@@ -1,0 +1,31 @@
+function getAllCssClasses() {
+  const classes = new Set();
+  // Iterate over all stylesheets
+  for (const sheet of document.styleSheets) {
+    try {
+      // Access the rules (may throw a DOMException for cross-origin stylesheets)
+      const rules = sheet.cssRules || sheet.rules; 
+      for (const rule of rules) {
+        // Check if the rule is a CSSStyleRule (contains style information)
+        if (rule.selectorText) {
+          // Use a regex to find all class selectors (starting with a dot)
+          // This is a basic regex and might need refinement for complex selectors
+          const classMatches = rule.selectorText.match(/\.(-?[_a-zA-Z]+[_a-zA-Z0-9-]*)/g);
+          if (classMatches) {
+            for (const match of classMatches) {
+              // Remove the leading dot and add to the Set to ensure uniqueness
+              classes.add(match.substring(1)); 
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Could not access rules for stylesheet: " + sheet.href, e);
+    }
+  }
+  // Convert the Set to an Array and sort alphabetically
+  return [...classes].sort();
+}
+
+const allClasses = getAllCssClasses();
+console.log(allClasses);

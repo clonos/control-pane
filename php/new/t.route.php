@@ -65,7 +65,10 @@ trait tRoute {
 				}
 				echo json_encode($new_array);
 				return;
-				exit;
+				//exit;
+			}else{
+				echo json_encode(['error'=>true,'error_message'=>'method «'.$this->mode.'» not exists...']);
+				return;
 			}
 
 			$included_result_array='';

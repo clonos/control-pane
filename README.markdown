@@ -135,10 +135,11 @@ Or copy:
 cp /usr/local/etc/php-fpm.d/www-php-fpm.conf.clonos.sample /usr/local/etc/php-fpm.d/www.conf
 ```
 
-Add "www" user to "cbsd" group:
+Add "www" user to "cbsd" group and change 'www' home directory to /usr/local/www:
 
 ```
 pw groupmod cbsd -M www
+pw usermod www -d /usr/local/www
 ```
 
 To execute CBSD commands, let the www user run CBSD through sudo: edit /usr/local/etc/sudoers.d/10_www :
@@ -302,6 +303,7 @@ h) Init web user database:
 
 ```
 cbsd clonosdb
+su www -c 'php /usr/local/www/clonos/php/new/_setup.php'
 ```
 
 i) Configure and run CBSD RACCT stats daemon:

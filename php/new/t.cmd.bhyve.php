@@ -201,7 +201,7 @@ trait tcBhyve {
 
 		$err=array();
 		$arr=array(
-			'workdir'=>$this->workdir,
+			'workdir'=>self::$workdir,
 			'jname'=>$form['vm_name'],
 			'host_hostname'=>'',
 			'ip4_addr'=>'',

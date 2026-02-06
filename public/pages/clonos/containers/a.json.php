@@ -109,7 +109,6 @@ EOT;
 }
 
 $tasks = (empty($jail_ids)) ? '' : $this->getRunningTasks($jail_ids);
-
 if($hres !== false){
 	$html_tpl_1 = str_replace(["\n","\r","\t"], '', $hres[1]);
 	$vars = [

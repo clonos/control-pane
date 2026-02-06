@@ -1,5 +1,5 @@
 <?php
-
+error_reporting(E_ALL);
 $db = new Db('base','nodes');
 $nodes = $db->select("select nodename,ip from nodelist order by nodename desc", []);
 $nodes[] = ['nodename'=>'local'];
@@ -75,6 +75,8 @@ if(!empty($ids)){
 		$html_tpl = str_replace('#'.$var.'#', $val, $html_tpl);
 	}
 }
+
+if(!isset($tasks) || empty($tasks)) $tasks=[];
 
 $included_result_array = [
 	'tbody' => str_replace(["\n","\r","\t"], '', $html),

@@ -841,6 +841,7 @@ trait tCommands {
 			$cmd='';
 			$txt_status='';
 			$tasks=(new Db('base','cbsdtaskd'))->select($query, array([$tid]));
+//print_r($tid);exit;
 			if(!empty($tasks)) foreach($tasks as $task){
 				$rid=preg_replace('/^#/','',$task['jname']);
 				foreach($check_arr as $key=>$val){

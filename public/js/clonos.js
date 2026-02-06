@@ -1246,7 +1246,7 @@ var clonos={
 		}else{
 			if(isset(data.template)) this.template=data.template;
 			if(isset(data.protected)) this.tpl_protected=data.protected;
-			if(typeof data.func==='function')
+			if(typeof this[data.func]==='function')
 			{
 				this[data.func](data);
 				if(isset(data.latest)) this.checkLatestUpdates(data.latest);
@@ -1255,8 +1255,7 @@ var clonos={
 				if(typeof data.func!='undefined')
 				{
 					var fres=data.func.split('.');
-					if(fres.length==2)
-					{
+					if(fres.length==2){
 						if(typeof window[fres[0]]=='undefined')
 						{
 							this.taskQueue[data.func]=data;
